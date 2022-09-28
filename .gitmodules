@@ -1,0 +1,3 @@
+[submodule "interaction_module"]
+	path = interaction_module
+	url = https://github.com/abhinayrv/Interaction-Module.git
