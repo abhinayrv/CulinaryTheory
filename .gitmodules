@@ -1,3 +1,12 @@
 [submodule "interaction_module"]
 	path = interaction_module
 	url = https://github.com/abhinayrv/Interaction-Module.git
+[submodule "Recipe-Module"]
+	path = Recipe-Module
+	url = https://github.com/abhinayrv/Recipe-Module.git
+[submodule "Authentication-Module"]
+	path = Authentication-Module
+	url = https://github.com/abhinayrv/Authentication-Module.git
+[submodule "UI-Module"]
+	path = UI-Module
+	url = https://github.com/abhinayrv/UI-Module.git
