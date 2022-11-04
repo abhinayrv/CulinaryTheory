@@ -1,6 +1,5 @@
-import mongoose from 'mongoose';
-import mongoosePaginate from 'mongoose-paginate';
-import bcrypt from 'bcrypt';
+const mongoose = require('mongoose');
+const crypto = require('crypto');
 
 const Schema = mongoose.Schema;
 const UserSchema = new Schema({
@@ -13,64 +12,56 @@ const UserSchema = new Schema({
     type: String,
     required: true
   },
+  salt: {
+    type: String,
+    default: ''
+  },
   role: {
     type: String,
     enum : ['user', 'admin'],
     default: 'user'
-  },
-  items : [{
-    type: Schema.Types.ObjectId,
-    ref: 'Item'
-  }]
+  }
 });
 
 UserSchema.set('toJSON', {
   transform: function(doc, ret, options) {
     delete ret.password;
+    delete ret.salt;
     return ret;
   }
 });
 
 UserSchema.pre('save', function(next) {
+  console.log("Pre method of user");
   if (!this.isModified('password')) return next();
 
-  bcrypt.hash(this.password, 10, function(err, hash) {
-    if (err) return next(err);
-
-    this.password = hash;
-    next();
-  });
+  var salt = crypto.randomBytes(16).toString("hex");
+  this.salt = salt;
+  this.password = crypto.pbkdf2Sync(this.password, salt, 310000, 32, 'sha256').toString('hex');
+  return next();
 });
 
-UserSchema.methods.getTokenData = function() {
+UserSchema.methods.getSessionData = function() {
   return {
-    id: this.id,
-    email: this.email
+    username: this.email,
+    role: this.role
   }
 };
 
-UserSchema.methods.verifyPassword = function(candidatePassword, callback) {
-  bcrypt.compare(candidatePassword, this.password, function(err, isMatch) {
-    if (err) return callback(err);
-    callback(null, isMatch);
-  });
+UserSchema.methods.verifyPassword = function(candidatePassword, next) {
+  console.log("In verify password");
+
+    var hashedPassword = crypto.pbkdf2Sync(candidatePassword, this.salt, 310000, 32, 'sha256').toString("hex")
+    
+    if (this.password == hashedPassword){
+        return next(null, true);
+    } else {
+        return next(null, false);
+    }
 };
 
 UserSchema.methods.equals = function(user) {
   return this.id == user.id;
 };
-
-UserSchema.methods.canRead = function(object) {
-  return this.equals(object) ||
-    (object.owner && object.owner == this.id) ||
-    (object._id && object._id == this.id) ||
-    this.role == "admin";
-};
-
-UserSchema.methods.canEdit = function(object) {
-  return this.canRead(object); // can be extended later
-};
-
-UserSchema.plugin(mongoosePaginate);
 
 module.exports = mongoose.model('User', UserSchema);

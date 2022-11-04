@@ -1,24 +1,42 @@
-import express from 'express';
-import bodyParser from 'body-parser';
-import mongoose from'mongoose';
-import morgan from 'morgan';
-import jwt from'jsonwebtoken';
+require('dotenv').config({path: 'src/.env'})
+const express = require('express');
+const path = require('path');
+const session = require('express-session');
+const db = require('./db');
+const User = require('./models/user')
+const routes = require('./routes');
+const config = require("./config/config");
 
-import User from './models/user';
-import Item from './models/item';
 
-import config from 'config';
-import db from './db/db';
-import routes from './routes';
 
-const app = express();
+var app = express();
 
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-app.use(morgan('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(express.static(path.join(__dirname, 'static')));
+
+app.use(session({
+  secret: 'keyboard cat',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { maxAge: 3000000 },
+  rolling: true
+}));
+
 app.use('/', routes);
 
-const port = process.env.PORT || config.server.port;
+app.use(function(err, req, res, next) {
+  // set locals, only providing error in development
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+  // render the error page
+  console.log(err)
+  res.status(err.status || 500);
+  res.render('error');
+});
+
+const port = config.server.port;
 app.listen(port);
 console.log('Node + Express REST API skeleton server started on port: ' + port);
 
