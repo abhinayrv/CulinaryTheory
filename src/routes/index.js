@@ -4,6 +4,7 @@ const path = require('path');
 const response = require('../helpers/response');
 const auth = require('../controller/auth');
 const users = require('../controller/users');
+const recipe = require('../controller/recipe')
 
 
 const routes  = express.Router();
@@ -32,6 +33,9 @@ routes.post('/login', auth.authenticate)
 
 
 routes.post('/register', users.create);
+
+routes.post('/create',recipe.create);
+routes.post('/edit',recipe.edit);
 
 routes.use(function(req, res) {
   response.sendNotFound(res);
