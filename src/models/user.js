@@ -1,8 +1,14 @@
 const mongoose = require('mongoose');
 const crypto = require('crypto');
+const nanoid = require('nanoid');
 
 const Schema = mongoose.Schema;
 const UserSchema = new Schema({
+  id: {
+    type: String,
+    required: true,
+    default: nanoid()
+  },
   email: {
     type: String,
     required: true,
@@ -33,7 +39,9 @@ UserSchema.set('toJSON', {
 
 UserSchema.pre('save', function(next) {
   console.log("Pre method of user");
-  if (!this.isModified('password')) return next();
+  if (!this.isModified('password')){
+     return next();
+  }
 
   var salt = crypto.randomBytes(16).toString("hex");
   this.salt = salt;
@@ -43,7 +51,7 @@ UserSchema.pre('save', function(next) {
 
 UserSchema.methods.getSessionData = function() {
   return {
-    username: this.email,
+    user_id: this.id,
     role: this.role
   }
 };

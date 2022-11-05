@@ -28,10 +28,12 @@ routes.get('/login/ui', (req, res) => {
     }
   });
 
-routes.post('/login', auth.authenticate)
+routes.post('/api/login', auth.authenticate)
 
 
-routes.post('/register', users.create);
+routes.post('/api/register', users.create);
+
+routes.get('/api/logout', auth.signOut);
 
 routes.use(function(req, res) {
   response.sendNotFound(res);

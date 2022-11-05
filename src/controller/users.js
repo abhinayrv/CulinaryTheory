@@ -8,41 +8,40 @@ const User = mongoose.model('User');
 exports.create = function(req, res) {
     if (!req.body.username){
 
-      response.sendBadRequest(res, "Please check the data entered");
+      return response.sendBadRequest(res, "Please check the data entered");
 
-    } else {
+    } 
 
-      User.findOne({ email: req.body.username}).exec(function(err, user){
-        if(err) {throw err};
-        if(user){
+    User.findOne({ email: req.body.username}).exec(function(err, user){
+      if(err) {
+        throw err;
+      }
 
-          response.sendBadRequest(res, "User already exists!");
-          
-        } else {
+      if(user){
 
-          const newUser = new User({email: req.body.username, password: req.body.password, salt: ''});
-          newUser.role = 'user';
-          var err = newUser.validateSync();
-          if (err) {
+        return response.sendBadRequest(res, "User already exists!");
+        
+      } 
 
-            response.sendBadRequest(res, "Please check the data entered");
+      const newUser = new User({email: req.body.username, password: req.body.password});
+      newUser.role = 'user';
+      var err = newUser.validateSync();
+      if (err) {
 
-          } else {
+        return response.sendBadRequest(res, "Please check the data entered");
 
-            newUser.save(function(err, user) {
-              if (err) return response.sendBadRequest(res, err);
-              console.log(`Hashed password after save ${user.password}`);
-              req.login(user, function(err) {
-                if (err) { throw err; }
-                response.sendCreated(res, user);
-              })
-            });
+      } 
 
-          }
-
+      newUser.save(function(err, user) {
+        if (err){
+          throw err;
         }
-      });
 
-    }
+        var session = req.session;
+        session.user = user.getSessionData();
+        return response.sendCreated(res, user);
+
+      });
+    });
     
-  };
+  }
