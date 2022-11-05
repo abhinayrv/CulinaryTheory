@@ -13,6 +13,9 @@ const config = require("./config/config");
 
 var app = express();
 
+var nuser = new User({email: "abh", password:"var"})
+console.log(nuser.toJSON());
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'static')));
@@ -21,7 +24,7 @@ app.use(session({
   secret: 'keyboard cat',
   resave: false,
   saveUninitialized: false,
-  cookie: { maxAge: 3000000 },
+  cookie: { maxAge: 30000 },
   rolling: true
 }));
 
@@ -39,7 +42,7 @@ app.use(function(err, req, res, next) {
 });
 
 const port = config.server.port;
-app.listen(port);
+app.listen(port, debug=true);
 console.log('Node + Express REST API skeleton server started on port: ' + port);
 
 module.exports = app;

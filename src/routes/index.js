@@ -30,9 +30,11 @@ routes.get('/login/ui', (req, res) => {
     }
   });
 
-routes.post('/login', auth.authenticate)
+routes.post('/api/login', auth.authenticate)
 
-routes.post('/register', users.create);
+
+routes.post('/api/register', users.create);
+routes.get('/api/logout', auth.signOut);
 
 routes.post('/api/bookmark',UserInteraction.add_bookmark);
 routes.get('/api/bookmarks/:user_id',UserInteraction.getbookmarks)
