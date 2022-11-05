@@ -47,4 +47,16 @@ function stepsValid(arr){
 function ingredsValid(arr){
     return arr.length >= 3 && arr.length <= 20;
 }
+RecipeSchema.methods.updateDoc = function(newData){
+    this.image_url = newData.image_url;
+    this.title = newData.title;
+    this.description = newData.description;
+    this.tags = newData.tags;
+    this.steps = newData.steps;
+    this.ingredients = newData.ingredients;
+    this.dietary_preferences = newData.dietary_preferences;
+    this.prep_time = newData.prep_time;
+    this.cuisine = newData.cuisine;
+    this.isPublic = newData.isPublic;
+}
 module.exports = mongoose.model('Recipes', RecipeSchema);
