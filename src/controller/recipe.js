@@ -8,7 +8,6 @@ const RecipeModel = mongoose.model('Recipes');
 
 exports.create = function(req, res){
     console.log("In recipe create");
-    console.log(req.body);
 
     validateRequest(req.body, function(result){
 
