@@ -33,13 +33,12 @@ routes.post('/login', auth.authenticate)
 
 routes.post('/register', users.create);
 
-routes.post('/add_bookmark',UserInteraction.add_bookmark);
-routes.get('/bookmarks/:user_id',UserInteraction.getbookmarks)
-routes.delete('/bookmarks/:bookmark_id',UserInteraction.deletebookmark);
-routes.post('/post',UserInteraction.insertLikeDislike);
-routes.get('/fetch/:Recipe_Id' , UserInteraction.functtest);
-routes.get('/fetchcount/:Recipe_Id/:Is_Liked/:Is_Disliked',  UserInteraction.countLikeDislike);
-routes.delete('/removelikedislike/:User_Id/:Recipe_Id', UserInteraction.deleteLikedislike);
+routes.post('/api/bookmark',UserInteraction.add_bookmark);
+routes.get('/api/bookmarks/:user_id',UserInteraction.getbookmarks)
+routes.delete('/api/deletebookmark',UserInteraction.deletebookmark);
+routes.post('/api/like',UserInteraction.insertLikeDislike);
+routes.get('/api/likes/:recipe_id',  UserInteraction.countLikeDislike);
+routes.delete('/api/deletelike', UserInteraction.deleteLikedislike);
 
 routes.use(function(req, res) {
   response.sendNotFound(res);

@@ -1,129 +1,149 @@
 const mongoose = require('mongoose')
 //const bookmarkModel = require('./models/BookmarkSchema'); 
 const bookmarkModel = require('../models/BookmarkSchema')
-const monmodel = require('../models/LikeDislikeSchema');
+const likemodel = require('../models/LikeSchema');
+const response = require('../helpers/response');
 
-exports.add_bookmark = function (request, response)  {
-    const bookmark = new bookmarkModel(request.body);
+exports.add_bookmark = function (req, res)  {
+      if (!req.body.user_id || !req.body.recipe_id) {
+        return response.sendBadRequest(res, 'Reqired fields missing');
+      }
     
-    try {
-      bookmarkModel.findOne({bookmark_id:bookmark.bookmark_id}).exec((err,bookmark1)=>{
+    
+      bookmarkModel.findOne({user_id: req.body.user_id, recipe_id: req.body.recipe_id}).exec((err, bookmark)=>{
         if (err){
-          throw error
+          throw error;
         }
-        else if (bookmark1){
-          response.status(400).send("Bookmark already exist");
-      }
-      else{
-        bookmark.save();
-        response.send("Bookmark  Added");
-      }
-    })
-    } catch (error) {
-      response.status(500).send(error);
-    }
-  };
-  exports.getbookmarks = function (request, response)  {
-    var fetchuserid = request.params.user_id;
- 
-   const bookmarks =  bookmarkModel.find({user_id:fetchuserid});
-   
-     try {
-       response.send(bookmarks);
-     } catch (error) {
-       response.status(500).send(error);
-     }
-   };
-   exports.deletebookmark = function (request, response) {
-    var bookmark_id=request.params.bookmark_id
+        
+        if (bookmark){
+          return response.sendBadRequest(res, "Already bookmarked!");
+          // response.status(400).send("Bookmark already exist");
+        }
+        
+        bookmark = new bookmarkModel(req.body);
+        var err = bookmark.validateSync();
+        
+        if(err){
+          return response.sendBadRequest(res, "Please check the data");
+        }
 
-    const bookmarks =  bookmarkModel.deleteOne({bookmark_id:bookmark_id});
-  
-    try {
-      
-      response.send("Bookmark deleted");
-    } catch (error) {
-      response.status(500).send(error);
-    }
+        bookmark.save(function (err, bookmark){
+          if (err){
+            throw err;
+          }
+
+          return response.sendSuccess(res, bookmark);
+        });
+      });
+
   };
-  exports.insertLikeDislike = function(req,res){
+
+  exports.getbookmarks = function (req, res)  {
+    if (!req.params.user_id) {
+      return response.sendBadRequest(res, 'user_id is required');
+    }
+ 
+   bookmarkModel.find({user_id: req.params.user_id}).exec(function(err, bookmarks){
+    if (err){
+        throw err;
+    }
+
+    response.sendSuccess(res, bookmarks);
+   });
+  }
+
+exports.deletebookmark = function (req, res) {
+  console.log('In delete bookmark');
+  if (!req.body.user_id || !req.body.recipe_id) {
+      return response.sendBadRequest(res, 'user_id and recipe id are required');
+  }
+
+  bookmarkModel.findOneAndDelete(({user_id:req.body.user_id,recipe_id:req.body.recipe_id}),function(err,doc){
+    if (err) {
+        throw err;
+      } 
+    
+    if (!doc) {
+      return response.sendNotFound(res);
+    }
+    
+    return response.sendSuccess(res, "deleted.");
+});
+    // 
+  };
+
+exports.insertLikeDislike = function(req,res){
 
     console.log("inside post function");
   
-    if ((req.body.User_Id == null) || (req.body.Recipe_Id==null) 
-    || ((req.body.Is_Liked==false) && (req.body.Is_Disliked==false)))
+    if (!req.body.user_id|| !req.body.recipe_id || req.body.is_liked==null)
     {
-     res.send("Please check the data");
+     return response.sendBadRequest(res, "Required fields missing");
     } 
-    else {
-        const data = new monmodel({
-        Like_Id:req.body.Like_Id,
-        User_Id:req.body.User_Id,
-        Recipe_Id:req.body.Recipe_Id,
-        Is_Liked:req.body.Is_Liked,
-        Is_Disliked:req.body.Is_Disliked
-    });
+
   
-    try {
-      monmodel.findOne({User_Id:data.User_Id,Recipe_Id:data.Recipe_Id}).exec((err,data1)=>{
-        if (err){
-          throw err
-        }
-        else if (data1){
-          res.status(400).send("Recipie already liked or disliked");
-          //res.json(data1)  
-        }
-      else{
-        const val = data.save();
-  
-        if (req.body.Is_Liked == true) {
-          res.send(" Like Posted");
-        } else if (req.body.Is_Disliked == true) {
-          res.send(" Dislike Posted");
-        }    
+    likemodel.findOne({user_id:req.body.user_id, recipe_id:req.body.recipe_id}).exec((err,like)=>{
+      if (err){
+        throw err;
       }
-    })
-    } catch (error) {
-      console.log(error);
-      res.status(500).send(error);
-    }
+      
+      if (like){
+        response.sendBadRequest(res, "Already liked/disliked."); 
+      }
+      like = new likemodel(req.body);
+      var err = like.validateSync();
+      
+      if(err){
+        console.log(err);
+        return response.sendBadRequest(res, "Please check the data");
+      }
+
+      like.save(function(err, like){
+        if (err){
+          throw err;
+        }
+
+        return response.sendCreated(res, like);
+      });
     
-  
-    //res.json(val);
-    }
+    });
   };
-  exports.functtest = function(req,res){
-    fetchid=req.params.Recipe_Id;
-    monmodel.find(({Recipe_Id:fetchid}),function(err,val){
-        res.send(val);
-    })
-  };
+
+
+
   exports.countLikeDislike = function(req,res){
-    fetchuserID= req.params.User_Id;
-    fetchid=req.params.Recipe_Id;
-    fetchlike = req.params.Is_Liked;
-    fetchdislike = req.params.Is_Disliked;
-    monmodel.count(({Recipe_Id:fetchid,Is_Liked:fetchlike,Is_Disliked:fetchdislike}),function(err,val){
+    
+    if (!req.params.recipe_id){
+      response.sendBadRequest(res,"recipie id is missing or invalid");
+    }
+
+    likemodel.count(({recipe_id:req.params.recipe_id,is_liked:true}),function(err,val){
         if (err) {
-            res.send(err);
-          } else {
-            res.json(val);
-          }
-    })
+            throw err;
+        }
+        response.sendSuccess(res,{likes:val});  
+    });
   };
 
   exports.deleteLikedislike = function(req,res){
-    fetchuserID= req.params.User_Id;
-    fetchid=req.params.Recipe_Id;
-    fetchlike = req.params.Is_Liked;
-    fetchdislike = req.params.Is_Disliked;
   
-    monmodel.findOneAndDelete(({User_Id:fetchuserID,Recipe_Id:fetchid}),function(err,doc){
+
+    if (!req.body.user_id || !req.body.recipe_id) 
+    {
+      response.sendBadRequest(res, "Please check the userid or recipieid");
+    }
+    
+  
+    likemodel.findOneAndDelete(({user_id:req.body.user_id,recipe_id:req.body.recipe_id}),function(err,doc){
         if (err) {
-            res.send(err);
-          } else {
-            res.send("Deleted");
-          }
+            throw err;
+          } 
+        
+        if (!doc) {
+          return response.sendNotFound();
+        }
+        
+        return response.sendSuccess(res, "deleted.");
     })
   };
    

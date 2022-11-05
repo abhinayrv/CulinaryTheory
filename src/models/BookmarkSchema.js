@@ -1,9 +1,19 @@
 const mongoose = require("mongoose");
 
 const BookmarkSchema = new mongoose.Schema({
-    user_id:String,
-    bookmarkURL:String,
-    bookmark_id:Number,
+    user_id:{
+        type:String,
+        required:true,
+    },
+    bookmark_id:{
+        type:String,
+        // required:true,
+        default: ""
+    },
+    recipe_id:{
+        type:String,
+        required:true,
+    },
 });
 
 
