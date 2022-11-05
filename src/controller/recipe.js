@@ -9,23 +9,25 @@ const RecipeModel = mongoose.model('Recipes');
 exports.create = function(req, res){
     console.log("In recipe create");
     console.log(req.body);
-    if (!validateRequest(req.body)){
-        return response.sendBadRequest(res, "One of the fields is wrong.")
-    }
-    else{
-        req.body.recipe_id = nanoid.generate();
-        const newRecipe = new RecipeModel(req.body);
-        const err = newRecipe.validateSync();
-        if (err){
-            return response.sendBadRequest(res, "Please check the data entered.");
-        }
-        newRecipe.save(function(err, recipe){
-            if (err) return response.sendBadRequest(res, err);
-            response.sendCreated(res, recipe);
-        });
 
-    }
-    
+    validateRequest(req.body, function(result){
+
+        if(!result){
+            return response.sendBadRequest(res, "One of the fields is missing.")
+        }
+        else{
+            req.body.recipe_id = nanoid.generate();
+            const newRecipe = new RecipeModel(req.body);
+            const err = newRecipe.validateSync();
+            if (err){
+                return response.sendBadRequest(res, "Please check the data entered.");
+            }
+            newRecipe.save(function(err, recipe){
+                if (err) return response.sendBadRequest(res, err);
+                response.sendCreated(res, "Successfully created in the database.");
+            });
+        }
+    });
 
 }
 
@@ -45,29 +47,27 @@ exports.edit = function(req, res){
             return response.sendBadRequest(res, "No document found for the given id.");
         }
         
-        if (!validateRequest(recipe)){
-            console.log("In if")
-            return response.sendBadRequest(res, "One of the fields is wrong.")
-        }
-        else{
-            console.log(recipe);
-            recipe.updateDoc(req.body);
-            recipe.save(function(err, recipe){
+        validateRequest(req.body, function(result){
+            if(!result){
+                console.log("In if")
+                return response.sendBadRequest(res, "One of the fields is wrong.")
+            }
+            else{
+                recipe.updateDoc(req.body);
+                recipe.save(function(err, recipe){
                 if (err) return response.sendBadRequest(res, err);
                 response.sendSuccess(res, "Successfully updated the doc.");
             });
         }
-        
-
     });
+});
     
 }
-function validateRequest(reqBody){
+function validateRequest(reqBody, next){
     if(!reqBody.image_url || !reqBody.title || !reqBody.description || !reqBody.tags || !reqBody.steps || 
         !reqBody.ingredients || !reqBody.dietary_preferences || !reqBody.prep_time || !reqBody.cuisine
         ){
-            return false;
+            return next(false);
         }
-        return true;
+        return next(true);
 }
-

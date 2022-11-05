@@ -1,9 +1,5 @@
 const mongoose = require('mongoose')
 
-
-
-//mongoose.connect("mongodb://auth_test:CulinaryTh@ec2-54-165-0-20.compute-1.amazonaws.com:27017/recipe_test")
-
 const Schema = mongoose.Schema;
 const RecipeSchema = new Schema({
     recipe_id: String,
