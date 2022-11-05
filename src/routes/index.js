@@ -4,6 +4,8 @@ const path = require('path');
 const response = require('../helpers/response');
 const auth = require('../controller/auth');
 const users = require('../controller/users');
+const recipe = require('../controller/recipe')
+const UserInteraction =require ("../controller/UserInteraction")
 
 
 const routes  = express.Router();
@@ -32,11 +34,23 @@ routes.post('/api/login', auth.authenticate)
 
 
 routes.post('/api/register', users.create);
-
 routes.get('/api/logout', auth.signOut);
+
+routes.post('/api/bookmark',UserInteraction.add_bookmark);
+routes.get('/api/bookmarks/:user_id',UserInteraction.getbookmarks)
+routes.delete('/api/deletebookmark',UserInteraction.deletebookmark);
+routes.post('/api/like',UserInteraction.insertLikeDislike);
+routes.get('/api/likes/:recipe_id',  UserInteraction.countLikeDislike);
+routes.delete('/api/deletelike', UserInteraction.deleteLikedislike);
+
+routes.post('/create',recipe.create);
+routes.post('/edit',recipe.edit);
 
 routes.use(function(req, res) {
   response.sendNotFound(res);
 });
+
+//user interaction routes are added here 
+
 
 module.exports = routes;
