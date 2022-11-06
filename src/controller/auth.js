@@ -6,13 +6,13 @@ const User = mongoose.model('User');
 exports.authenticate = function(req, res) {
     console.log(`Login request`);
   
-  if (!req.body.username || !req.body.password) {
+  if (!req.body.email || !req.body.password) {
 
     return response.sendBadRequest(res, "Please check the fields enetered");
     
   } 
 
-  User.findOne({ email: req.body.username })
+  User.findOne({ email: req.body.email })
   .exec(function(err, user) {
     if (err) {
         console.log("Some error in user find");
@@ -69,4 +69,21 @@ exports.ensureAuthenticated = function(req, res, next) {
     }
     return response.sendUnauthorized(res, "Please login and retry");
   };
+
+exports.ensureOwner = function(req, res, next) {
+  if (req.body.user_id) {
+    if (req.session.user.user_id != req.body.user_id) {
+      return response.sendForbidden(res);
+    }
+
+  } else if (req.params.user_id) {
+    if (req.session.user.user_id != req.params.user_id) {
+      return response.sendForbidden(res);
+    }
+
+  } else {
+    return response.sendBadRequest(res, "user_id missing");
+  }
+  return next();
+}
 
