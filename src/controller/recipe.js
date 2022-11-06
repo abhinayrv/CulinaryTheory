@@ -20,7 +20,7 @@ exports.create = function(req, res){
             const err = newRecipe.validateSync();
             if (err){
                 console.log(err);
-                return response.sendBadRequest(res, "Please check the data entered.");
+                return response.sendBadRequest(res, "Please check the data entered.", err);
             }
             newRecipe.save(function(err, recipe){
                 if (err) return response.sendBadRequest(res, err);
@@ -46,6 +46,10 @@ exports.edit = function(req, res){
             console.log("Doc not found.")
             return response.sendBadRequest(res, "No document found for the given id.");
         }
+
+        if (recipe.user_id != req.body.user_id) {
+            return response.sendForbidden(res);
+        }
         
         validateRequest(req.body, function(result){
             if(!result){
@@ -55,7 +59,7 @@ exports.edit = function(req, res){
             else{
                 recipe.updateDoc(req.body);
                 recipe.save(function(err, recipe){
-                if (err) return response.sendBadRequest(res, err);
+                if (err) return response.sendBadRequest(res, "Please check the data entered.", err);
                 response.sendSuccess(res, "Successfully updated the doc.", recipe.toJSON());
             });
         }

@@ -148,7 +148,7 @@ exports.deleteLikedislike = function(req,res){
           } 
         
         if (!doc) {
-          return response.sendNotFound();
+          return response.sendNotFound(res);
         }
         
         return response.sendSuccess(res, "Successfully deleted.", doc.toJSON());
