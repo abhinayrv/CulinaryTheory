@@ -1,25 +1,30 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
+const nanoid = require('nanoid');
 
 const Schema = mongoose.Schema;
 const RecipeSchema = new Schema({
-    recipe_id: String,
+    recipe_id: {
+        type: String,
+        required: true,
+        default: nanoid()
+    },
     image_url: String,
     title: {type:String,required:true},
     description: String,
     tags: {type:[String], required: true, validate: [tagsValid, '{PATH} does not meet requirements.']},
     steps: {
         type: [{
-            step_no: Number,
-            step: String
+            step_no: {type:Number,required:true},
+            step: {type:String,required:true}
     }],
         validate: [stepsValid, '{PATH} does not meet requirements.'],
         required: true
     },
     ingredients: {
         type: [{
-            ingre_no: Number,
-            ingredient: String,
-            quantity: String
+            ingre_no: {type:Number,required:true},
+            ingredient: {type:String,required:true},
+            quantity: {type:String,required:true},
         }],
         required: true,
         validate: [ingredsValid, '{PATH} does not meet requirements.']
@@ -27,7 +32,7 @@ const RecipeSchema = new Schema({
     dietary_preferences: {type:String, required:true, enum:["vegetarian", "nonvegetarian","contains egg"]},
     prep_time: {type:Number,required:true, enum:[30, 60, 90]},
     cuisine: String,
-    isPublic: {type:Boolean,default:true},
+    is_public: {type:Boolean,default:true},
     user_id: {type:String, required:true}
 },
     {timestamps: true}
@@ -53,6 +58,14 @@ RecipeSchema.methods.updateDoc = function(newData){
     this.dietary_preferences = newData.dietary_preferences;
     this.prep_time = newData.prep_time;
     this.cuisine = newData.cuisine;
-    this.isPublic = newData.isPublic;
+    this.is_public = newData.isPublic;
 }
+
+RecipeSchema.set('toJSON', {
+    transform: function(doc, ret, options) {
+      delete ret._id;
+      return ret;
+    }
+  });
+
 module.exports = mongoose.model('Recipes', RecipeSchema);

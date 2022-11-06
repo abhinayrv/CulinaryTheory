@@ -1,5 +1,9 @@
-exports.sendCreated = function(res, data) {
-  return res.status(201).send(data);
+exports.sendCreated = function(res, message, data) {
+  return res.status(201).send({
+    success: true,
+    message: message || 'Created',
+    data: data || {}
+  });
 };
 
 exports.sendBadRequest = function(res, message) {
@@ -30,10 +34,11 @@ exports.sendNotFound = function(res, message) {
   });
 };
 
-exports.sendSuccess = function(res, message) {
+exports.sendSuccess = function(res, message, data) {
   return res.status(200).send({
     success: true,
-    message: message || 'Success'
+    message: message || 'Success',
+    data: data
   });
 };
 

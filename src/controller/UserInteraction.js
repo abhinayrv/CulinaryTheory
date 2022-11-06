@@ -1,8 +1,9 @@
-const mongoose = require('mongoose')
-//const bookmarkModel = require('./models/BookmarkSchema'); 
-const bookmarkModel = require('../models/BookmarkSchema')
-const likemodel = require('../models/LikeSchema');
+const mongoose = require('mongoose');
+const nanoid = require('nanoid');
 const response = require('../helpers/response');
+const bookmarkModel = mongoose.model('Bookmark');
+const likemodel = mongoose.model('Like');
+
 
 exports.add_bookmark = function (req, res)  {
       if (!req.body.user_id || !req.body.recipe_id) {
@@ -12,14 +13,14 @@ exports.add_bookmark = function (req, res)  {
     
       bookmarkModel.findOne({user_id: req.body.user_id, recipe_id: req.body.recipe_id}).exec((err, bookmark)=>{
         if (err){
-          throw error;
+          throw err;
         }
         
         if (bookmark){
           return response.sendBadRequest(res, "Already bookmarked!");
-          // response.status(400).send("Bookmark already exist");
         }
         
+        req.body.bookmark_id = nanoid();
         bookmark = new bookmarkModel(req.body);
         var err = bookmark.validateSync();
         
@@ -32,13 +33,13 @@ exports.add_bookmark = function (req, res)  {
             throw err;
           }
 
-          return response.sendSuccess(res, bookmark);
+          return response.sendSuccess(res, "Recipe bookmarked", bookmark.toJSON());
         });
       });
 
   };
 
-  exports.getbookmarks = function (req, res)  {
+exports.getbookmarks = function (req, res)  {
     if (!req.params.user_id) {
       return response.sendBadRequest(res, 'user_id is required');
     }
@@ -48,7 +49,7 @@ exports.add_bookmark = function (req, res)  {
         throw err;
     }
 
-    response.sendSuccess(res, bookmarks);
+    response.sendSuccess(res, "Success", bookmarks);
    });
   }
 
@@ -67,10 +68,10 @@ exports.deletebookmark = function (req, res) {
       return response.sendNotFound(res);
     }
     
-    return response.sendSuccess(res, "deleted.");
+    return response.sendSuccess(res, "Successfully deleted.", doc.toJSON());
 });
-    // 
-  };
+
+};
 
 exports.insertLikeDislike = function(req,res){
 
@@ -88,8 +89,10 @@ exports.insertLikeDislike = function(req,res){
       }
       
       if (like){
-        response.sendBadRequest(res, "Already liked/disliked."); 
+        return response.sendBadRequest(res, "Already liked/disliked."); 
       }
+
+      req.body.like_id = nanoid();
       like = new likemodel(req.body);
       var err = like.validateSync();
       
@@ -103,7 +106,7 @@ exports.insertLikeDislike = function(req,res){
           throw err;
         }
 
-        return response.sendCreated(res, like);
+        return response.sendCreated(res, "Added like/dislike successfully.", like.toJSON());
       });
     
     });
@@ -111,21 +114,26 @@ exports.insertLikeDislike = function(req,res){
 
 
 
-  exports.countLikeDislike = function(req,res){
+exports.countLikeDislike = function(req,res){
     
     if (!req.params.recipe_id){
       response.sendBadRequest(res,"recipie id is missing or invalid");
     }
 
-    likemodel.count(({recipe_id:req.params.recipe_id,is_liked:true}),function(err,val){
+    likemodel.count(({recipe_id:req.params.recipe_id,is_liked:true}),function(err,likes){
         if (err) {
             throw err;
         }
-        response.sendSuccess(res,{likes:val});  
+        likemodel.count(({recipe_id:req.params.recipe_id,is_liked:false}),function(err,dislikes){
+            if (err) {
+              throw err;
+            }
+            response.sendSuccess(res, "Success", {likes:likes, dislikes:dislikes});
+        });  
     });
   };
 
-  exports.deleteLikedislike = function(req,res){
+exports.deleteLikedislike = function(req,res){
   
 
     if (!req.body.user_id || !req.body.recipe_id) 
@@ -140,10 +148,10 @@ exports.insertLikeDislike = function(req,res){
           } 
         
         if (!doc) {
-          return response.sendNotFound();
+          return response.sendNotFound(res);
         }
         
-        return response.sendSuccess(res, "deleted.");
+        return response.sendSuccess(res, "Successfully deleted.", doc.toJSON());
     })
   };
    

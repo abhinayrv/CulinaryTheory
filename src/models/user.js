@@ -1,13 +1,11 @@
 const mongoose = require('mongoose');
 const crypto = require('crypto');
-const nanoid = require('nanoid');
 
 const Schema = mongoose.Schema;
 const UserSchema = new Schema({
-  id: {
+  user_id: {
     type: String,
     required: true,
-    default: nanoid()
   },
   email: {
     type: String,
@@ -33,6 +31,7 @@ UserSchema.set('toJSON', {
   transform: function(doc, ret, options) {
     delete ret.password;
     delete ret.salt;
+    delete ret._id;
     return ret;
   }
 });
@@ -51,7 +50,7 @@ UserSchema.pre('save', function(next) {
 
 UserSchema.methods.getSessionData = function() {
   return {
-    user_id: this.id,
+    user_id: this.user_id,
     role: this.role
   }
 };
@@ -69,7 +68,7 @@ UserSchema.methods.verifyPassword = function(candidatePassword, next) {
 };
 
 UserSchema.methods.equals = function(user) {
-  return this.id == user.id;
+  return this.user_id == user.user_id;
 };
 
 module.exports = mongoose.model('User', UserSchema);

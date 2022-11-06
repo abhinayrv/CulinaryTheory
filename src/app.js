@@ -5,6 +5,8 @@ const session = require('express-session');
 const db = require('./db');
 const User = require('./models/user')
 const recipe = require("./models/recipe");
+const bookmarkModel = require('./models/BookmarkSchema')
+const likemodel = require('./models/LikeSchema');
 const routes = require('./routes');
 const config = require("./config/config");
 
@@ -12,9 +14,6 @@ const config = require("./config/config");
 
 
 var app = express();
-
-var nuser = new User({email: "abh", password:"var"})
-console.log(nuser.toJSON());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -24,11 +23,11 @@ app.use(session({
   secret: 'keyboard cat',
   resave: false,
   saveUninitialized: false,
-  cookie: { maxAge: 30000 },
+  cookie: { maxAge: 3000000 },
   rolling: true
 }));
 
-app.use('/', routes);
+app.use('/api', routes);
 
 app.use(function(err, req, res, next) {
   // set locals, only providing error in development

@@ -26,31 +26,28 @@ routes.get('/login/ui', (req, res) => {
         res.send("You are logged in!");
     } else {
         res.sendFile("index.html", {root: path.join(path.dirname(__dirname), "views")})
-        // res.render("index.html");
     }
   });
 
-routes.post('/api/login', auth.authenticate)
+routes.post('/login', auth.authenticate)
 
 
-routes.post('/api/register', users.create);
-routes.get('/api/logout', auth.signOut);
+routes.post('/register', users.create);
+routes.get('/logout', auth.signOut);
 
-routes.post('/api/bookmark',UserInteraction.add_bookmark);
-routes.get('/api/bookmarks/:user_id',UserInteraction.getbookmarks)
-routes.delete('/api/deletebookmark',UserInteraction.deletebookmark);
-routes.post('/api/like',UserInteraction.insertLikeDislike);
-routes.get('/api/likes/:recipe_id',  UserInteraction.countLikeDislike);
-routes.delete('/api/deletelike', UserInteraction.deleteLikedislike);
+routes.post('/bookmark', auth.ensureAuthenticated, auth.ensureOwner, UserInteraction.add_bookmark);
+routes.get('/bookmarks/:user_id', auth.ensureAuthenticated, auth.ensureOwner, UserInteraction.getbookmarks)
+routes.delete('/deletebookmark', auth.ensureAuthenticated, auth.ensureOwner, UserInteraction.deletebookmark);
+routes.post('/like', auth.ensureAuthenticated, auth.ensureOwner, UserInteraction.insertLikeDislike);
+routes.get('/likes/:recipe_id', UserInteraction.countLikeDislike);
+routes.delete('/deletelike', auth.ensureAuthenticated, auth.ensureOwner, UserInteraction.deleteLikedislike);
 
-routes.post('/create',recipe.create);
-routes.post('/edit',recipe.edit);
+routes.post('/create', auth.ensureAuthenticated, auth.ensureOwner, recipe.create);
+routes.post('/edit', auth.ensureAuthenticated, auth.ensureOwner, recipe.edit);
 
 routes.use(function(req, res) {
   response.sendNotFound(res);
 });
-
-//user interaction routes are added here 
 
 
 module.exports = routes;

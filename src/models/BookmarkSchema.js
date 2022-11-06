@@ -7,8 +7,7 @@ const BookmarkSchema = new mongoose.Schema({
     },
     bookmark_id:{
         type:String,
-        // required:true,
-        default: ""
+        required:true,
     },
     recipe_id:{
         type:String,
@@ -16,7 +15,14 @@ const BookmarkSchema = new mongoose.Schema({
     },
 });
 
+BookmarkSchema.set('toJSON', {
+    transform: function(doc, ret, options) {
+      delete ret._id;
+      return ret;
+    }
+  });
 
-module.exports = mongoose.model('Bookmarks', BookmarkSchema);
+
+module.exports = mongoose.model('Bookmark', BookmarkSchema);
 
 

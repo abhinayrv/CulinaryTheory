@@ -1,10 +1,9 @@
 const mongoose = require("mongoose");
-const nanoid = require('nanoid');
 
-const likeSchema={
+const likeSchema = new mongoose.Schema({
     like_id:{
         type:String,
-        default: ''
+        required: true
     },
     user_id:{
         type:String,
@@ -18,8 +17,13 @@ const likeSchema={
         type:Boolean,
         required:true,
     },
-    }   
+});
 
-const LikeDislikeModel = mongoose.model("recipiecollections",likeSchema);
+likeSchema.set('toJSON', {
+    transform: function(doc, ret, options) {
+        delete ret._id;
+        return ret;
+    }
+    });
 
-module.exports =LikeDislikeModel;
+module.exports = mongoose.model("Like", likeSchema);

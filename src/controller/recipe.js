@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const nanoid = require('shortid');
+const nanoid = require('nanoid');
 const response = require('../helpers/response');
 const request = require('../helpers/request');
 
@@ -15,15 +15,16 @@ exports.create = function(req, res){
             return response.sendBadRequest(res, "One of the fields is missing.")
         }
         else{
-            req.body.recipe_id = nanoid.generate();
+            req.body.recipe_id = nanoid();
             const newRecipe = new RecipeModel(req.body);
             const err = newRecipe.validateSync();
             if (err){
-                return response.sendBadRequest(res, "Please check the data entered.");
+                console.log(err);
+                return response.sendBadRequest(res, "Please check the data entered.", err);
             }
             newRecipe.save(function(err, recipe){
                 if (err) return response.sendBadRequest(res, err);
-                response.sendCreated(res, "Successfully created in the database.");
+                response.sendCreated(res, "Successfully created the recipe", newRecipe.toJSON());
             });
         }
     });
@@ -45,17 +46,21 @@ exports.edit = function(req, res){
             console.log("Doc not found.")
             return response.sendBadRequest(res, "No document found for the given id.");
         }
+
+        if (recipe.user_id != req.body.user_id) {
+            return response.sendForbidden(res);
+        }
         
         validateRequest(req.body, function(result){
             if(!result){
                 console.log("In if")
-                return response.sendBadRequest(res, "One of the fields is wrong.")
+                return response.sendBadRequest(res, "One of the fields is wrong/missing.")
             }
             else{
                 recipe.updateDoc(req.body);
                 recipe.save(function(err, recipe){
-                if (err) return response.sendBadRequest(res, err);
-                response.sendSuccess(res, "Successfully updated the doc.");
+                if (err) return response.sendBadRequest(res, "Please check the data entered.", err);
+                response.sendSuccess(res, "Successfully updated the doc.", recipe.toJSON());
             });
         }
     });
