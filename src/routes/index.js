@@ -44,6 +44,7 @@ routes.delete('/deletelike', auth.ensureAuthenticated, auth.ensureOwner, UserInt
 
 routes.post('/create', auth.ensureAuthenticated, auth.ensureOwner, recipe.create);
 routes.post('/edit', auth.ensureAuthenticated, auth.ensureOwner, recipe.edit);
+// routes.post('/draft', auth.ensureAuthenticated, auth.ensureOwner, recipe.draft);
 
 routes.use(function(req, res) {
   response.sendNotFound(res);

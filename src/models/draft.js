@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const nanoid = require('nanoid');
 
 const Schema = mongoose.Schema;
-const RecipeSchema = new Schema({
+const DraftSchema = new Schema({
     recipe_id: {
         type: String,
         required: true,
@@ -11,14 +11,13 @@ const RecipeSchema = new Schema({
     image_url: String,
     title: {type:String,required:true},
     description: String,
-    tags: {type:[String], required: true, validate: [tagsValid, '{PATH} does not meet requirements.']},
+    tags: {type:[String], validate: [tagsValid, '{PATH} does not meet requirements.']},
     steps: {
         type: [{
             step_no: {type:Number,required:true},
             step: {type:String,required:true}
     }],
         validate: [stepsValid, '{PATH} does not meet requirements.'],
-        required: true
     },
     ingredients: {
         type: [{
@@ -26,11 +25,10 @@ const RecipeSchema = new Schema({
             ingredient: {type:String,required:true},
             quantity: {type:String,required:true},
         }],
-        required: true,
         validate: [ingredsValid, '{PATH} does not meet requirements.']
     },
-    dietary_preferences: {type:String, required:true, enum:["vegetarian", "nonvegetarian","contains egg"]},
-    prep_time: {type:Number,required:true, enum:[30, 60, 90]},
+    dietary_preferences: {type:String, enum:["vegetarian", "nonvegetarian","contains egg"]},
+    prep_time: {type:Number, enum:[30, 60, 90]},
     cuisine: String,
     is_public: {type:Boolean,default:true},
     user_id: {type:String, required:true}
@@ -45,7 +43,7 @@ function tagsValid(arr){
             break;
         }
     }
-    return arr.length >= 5 && arr.length <= 10 && flag;
+    return flag;
 }
 
 function stepsValid(arr){
@@ -58,7 +56,7 @@ function stepsValid(arr){
             }
         }
     }
-    return arr.length >= 5;
+    return true;
 }
 
 function ingredsValid(arr){
@@ -66,12 +64,12 @@ function ingredsValid(arr){
     for(i in arr){
         flag = arr[i].ingredient.length <= 30
         if(flag==false){
-            break;
+            return false;
         }
     }
-    return arr.length >= 3 && arr.length <= 20 && flag;
+    return true;
 }
-RecipeSchema.methods.updateDoc = function(newData){
+DraftSchema.methods.updateDoc = function(newData){
     this.image_url = newData.image_url;
     this.title = newData.title;
     this.description = newData.description;
@@ -84,11 +82,11 @@ RecipeSchema.methods.updateDoc = function(newData){
     this.is_public = newData.isPublic;
 }
 
-RecipeSchema.set('toJSON', {
+DraftSchema.set('toJSON', {
     transform: function(doc, ret, options) {
       delete ret._id;
       return ret;
     }
   });
 
-module.exports = mongoose.model('Recipes', RecipeSchema);
+module.exports = mongoose.model('Drafts', DraftSchema);
