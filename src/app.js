@@ -7,6 +7,7 @@ const User = require('./models/user')
 const recipe = require("./models/recipe");
 const bookmarkModel = require('./models/BookmarkSchema')
 const likemodel = require('./models/LikeSchema');
+const reportModel = require('./models/ReportSchema');
 const routes = require('./routes');
 const config = require("./config/config");
 

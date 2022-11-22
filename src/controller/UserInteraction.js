@@ -3,7 +3,7 @@ const nanoid = require('nanoid');
 const response = require('../helpers/response');
 const bookmarkModel = mongoose.model('Bookmark');
 const likemodel = mongoose.model('Like');
-
+const reportModel = mongoose.model('Report');
 
 exports.add_bookmark = function (req, res)  {
       if (!req.body.user_id || !req.body.recipe_id) {
@@ -154,4 +154,37 @@ exports.deleteLikedislike = function(req,res){
         return response.sendSuccess(res, "Successfully deleted.", doc.toJSON());
     })
   };
-   
+
+  exports.add_reported_recipe = function (req, res)  {
+    if (!req.body.user_id || !req.body.recipe_id) {
+      return response.sendBadRequest(res, 'Reqired fields missing');
+    }
+  
+  
+    reportModel.findOne({user_id: req.body.user_id, recipe_id: req.body.recipe_id}).exec((err, report)=>{
+      if (err){
+        throw err;
+      }
+      
+      if (report){
+        return response.sendBadRequest(res, "Already reporteded!");
+      }
+      
+      req.body.report_id = nanoid();
+      report = new reportModel(req.body);
+      var err = report.validateSync();
+      
+      if(err){
+        return response.sendBadRequest(res, "Please check the data");
+      }
+
+      report.save(function (err, report){
+        if (err){
+          throw err;
+        }
+
+        return response.sendSuccess(res, "Recipe Reported", report.toJSON());
+      });
+    });
+
+};

@@ -41,6 +41,7 @@ routes.delete('/deletebookmark', auth.ensureAuthenticated, auth.ensureOwner, Use
 routes.post('/like', auth.ensureAuthenticated, auth.ensureOwner, UserInteraction.insertLikeDislike);
 routes.get('/likes/:recipe_id', UserInteraction.countLikeDislike);
 routes.delete('/deletelike', auth.ensureAuthenticated, auth.ensureOwner, UserInteraction.deleteLikedislike);
+routes.post('/Report', UserInteraction.add_reported_recipe);
 
 routes.post('/create', auth.ensureAuthenticated, auth.ensureOwner, recipe.create);
 routes.post('/edit', auth.ensureAuthenticated, auth.ensureOwner, recipe.edit);
