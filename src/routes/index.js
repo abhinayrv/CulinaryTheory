@@ -34,6 +34,10 @@ routes.post('/login', auth.authenticate)
 
 routes.post('/register', users.create);
 routes.get('/logout', auth.signOut);
+routes.post('/reset', auth.resetPasswordEmail);
+routes.get('/reset/:token', auth.validateResetToken, auth.renderResetPage);
+routes.post('/resetpassword', auth.validateResetToken, auth.resetPassword, auth.deleteToken);
+routes.post('/updatepassword', auth.ensureAuthenticated, auth.ensureOwner, auth.updatePassword);
 
 routes.post('/bookmark', auth.ensureAuthenticated, auth.ensureOwner, UserInteraction.add_bookmark);
 routes.get('/bookmarks/:user_id', auth.ensureAuthenticated, auth.ensureOwner, UserInteraction.getbookmarks)
