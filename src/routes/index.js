@@ -42,6 +42,9 @@ routes.post('/like', auth.ensureAuthenticated, auth.ensureOwner, UserInteraction
 routes.get('/likes/:recipe_id', UserInteraction.countLikeDislike);
 routes.delete('/deletelike', auth.ensureAuthenticated, auth.ensureOwner, UserInteraction.deleteLikedislike);
 routes.post('/Report', UserInteraction.add_reported_recipe);
+routes.get('/Reports/:report_id' , auth.ensureAuthenticated, auth.ensureOwner, UserInteraction.getreportedrecipe);
+routes.delete('/deletereport', auth.ensureAuthenticated, auth.ensureOwner, UserInteraction.deletereportedrecipe);
+
 
 routes.post('/create', auth.ensureAuthenticated, auth.ensureOwner, recipe.create);
 routes.post('/edit', auth.ensureAuthenticated, auth.ensureOwner, recipe.edit);

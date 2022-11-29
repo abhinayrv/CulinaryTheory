@@ -188,3 +188,35 @@ exports.deleteLikedislike = function(req,res){
     });
 
 };
+
+exports.getreportedrecipe = function (req, res)  {
+  if (!req.params.report_id) {
+    return response.sendBadRequest(res, 'report_id is required');
+  }
+
+ reportModel.find({report_id: req.params.report_id}).exec(function(err, report){
+  if (err){
+      throw err;
+  }
+
+  response.sendSuccess(res, "Success", report.toJSON());
+ });
+}
+exports.deletereportedrecipe = function (req, res) {
+  if (!req.body.user_id || !req.body.report_id) {
+      return response.sendBadRequest(res, 'user_id and report_id are required');
+  }
+
+  reportModel.findOneAndDelete(({user_id:req.body.user_id,report_id:req.body.report_id}),function(err,report){
+    if (err) {
+        throw err;
+      } 
+    
+    if (!report) {
+      return response.sendNotFound(res);
+    }
+    
+    return response.sendSuccess(res, "Successfully deleted.", report.toJSON());
+});
+
+};
