@@ -3,7 +3,7 @@ const nanoid = require('nanoid');
 
 const Schema = mongoose.Schema;
 const DraftSchema = new Schema({
-    recipe_id: {
+    draft_id: {
         type: String,
         required: true
     },
