@@ -50,6 +50,10 @@ routes.delete('/deletereport', UserInteraction.deletereportedrecipe);
 routes.post('/create', auth.ensureAuthenticated, auth.ensureOwner, recipe.create);
 routes.post('/edit', auth.ensureAuthenticated, auth.ensureOwner, recipe.edit);
 
+// routes.post('createuserprofile', UserInteraction.createuser);
+// routes.post('viewuserprofile', UserInteraction.viewuser);
+// routes.post('edituserprofile', UserInteraction.viewuser);
+
 routes.use(function(req, res) {
   response.sendNotFound(res);
 });

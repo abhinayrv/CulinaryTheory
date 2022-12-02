@@ -5,6 +5,7 @@ const bookmarkModel = mongoose.model('Bookmark');
 const likemodel = mongoose.model('Like');
 const commentModel = mongoose.model('comments');
 const reportModel = mongoose.model('Report');
+const userprofileModel = mongoose.model('UserProfile');
 
 
 
@@ -275,3 +276,37 @@ exports.deletereportedrecipe = function (req, res) {
 });
 
 }; 
+
+// exports.create_user_profile = function (req, res)  {
+//   if (!req.body.user_id || !req.body.user_name || !req.body.bio_info) {
+//     return response.sendBadRequest(res, 'Reqired fields missing');
+//   }
+
+
+//   userprofileModel.findOne({user_id: req.body.user_id}).exec((err, report)=>{
+//     if (err){
+//       throw err;
+//     }
+    
+//     if (report){
+//       return response.sendBadRequest(res, "Already reporteded!");
+//     }
+    
+//     req.body.report_id = nanoid();
+//     report = new reportModel(req.body);
+//     var err = report.validateSync();
+    
+//     if(err){
+//       return response.sendBadRequest(res, "Please check the data");
+//     }
+
+//     report.save(function (err, report){
+//       if (err){
+//         throw err;
+//       }
+
+//       return response.sendSuccess(res, "Recipe Reported", report.toJSON());
+//     });
+//   });
+
+// };
