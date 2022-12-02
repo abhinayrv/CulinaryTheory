@@ -139,8 +139,8 @@ exports.search = function(req, res){
                     var data = {}
                     data['page'] = pageNumber;
                     data['total_count'] = count;
-                    data['pages'] = Math.ceil(count / limit);
-                    data['recipes'] = docs;
+                    data['total_pages'] = Math.ceil(count / limit);
+                    data['data'] = docs;
                     return response.sendSuccess(res, "Successfully fetched the recipes.",data);
                 }
                 
@@ -171,8 +171,8 @@ exports.search = function(req, res){
                         var data = {}
                         data['page'] = pageNumber;
                         data['total_count'] = count;
-                        data['pages'] = Math.ceil(count / limit);
-                        data['recipes'] = docs;
+                        data['total_pages'] = Math.ceil(count / limit);
+                        data['data'] = docs;
                         return response.sendSuccess(res, "Successfully fetched the recipes.",data);
                     }
 
@@ -211,8 +211,8 @@ exports.search = function(req, res){
                         var data = {}
                         data['page'] = pageNumber;
                         data['total_count'] = count;
-                        data['pages'] = Math.ceil(count / limit);
-                        data['recipes'] = docs;
+                        data['total_pages'] = Math.ceil(count / limit);
+                        data['data'] = docs;
                         return response.sendSuccess(res, "Successfully fetched the recipes.",data);
                     }
 
@@ -307,7 +307,7 @@ exports.getRecipes = function(req, res){
                 data['page'] = pageNumber;
                 data['total_count'] = count;
                 data['total_pages'] = Math.ceil(count / limit);
-                data['recipes'] = docs;
+                data['data'] = docs;
                 return response.sendSuccess(res, "Successfully fetched the recipes.",data);
             }
 
