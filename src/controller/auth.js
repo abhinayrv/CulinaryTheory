@@ -37,12 +37,20 @@ exports.authenticate = function(req, res) {
 
         if (isMatch) {
             var session = req.session;
-            session.user = user.getSessionData();
-            return response.sendSuccess(res, "Logged in successfully!");
+            user.getSessionData(function(err, user_data){
+              if(err){
+                console.log("Error creating session");
+                throw err;
+              }
+              console.log(user_data);
+              session.user = user_data;
+              return response.sendSuccess(res, "Logged in successfully!");
+            })
+
+        } else {
+          console.log("Password did not match");
+          return response.sendUnauthorized(res, "Incorrect username or password")
         }
-        
-        console.log("Password did not match");
-        return response.sendUnauthorized(res, "Incorrect username or password")
         
       });
 
@@ -273,3 +281,16 @@ exports.ensureOwner = function(req, res, next) {
   }
   return next();
 }
+
+exports.ensureAdmin = function(req, res, next) {
+
+    if (req.session.user) {
+      if (req.session.user.role === "admin") {
+        return next();
+      } else {
+        return response.sendForbidden(res);
+      }
+    } else {
+      return response.sendUnauthorized(res, "Please login and retry");
+    }
+};

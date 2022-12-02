@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const config = require('../config/config')
+const Premium = require('../models/premiumSubscription');
 
 const Schema = mongoose.Schema;
 const UserSchema = new Schema({
@@ -29,16 +30,6 @@ const UserSchema = new Schema({
     type: String,
     enum : ['user', 'admin'],
     default: 'user'
-  },
-  is_premium: {
-    type: Boolean,
-    default: false
-  },
-  premium_start: {
-    type: Date
-  },
-  premium_end: {
-    type: Date
   }
 },
 {timestamps: true});
@@ -64,11 +55,24 @@ UserSchema.pre('save', function(next) {
   return next();
 });
 
-UserSchema.methods.getSessionData = function() {
-  return {
-    user_id: this.user_id,
-    role: this.role
-  }
+UserSchema.methods.getSessionData = function(next) {
+  checkPremium(this.user_id, function(err, is_prem){
+    console.log("inside session data");
+    if(err){
+      return next(err, {});
+    }
+
+    return next(false, {
+      user_id: this.user_id,
+      role: this.role,
+      prem: is_prem
+    });
+  }.bind(this))
+
+  // return {
+  //   user_id: this.user_id,
+  //   role: this.role
+  // }
 };
 
 UserSchema.methods.verifyPassword = function(candidatePassword, next) {
@@ -130,6 +134,26 @@ function checkEmail(email){
     return false;
   }
   return true;
+}
+
+function checkPremium(user_id, next){
+  Premium.findOne({user_id: user_id, active: true}).exec(function(err, premium){
+    if(err){
+      return next(err, false);
+    }
+
+    if(!premium){
+      return next(false, false);
+    }
+
+    premium.updateSubscription(function(err){
+      if(err){
+        return next(err, false);
+      }
+
+      return next(false, premium.active);
+    })
+  });
 }
 
 module.exports = mongoose.model('User', UserSchema);

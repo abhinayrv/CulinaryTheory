@@ -24,5 +24,29 @@ module.exports = {
         user: process.env.email_user,
         pass: process.env.email_pass
     }
+  },
+  paypal: {
+    trial_id: "P-0H974515YU526521MMOD4PPI",
+    non_trial_id: "P-21N34790H2065803JMOESPXQ",
+    base_url: "https://api-m.sandbox.paypal.com",
+    subscription_body: {
+      plan_id:"",
+      start_time: "",
+      subscriber: {
+      name: {
+          given_name: ""  
+      },
+      email: ""
+      },
+      application_context: {
+      brand_name: "The Culinary Theory",
+      locale: "en-US",
+      shipping_preference: "NO_SHIPPING",
+      user_action: "SUBSCRIBE_NOW",
+      payment_method: {
+          payee_preferred: "IMMEDIATE_PAYMENT_REQUIRED"
+      },
+  }
+  }
   }
 };
