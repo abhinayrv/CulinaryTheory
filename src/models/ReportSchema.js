@@ -20,11 +20,14 @@ const ReportSchema = new mongoose.Schema({
     closed:{
         type:Boolean,
         required:true,
+        default: false
     },
     action_by:{
         type:String,
-        required:true,
     },
+    action: {
+        type: String,
+    }
     },
     {timestamps: true}
 );
