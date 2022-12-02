@@ -3,11 +3,12 @@ const nanoid = require('nanoid');
 const response = require('../helpers/response');
 const bookmarkModel = mongoose.model('Bookmark');
 const likemodel = mongoose.model('Like');
-const reportModel = mongoose.model('Report');
+const commentModel = mongoose.model('comments');
+
 
 exports.add_bookmark = function (req, res)  {
       if (!req.body.user_id || !req.body.recipe_id) {
-        return response.sendBadRequest(res, 'Reqired fields missing');
+        return response.sendBadRequest(res, 'Required fields missing');
       }
     
     
@@ -75,7 +76,7 @@ exports.deletebookmark = function (req, res) {
 
 exports.insertLikeDislike = function(req,res){
 
-    console.log("inside post function");
+    
   
     if (!req.body.user_id|| !req.body.recipe_id || req.body.is_liked==null)
     {
@@ -154,71 +155,53 @@ exports.deleteLikedislike = function(req,res){
         return response.sendSuccess(res, "Successfully deleted.", doc.toJSON());
     })
   };
-
-  exports.add_reported_recipe = function (req, res)  {
-    if (!req.body.user_id || !req.body.recipe_id) {
-      return response.sendBadRequest(res, 'Reqired fields missing');
+   
+  //Comments Insert Start
+  exports.comments = function(req,res){
+    
+    if (!req.body.user_id || !req.body.recipe_id ||!req.body.comment_text) {
+      return response.sendBadRequest(res, 'Required fields missing');
     }
-  
-  
-    reportModel.findOne({user_id: req.body.user_id, recipe_id: req.body.recipe_id}).exec((err, report)=>{
-      if (err){
-        throw err;
-      }
-      
-      if (report){
-        return response.sendBadRequest(res, "Already reporteded!");
-      }
-      
-      req.body.report_id = nanoid();
-      report = new reportModel(req.body);
-      var err = report.validateSync();
-      
-      if(err){
-        return response.sendBadRequest(res, "Please check the data");
-      }
-
-      report.save(function (err, report){
-        if (err){
-          throw err;
+    
+    req.body.comment_id = nanoid();
+    req.body.created_dt = new Date();
+    comment = new commentModel(req.body);
+        var err = comment.validateSync();
+        
+        if(err){
+          return response.sendBadRequest(res, "Please check the data");
         }
 
-        return response.sendSuccess(res, "Recipe Reported", report.toJSON());
-      });
-    });
+        comment.save(function (err, comment){
+          if (err){
+            throw err;
+          }
 
-};
+          return response.sendSuccess(res, "Comment Saved", comment.toJSON());
+        })
+      };
+  //Comments Insert End
 
-exports.getreportedrecipe = function (req, res)  {
-  
-  if (!req.body.recipe_id) {
-    return response.sendBadRequest(res, 'recipe_id is required');
-  }
-
- reportModel.find({recipe_id: req.body.recipe_id}).exec(function(err, report){
-  if (err){
-      throw err;
-  }
-
-  response.sendSuccess(res, "Success", report);
- });
-}
-
-exports.deletereportedrecipe = function (req, res) {
-  if (!req.body.recipe_id) {
-      return response.sendBadRequest(res, 'recipe id  is required');
-  }
-
-  reportModel.findOneAndDelete(({recipe_id_id:req.body.recipe_id}),function(err,report){
-    if (err) {
-        throw err;
-      } 
-    
-    if (!report) {
-      return response.sendNotFound(res);
+  //Comments Get start (message has total number of pages)
+  exports.getcomments = function (req, res)  {
+    if (!req.body.recipe_id) {
+      return response.sendBadRequest(res, 'recipe_id  is required');
     }
-    
-    return response.sendSuccess(res, "Successfully deleted.", report.toJSON());
-});
-
-};
+  
+    commentModel.find({recipe_id: req.body.recipe_id}).sort({created_dt: -1}).exec(function(err, comments){
+    if (err){
+        throw err;
+    }    
+    commentModel.count({recipe_id: req.body.recipe_id}).exec(function(err, totalComments){
+      if (err){
+             throw err;
+         }
+    const totalPages = Math.ceil(parseInt(totalComments)/parseInt(req.params.limit));    
+    const startIndex = (req.params.page - 1) * req.params.limit;
+    const endIndex = req.params.page * req.params.limit;
+    commentsResult = comments.slice(startIndex,endIndex);
+    response.sendSuccess(res,totalPages ,commentsResult);
+    }) 
+   });
+  }
+  //Comments Get end
