@@ -262,4 +262,52 @@ exports.getreportedrecipe = function (req, res)  {
  });
 }
 
+// bookmark kiya ki nahi
+// like ya dislike kiya ki nahi
+exports.isBookmarked = function(req, res){
+  if(!req.params.user_id || !req.params.recipe_id){
+    response.sendBadRequest(res, "No user id found.");
+  }
+  else{
+    bookmarkModel.findOne({user_id : req.params.user_id, recipe_id : req.params.recipe_id}, function(err, docs){
+
+      if(err){
+        throw err;
+      }
+      if(!docs){
+        response.sendSuccess(res, "User has not bookmarked any recipe.", {bookmarked : false});
+      }
+      else{
+        response.sendSuccess(res, "User has not bookmarked any recipe.", {bookmarked : true});
+      }
+    });
+  }
+}
+
+exports.isLiked = function(req, res){
+  if(!req.params.user_id || !req.params.recipe_id){
+    response.sendBadRequest(res, "No user id found.");
+  }
+  else{
+    likemodel.findOne({user_id : req.params.user_id, recipe_id : req.params.recipe_id}, function(err, docs){
+
+      if(err){
+        throw err;
+      }
+      if(!docs){
+        response.sendSuccess(res, "User has not liked any recipe.", {liked : false});
+      }
+      else{
+        if(docs.is_liked){
+          response.sendSuccess(res, "User has liked this recipe.", {liked : true});
+        }
+        else{
+          response.sendSuccess(res, "User has not liked this recipe.", {liked : false});
+        }
+        
+      }
+    });
+  }
+}
+
 
