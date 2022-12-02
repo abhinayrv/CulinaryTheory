@@ -17,11 +17,9 @@ const commentsSchema = new mongoose.Schema({
         type:String,
         required:true,
     },
-    created_dt:{
-        type:Date,
-        required:true,
-    }
-});
+},
+    {timestamps:true}
+);
 
 commentsSchema.set('toJSON', {
     transform: function(doc, ret, options) {

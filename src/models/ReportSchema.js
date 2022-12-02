@@ -17,8 +17,8 @@ const ReportSchema = new mongoose.Schema({
         type:String,
         required:true,
     },
-    status:{
-        type:String,
+    closed:{
+        type:Boolean,
         required:true,
     },
     action_by:{

@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const nanoid = require('nanoid');
 const response = require('../helpers/response');
+const { report } = require('../routes');
 const bookmarkModel = mongoose.model('Bookmark');
 const likemodel = mongoose.model('Like');
 const commentModel = mongoose.model('comments');
@@ -166,7 +167,7 @@ exports.deleteLikedislike = function(req,res){
     }
     
     req.body.comment_id = nanoid();
-    req.body.created_dt = new Date();
+    
     comment = new commentModel(req.body);
         var err = comment.validateSync();
         
@@ -190,7 +191,7 @@ exports.deleteLikedislike = function(req,res){
       return response.sendBadRequest(res, 'recipe_id  is required');
     }
   
-    commentModel.find({recipe_id: req.body.recipe_id}).sort({created_dt: -1}).exec(function(err, comments){
+    commentModel.find({recipe_id: req.body.recipe_id}).sort({timestamps: -1}).exec(function(err, comments){
     if (err){
         throw err;
     }    
@@ -220,7 +221,7 @@ exports.deleteLikedislike = function(req,res){
       }
       
       if (report){
-        return response.sendBadRequest(res, "Already reporteded!");
+        return response.sendBadRequest(res, "Already reported!");
       }
       
       req.body.report_id = nanoid();
@@ -244,34 +245,21 @@ exports.deleteLikedislike = function(req,res){
 
 exports.getreportedrecipe = function (req, res)  {
   
-  if (!req.body.recipe_id) {
-    return response.sendBadRequest(res, 'recipe_id is required');
-  }
-
- reportModel.find({recipe_id: req.body.recipe_id}).exec(function(err, report){
+  reportModel.find({closed:false}).sort({timestamps: -1}).exec(function(err, report){
   if (err){
       throw err;
-  }
-
-  response.sendSuccess(res, "Success", report);
+  }    
+  reportModel.count({closed:false}).exec(function(err, totalreports){
+    if (err){
+           throw err;
+       }
+  const totalPages = Math.ceil(parseInt(totalreports)/parseInt(req.params.limit));    
+  const startIndex = (req.params.page - 1) * req.params.limit;
+  const endIndex = req.params.page * req.params.limit;
+  reportResult = report.slice(startIndex,endIndex);
+  response.sendSuccess(res,totalPages ,reportResult);
+  }) 
  });
 }
 
-exports.deletereportedrecipe = function (req, res) {
-  if (!req.body.recipe_id) {
-      return response.sendBadRequest(res, 'recipe id  is required');
-  }
 
-  reportModel.findOneAndDelete(({recipe_id_id:req.body.recipe_id}),function(err,report){
-    if (err) {
-        throw err;
-      } 
-    
-    if (!report) {
-      return response.sendNotFound(res);
-    }
-    
-    return response.sendSuccess(res, "Successfully deleted.", report.toJSON());
-});
-
-}; 
