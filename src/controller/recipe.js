@@ -20,8 +20,7 @@ exports.create = function(req, res){
             const newRecipe = new RecipeModel(req.body);
             const err = newRecipe.validateSync();
             if (err){
-                console.log(err);
-                return response.sendBadRequest(res, "Please check the data entered.", err);
+                return response.sendBadRequest(res, err.errors, err);
             }
             newRecipe.save(function(err, recipe){
                 if (err) return response.sendBadRequest(res, err);

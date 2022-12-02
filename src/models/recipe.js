@@ -11,13 +11,36 @@ const RecipeSchema = new Schema({
     image_url: String,
     title: {type:String,required:true},
     description: String,
-    tags: {type:[String], required: true, validate: [tagsValid, '{PATH} does not meet requirements.']},
+    tags: {
+        type:[String],
+        required: true,
+        validate: 
+        [
+            {
+                validator: tagsValid1,
+                message: "Maximum length of tags must be at most 30" 
+            },
+            {
+                validator: tagsValid2,
+                message:"User must enter at least 5 and at most 10 tags"
+            }
+        ]
+    },
     steps: {
         type: [{
             step_no: {type:Number,required:true},
             step: {type:String,required:true}
     }],
-        validate: [stepsValid, '{PATH} does not meet requirements.'],
+        validate: [
+            {
+                validator : stepsValid1,
+                message: "Step Name is required if Step Number is entered"
+            },
+            {
+                validator: stepsValid2,
+                message: "User must enter at least 5 steps"
+            }
+        ],
         required: true
     },
     ingredients: {
@@ -27,7 +50,17 @@ const RecipeSchema = new Schema({
             quantity: {type:String,required:true},
         }],
         required: true,
-        validate: [ingredsValid, '{PATH} does not meet requirements.']
+        validate: 
+        [
+            {
+                validator: ingredsValid1,
+                message: "Maximum length of ingredient must be less than 30" 
+            },
+            {
+                validator: ingredsValid2,
+                message:"User must enter at least 3 and at most 20 ingredients"
+            }
+        ]
     },
     dietary_preferences: {type:String, required:true, enum:["vegetarian", "nonvegetarian","contains egg"]},
     prep_time: {type:Number,required:true, enum:[30, 60, 90]},
@@ -37,7 +70,7 @@ const RecipeSchema = new Schema({
 },
     {timestamps: true}
 );
-function tagsValid(arr){
+function tagsValid1(arr){
     flag = true;
     for(i in arr){
         flag = arr[i].length <= 30
@@ -45,10 +78,13 @@ function tagsValid(arr){
             break;
         }
     }
-    return arr.length >= 5 && arr.length <= 10 && flag;
+    return flag;
+}
+function tagsValid2(arr){
+    return arr.length >= 5 && arr.length <= 10;
 }
 
-function stepsValid(arr){
+function stepsValid1(arr){
     flag = true;
     for(i in arr){
         if(arr[i].step_no) {
@@ -58,10 +94,14 @@ function stepsValid(arr){
             }
         }
     }
+    return true;
+}
+
+function stepsValid2(arr){
     return arr.length >= 5;
 }
 
-function ingredsValid(arr){
+function ingredsValid1(arr){
     flag = true;
     for(i in arr){
         flag = arr[i].ingredient.length <= 30
@@ -69,8 +109,14 @@ function ingredsValid(arr){
             break;
         }
     }
-    return arr.length >= 3 && arr.length <= 20 && flag;
+    return flag;
+
 }
+function ingredsValid2(arr){
+    return arr.length >= 3 && arr.length <= 20;
+}
+
+    
 RecipeSchema.methods.updateDoc = function(newData){
     this.image_url = newData.image_url;
     this.title = newData.title;
