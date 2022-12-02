@@ -298,24 +298,69 @@ exports.getRecipes = function(req, res){
 
 }
 
+
 exports.checkRecipe = function(req, res, next){
 
-    RecipeModel.findOne({recipe_id : req.body.recipe_id}, function(err, doc){
-        if(err){
-            throw err;
-        }
-        if(!doc){
-            response.sendNotFound(res, "Recipe cannot be found.");
-        }
-        else{
-            if(recipe.isPublic == false){
-                response.sendForbidden(res, "Recipe is not public.");
+    if(!req.body.recipe_id){
+        response.sendBadRequest(res, "Recipe Id does not exist.");
+    }
+    else{
+        RecipeModel.findOne({recipe_id : req.body.recipe_id}, function(err, doc){
+            if(err){
+                throw err;
+            }
+            if(!doc){
+                response.sendNotFound(res, "Recipe cannot be found.");
             }
             else{
-                return next();
+                if(recipe.isPublic == false){
+                    response.sendForbidden(res, "Recipe is not public.");
+                }
+                else{
+                    return next();
+                }
             }
-        }
-
-    });
+    
+        });
+    }
 }
+
+exports.userRecipe = function(req, res){
+    if(!req.body.user_id){
+        res.sendBadRequest(res, "No user id found.");
+    }
+    else{
+        RecipeModel.find({user_id : req.body.recipe_id}, function(err, docs){
+            if(err){
+                throw err;
+            }
+            if(!doc){
+                response.sendNotFound(res, "No recipes by this user.");
+            }
+            else{
+                response.sendSuccess(res, "Successfully fetched the recipes.", docs);
+            }
+        });
+    }
+}
+
+exports.userRecipePublic = function(req, res){
+    if(!req.body.user_id){
+        res.sendBadRequest(res, "No user id found.");
+    }
+    else{
+        RecipeModel.find({user_id : req.body.recipe_id, isPublic : true}, function(err, docs){
+            if(err){
+                throw err;
+            }
+            if(!doc){
+                response.sendNotFound(res, "No recipes by this user.");
+            }
+            else{
+                response.sendSuccess(res, "Successfully fetched the recipes.", docs);
+            }
+        });
+    }
+}
+
 
