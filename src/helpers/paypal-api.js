@@ -13,8 +13,10 @@ function generate_token(next){
       Authorization: `Basic ${auth}`,
     }
     }).then((response) => {
+        console.log("Token request completed");
         if (response.status === 200 || response.status === 201) {
             response.json().then((rjson)=>{
+                console.log("got resp json");
                 return next(rjson.access_token);
             });
           }
@@ -75,8 +77,10 @@ exports.get_subscription = function(id, next){
             Authorization: `Bearer ${access_token}`,
             },
         }).then(function(response){
+            console.log("Got subscription details");
             if (response.status == 200 || response.status == 201){
                 response.json().then(function(rjson){
+                    console.log("Got subscription json");
                     return next(false, rjson);
                 });
             } else {

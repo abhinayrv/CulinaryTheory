@@ -1,6 +1,4 @@
 const mongoose = require('mongoose');
-const crypto = require('crypto');
-const nodemailer = require('nodemailer');
 const config = require('../config/config')
 const paypal = require("../helpers/paypal-api");
 
@@ -104,8 +102,10 @@ PremiumSchema.methods.updateSubscription = function(next){
                         return next(err);
                     }
     
-                    return next(false)
+                    return next(false);
                 });
+            } else {
+                return next(false);
             }
         }.bind(this))
     }

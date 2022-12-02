@@ -38,6 +38,7 @@ exports.authenticate = function(req, res) {
         if (isMatch) {
             var session = req.session;
             user.getSessionData(function(err, user_data){
+              console.log("Inside session data");
               if(err){
                 console.log("Error creating session");
                 throw err;
@@ -260,6 +261,7 @@ exports.deleteToken = function(req, res) {
 
 exports.ensureAuthenticated = function(req, res, next) {
     if (req.session.user) {
+      req.body.user_id = req.session.user.user_id;
       return next();
     }
     return response.sendUnauthorized(res, "Please login and retry");

@@ -6,6 +6,7 @@ const config = require("../config/config");
 
 const User = mongoose.model("User");
 const Premium = mongoose.model("Premium");
+const EmailSub = mongoose.model("EmailSub");
 
 exports.generateSubscription = function(req, res){
     if (!req.body.user_id){
@@ -133,8 +134,8 @@ exports.subscribe = function(req, res){
         }
 
         req.body.sub_id = nanoid();
+        var email_sub = new EmailSub({user_id: user.user_id, email: user.email});
         var premium_sub = new Premium(req.body);
-
         premium_sub.setBillingDate(function(err){
             if (err) {
                 console.log("Error setting the next billing date");
@@ -146,8 +147,11 @@ exports.subscribe = function(req, res){
                     console.log("Error saving subscription details");
                     throw err;
                 }
+                email_sub.save(function(err, email_sub){
+                    return response.sendCreated(res, "Subscription successful", premium_sub.toJSON());
+                })
 
-                return response.sendCreated(res, "Subscription successful", premium_sub.toJSON());
+                // return response.sendCreated(res, "Subscription successful", premium_sub.toJSON());
             });
         });
     });
@@ -185,4 +189,80 @@ exports.isPremiumUser = function(req, res){
         }
     }
     return response.sendBadRequest(res, "Please login and retry");
+}
+
+exports.isEmailSub = function(req, res){
+    if (!req.body.user_id){
+        return response.sendBadRequest(res, "No user id");
+    }
+
+    EmailSub.findOne({user_id: req.body.user_id}).exec(function(err, email_sub){
+        if(err){
+            console.log("Error finding the email subscription");
+            throw err;
+        }
+
+        if(!email_sub){
+            return response.sendSuccess(res, "Not subscribed", {subscribed: false});
+        }
+
+        return response.sendSuccess(res, "Subscribed to emails", {subscribed: true});
+    });
+}
+
+exports.subscribeEmail = function(req, res){
+    if (!req.body.user_id){
+        return response.sendBadRequest(res, "No user id");
+    }
+
+    User.findOne({user_id: req.body.user_id}).exec(function(err, user){
+        if (err) {
+            console.log("Error looking for user");
+            throw err;
+        }
+
+        if(!user) {
+            return response.sendBadRequest(res, "User does not exist");
+        }
+
+        EmailSub.findOne({user_id: user.user_id}).exec(function(err, email_sub){
+            if(err) {
+                console.log("Error finding email subscription");
+                throw err;
+            }
+
+            if(email_sub) {
+                return response.sendBadRequest(res, "Already subscribed to emails");
+            }
+
+            var new_email_sub = new EmailSub({user_id: user.user_id, email: user.email})
+            new_email_sub.save(function(err, new_email_sub){
+                if(err) {
+                    console.log("Error creating email subscription");
+                    throw err;
+                }
+
+                return response.sendCreated(res, "Subscibed to emails", new_email_sub.toJSON());
+            });
+        });
+    });
+}
+
+exports.unsubEmail = function(req, res){
+    if (!req.body.user_id) {
+        return response.sendBadRequest(res, "No user id");
+    }
+
+    EmailSub.findOneAndDelete({user_id: req.body.user_id}).exec(function(err, email_sub){
+        if(err) {
+            console.log("Error looking for email subscription");
+            throw err;
+        }
+
+        if(!email_sub){
+            return response.sendNotFound(res, "User not subscribed to emails");
+        }
+
+        return response.sendSuccess(res, "Successfully unsubscribed");
+    })
 }

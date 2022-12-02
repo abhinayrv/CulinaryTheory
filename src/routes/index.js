@@ -46,6 +46,10 @@ routes.post('/cancelsub', auth.ensureAuthenticated, auth.ensureOwner, subscripti
 routes.post('/getsub', auth.ensureAuthenticated, auth.ensureOwner, subscription.getSubscription);
 routes.get('/ispremium', subscription.isPremiumUser);
 
+routes.post('/subscribemail', auth.ensureAuthenticated, subscription.subscribeEmail);
+routes.get('/isemailsub', auth.ensureAuthenticated, subscription.isEmailSub);
+routes.post('/unsubemail', auth.ensureAuthenticated, subscription.unsubEmail);
+
 routes.post('/bookmark', auth.ensureAuthenticated, auth.ensureOwner, UserInteraction.add_bookmark);
 routes.get('/bookmarks/:user_id', auth.ensureAuthenticated, auth.ensureOwner, UserInteraction.getbookmarks)
 routes.delete('/deletebookmark', auth.ensureAuthenticated, auth.ensureOwner, UserInteraction.deletebookmark);

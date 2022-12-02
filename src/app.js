@@ -9,6 +9,7 @@ const bookmarkModel = require('./models/BookmarkSchema')
 const likemodel = require('./models/LikeSchema');
 const Token = require('./models/token');
 const Premium = require('./models/premiumSubscription');
+const EmailSub = require('./models/emailSub');
 const routes = require('./routes');
 const config = require("./config/config");
 
