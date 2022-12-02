@@ -5,8 +5,7 @@ const Schema = mongoose.Schema;
 const DraftSchema = new Schema({
     recipe_id: {
         type: String,
-        required: true,
-        default: nanoid()
+        required: true
     },
     image_url: String,
     title: {type:String,required:true},
@@ -14,21 +13,21 @@ const DraftSchema = new Schema({
     tags: {type:[String], validate: [tagsValid, '{PATH} does not meet requirements.']},
     steps: {
         type: [{
-            step_no: {type:Number,required:true},
-            step: {type:String,required:true}
+            step_no: {type:Number},
+            step: {type:String}
     }],
         validate: [stepsValid, '{PATH} does not meet requirements.'],
     },
     ingredients: {
         type: [{
-            ingre_no: {type:Number,required:true},
-            ingredient: {type:String,required:true},
-            quantity: {type:String,required:true},
+            ingre_no: {type:Number},
+            ingredient: {type:String},
+            quantity: {type:String},
         }],
         validate: [ingredsValid, '{PATH} does not meet requirements.']
     },
-    dietary_preferences: {type:String, enum:["vegetarian", "nonvegetarian","contains egg"]},
-    prep_time: {type:Number, enum:[30, 60, 90]},
+    dietary_preferences: {type:String},
+    prep_time: {type:Number},
     cuisine: String,
     is_public: {type:Boolean,default:true},
     user_id: {type:String, required:true}

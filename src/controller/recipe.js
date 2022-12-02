@@ -5,6 +5,7 @@ const request = require('../helpers/request');
 
 
 const RecipeModel = mongoose.model('Recipes');
+const DraftModel = mongoose.model('Drafts');
 
 exports.create = function(req, res){
     console.log("In recipe create");
@@ -28,7 +29,6 @@ exports.create = function(req, res){
             });
         }
     });
-
 }
 
 exports.edit = function(req, res){
@@ -65,33 +65,22 @@ exports.edit = function(req, res){
         }
     });
 });
-
+}
 exports.draft = function(req, res){
     console.log("In draft create");
-
-    validateRequest(req.body, function(result){
-
-        if(!result){
-            return response.sendBadRequest(res, "One of the fields is missing.")
-        }
-        else{
-            req.body.recipe_id = nanoid();
-            const newRecipe = new RecipeModel(req.body);
-            const err = newRecipe.validateSync();
-            if (err){
-                console.log(err);
-                return response.sendBadRequest(res, "Please check the data entered.", err);
-            }
-            newRecipe.save(function(err, recipe){
-                if (err) return response.sendBadRequest(res, err);
-                response.sendCreated(res, "Successfully created the draft", newRecipe.toJSON());
-            });
-        }
+    req.body.recipe_id = nanoid();
+    const newRecipe = new DraftModel(req.body);
+    const err = newRecipe.validateSync();
+    if (err){
+        console.log(err);
+        return response.sendBadRequest(res, "Please check the data entered.", err);
+    }
+    newRecipe.save(function(err, recipe){
+        if (err) return response.sendBadRequest(res, err);
+        response.sendCreated(res, "Successfully created the draft", newRecipe.toJSON());
     });
-
 }
 
-}
 function validateRequest(reqBody, next){
     if(!reqBody.image_url || !reqBody.title || !reqBody.description || !reqBody.tags || !reqBody.steps || 
         !reqBody.ingredients || !reqBody.dietary_preferences || !reqBody.prep_time || !reqBody.cuisine
@@ -100,3 +89,5 @@ function validateRequest(reqBody, next){
         }
         return next(true);
 }
+
+

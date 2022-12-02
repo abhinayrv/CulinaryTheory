@@ -40,7 +40,7 @@ const RecipeSchema = new Schema({
 function tagsValid(arr){
     flag = true;
     for(i in arr){
-        flag = arr[i].length <= 10
+        flag = arr[i].length <= 30
         if(flag==false){
             break;
         }
