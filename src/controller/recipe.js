@@ -3,13 +3,13 @@ const nanoid = require('nanoid');
 const response = require('../helpers/response');
 const request = require('../helpers/request');
 const recipe = require('../models/recipe');
+const e = require('express');
 
 
 const RecipeModel = mongoose.model('Recipes');
 
 exports.create = function(req, res){
     console.log("In recipe create");
-    console.log(req);
 
     validateRequest(req.body, function(result){
 
@@ -97,29 +97,35 @@ function callback(res, err, docs, message){
 exports.search = function(req, res){
     console.log("In recipe search");
 
-    if (!req.params.searchBy){
+    if (!req.query.searchBy){
         console.log("No search by field found.");
         return response.sendBadRequest(res, "Search By field not present.");
     }
-    if (!req.params.searchFor){
+    if (!req.query.searchFor){
         console.log("No search for field found.");
         return response.sendBadRequest(res, "Search For field not present.");
     }
+    var limit = 5
+    if(req.query.limit){
+        limit = parseInt(req.query.limit)
+    }
+    var pageNumber = 0
+    if(req.query.pageNumber){
+        pageNumber = parseInt(req.query.pageNumber)
+    }
 
-
-    var searchBy = req.params.searchBy.toLowerCase();
-    var searchFor = req.params.searchFor;
-
-    var limit = parseInt(req.params.limit)
-    var pageNumber = parseInt(req.params.pageNumber)
+    console.log(limit);
+    console.log(pageNumber);
+    var searchBy = req.query.searchBy.toLowerCase();
+    var searchFor = req.query.searchFor;
 
 
     console.log(searchBy);
     console.log(searchFor);
 
     if(searchBy == "title"){
-        RecipeModel.find({title : {$regex : searchFor, $options: 'i'}, isPublic: true}, function(err1, docs){
-            RecipeModel.countDocuments({title : {$regex : searchFor, $options: 'i'}, isPublic: true}, function(err2, count){
+        RecipeModel.find({title : {$regex : searchFor, $options: 'i'}, isPublic: true, adminDelete:false}, function(err1, docs){
+            RecipeModel.countDocuments({title : {$regex : searchFor, $options: 'i'}, isPublic: true, adminDelete:false}, function(err2, count){
                 if(err1){
                     throw err1;
                 }
@@ -131,6 +137,7 @@ exports.search = function(req, res){
                 }
                 else{
                     var data = {}
+                    data['page'] = pageNumber;
                     data['total_count'] = count;
                     data['pages'] = Math.ceil(count / limit);
                     data['recipes'] = docs;
@@ -148,9 +155,9 @@ exports.search = function(req, res){
             response.sendBadRequest(res, "Tags array is null.")
         }
         else{
-            RecipeModel.find({tags : {$in: arraySearch}, isPublic: true}, function(err1, docs){
+            RecipeModel.find({tags : {$in: arraySearch}, isPublic: true, adminDelete:false}, function(err1, docs){
 
-                RecipeModel.countDocuments({tags : {$in: arraySearch}, isPublic: true}, function(err2, count){
+                RecipeModel.countDocuments({tags : {$in: arraySearch}, isPublic: true, adminDelete:false}, function(err2, count){
                     if(err1){
                         throw err1;
                     }
@@ -162,6 +169,7 @@ exports.search = function(req, res){
                     }
                     else{
                         var data = {}
+                        data['page'] = pageNumber;
                         data['total_count'] = count;
                         data['pages'] = Math.ceil(count / limit);
                         data['recipes'] = docs;
@@ -184,7 +192,7 @@ exports.search = function(req, res){
             const findBy = [];
             for(let i = 0; i < arraySearch.length; i++){
                 var ele = { "ingredients.ingredient": {$regex: arraySearch[i], $options : "i" },
-                            "isPublic": true };
+                            "isPublic": true, "adminDelete":false};
                 findBy.push(ele);
             }
             console.log(findBy);
@@ -201,6 +209,7 @@ exports.search = function(req, res){
                     }
                     else{
                         var data = {}
+                        data['page'] = pageNumber;
                         data['total_count'] = count;
                         data['pages'] = Math.ceil(count / limit);
                         data['recipes'] = docs;
@@ -212,6 +221,10 @@ exports.search = function(req, res){
 
         }
     }
+    else{
+        response.sendBadRequest(res, "Wrong type of search.");
+    }
+
 }
 
 
@@ -249,10 +262,10 @@ exports.getSingleRecipe = function(req, res){
         response.sendBadRequest(res, "No recipe id or user id present.")
     }
     else {
-        RecipeModel.find({recipe_id : req.params.recipe_id, user_id : req.params.user_id}, function(err, recipe){
+        RecipeModel.find({recipe_id : req.params.recipe_id, user_id : req.params.user_id, adminDelete:false}, function(err, recipe){
 
-            if(recipe.user_id == req.params.user_id){
-                return callback(res, err, recipe, "Successfully fetched the recipe.");
+            if(!recipe){
+                return callback(res, err, recipe, "No such recipe found.");
             }
             else{
                 if(recipe.isPublic == false){
@@ -269,13 +282,17 @@ exports.getSingleRecipe = function(req, res){
 
 exports.getRecipes = function(req, res){
 
-    const pageNumber = parseInt(req.params.pageNumber);
-    const limit = parseInt(req.params.limit);
-    console.log(pageNumber);
-    console.log(limit);
+    var pageNumber = 0;
+    var limit = 5;
+    if(req.query.pageNumber){
+        pageNumber = parseInt(req.query.pageNumber);
+    }
+    if(req.query.limit){
+        limit = parseInt(req.query.limit);
+    }
 
-    RecipeModel.find({}, function(err1, docs){
-        RecipeModel.countDocuments({}, function(err2, count){
+    RecipeModel.find({adminDelete : false}, function(err1, docs){
+        RecipeModel.countDocuments({adminDelete : false}, function(err2, count){
             if(err1){
                 throw err1;
             }
@@ -287,8 +304,9 @@ exports.getRecipes = function(req, res){
             }
             else{
                 var data = {}
+                data['page'] = pageNumber;
                 data['total_count'] = count;
-                data['pages'] = Math.ceil(count / limit);
+                data['total_pages'] = Math.ceil(count / limit);
                 data['recipes'] = docs;
                 return response.sendSuccess(res, "Successfully fetched the recipes.",data);
             }
@@ -305,7 +323,7 @@ exports.checkRecipe = function(req, res, next){
         response.sendBadRequest(res, "Recipe Id does not exist.");
     }
     else{
-        RecipeModel.findOne({recipe_id : req.body.recipe_id}, function(err, doc){
+        RecipeModel.findOne({recipe_id : req.body.recipe_id, adminDelete:false}, function(err, doc){
             if(err){
                 throw err;
             }
@@ -313,7 +331,7 @@ exports.checkRecipe = function(req, res, next){
                 response.sendNotFound(res, "Recipe cannot be found.");
             }
             else{
-                if(recipe.isPublic == false){
+                if(recipe.isPublic == false && recipe.adminDelete == false){
                     response.sendForbidden(res, "Recipe is not public.");
                 }
                 else{
@@ -326,11 +344,11 @@ exports.checkRecipe = function(req, res, next){
 }
 
 exports.userRecipe = function(req, res){
-    if(!req.body.user_id){
+    if(!req.params.user_id){
         res.sendBadRequest(res, "No user id found.");
     }
     else{
-        RecipeModel.find({user_id : req.body.recipe_id}, function(err, docs){
+        RecipeModel.find({user_id : req.params.user_id, adminDelete : false}, function(err, docs){
             if(err){
                 throw err;
             }
@@ -345,11 +363,11 @@ exports.userRecipe = function(req, res){
 }
 
 exports.userRecipePublic = function(req, res){
-    if(!req.body.user_id){
+    if(!req.params.user_id){
         res.sendBadRequest(res, "No user id found.");
     }
     else{
-        RecipeModel.find({user_id : req.body.recipe_id, isPublic : true}, function(err, docs){
+        RecipeModel.find({user_id : req.params.query_user_id, isPublic : true, adminDelete : false}, function(err, docs){
             if(err){
                 throw err;
             }

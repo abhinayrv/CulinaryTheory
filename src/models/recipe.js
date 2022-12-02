@@ -30,7 +30,7 @@ const RecipeSchema = new Schema({
         validate: [ingredsValid, '{PATH} does not meet requirements.']
     },
     dietary_preferences: {type:String, required:true, enum:["vegetarian", "nonvegetarian","contains egg"]},
-    prep_time: {type:Number,required:true, enum:[30, 60, 90]},
+    prep_time: {type:Number,required:true},
     cuisine: String,
     is_public: {type:Boolean,default:true},
     user_id: {type:String, required:true},
