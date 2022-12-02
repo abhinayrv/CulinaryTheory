@@ -44,6 +44,9 @@ routes.delete('/deletelike', auth.ensureAuthenticated, auth.ensureOwner, UserInt
 
 routes.post('/create', auth.ensureAuthenticated, auth.ensureOwner, recipe.create);
 routes.post('/edit', auth.ensureAuthenticated, auth.ensureOwner, recipe.edit);
+routes.get('/recipe/:pageNumber/:limit', recipe.getRecipes);
+routes.get("/search/:searchBy/:searchFor/:pageNumber/:limit/",recipe.search);
+routes.delete("/deleterecipe",auth.ensureAuthenticated, auth.ensureOwner, recipe.delete);
 
 routes.use(function(req, res) {
   response.sendNotFound(res);
