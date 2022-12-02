@@ -29,8 +29,8 @@ exports.create = function(req, res) {
       newUser.role = 'user';
       var err = newUser.validateSync();
       if (err) {
-        console.log(err);
-        return response.sendBadRequest(res, "Please check the data entered");
+        console.log(err.message);
+        return response.sendBadRequest(res, err.message);
 
       } 
 

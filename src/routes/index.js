@@ -6,6 +6,7 @@ const auth = require('../controller/auth');
 const users = require('../controller/users');
 const recipe = require('../controller/recipe')
 const UserInteraction =require ("../controller/UserInteraction")
+const subscription = require("../controller/subscription");
 
 
 const routes  = express.Router();
@@ -34,6 +35,20 @@ routes.post('/login', auth.authenticate)
 
 routes.post('/register', users.create);
 routes.get('/logout', auth.signOut);
+routes.post('/reset', auth.resetPasswordEmail);
+routes.get('/reset/:token', auth.validateResetToken, auth.renderResetPage);
+routes.post('/resetpassword', auth.validateResetToken, auth.resetPassword, auth.deleteToken);
+routes.post('/updatepassword', auth.ensureAuthenticated, auth.ensureOwner, auth.updatePassword);
+
+routes.post('/gensub', auth.ensureAuthenticated, auth.ensureOwner, subscription.generateSubscription);
+routes.post('/subscribe', auth.ensureAuthenticated, auth.ensureOwner, subscription.subscribe);
+routes.post('/cancelsub', auth.ensureAuthenticated, auth.ensureOwner, subscription.cancelSubscription);
+routes.post('/getsub', auth.ensureAuthenticated, auth.ensureOwner, subscription.getSubscription);
+routes.get('/ispremium', subscription.isPremiumUser);
+
+routes.post('/subscribemail', auth.ensureAuthenticated, subscription.subscribeEmail);
+routes.get('/isemailsub', auth.ensureAuthenticated, subscription.isEmailSub);
+routes.post('/unsubemail', auth.ensureAuthenticated, subscription.unsubEmail);
 
 routes.post('/bookmark', auth.ensureAuthenticated, auth.ensureOwner, UserInteraction.add_bookmark);
 routes.get('/bookmarks/:user_id', auth.ensureAuthenticated, auth.ensureOwner, UserInteraction.getbookmarks)
