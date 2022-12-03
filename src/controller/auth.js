@@ -1,7 +1,9 @@
 const mongoose = require('mongoose');
+const path = require('path');
 const config = require('../config/config');
 const response = require('../helpers/response');
 const User = mongoose.model('User');
+const Token = mongoose.model('Token');
 
 exports.authenticate = function(req, res) {
     console.log(`Login request`);
@@ -35,20 +37,86 @@ exports.authenticate = function(req, res) {
 
         if (isMatch) {
             var session = req.session;
-            session.user = user.getSessionData();
-            return response.sendSuccess(res, "Logged in successfully!");
+            user.getSessionData(function(err, user_data){
+              console.log("Inside session data");
+              if(err){
+                console.log("Error creating session");
+                throw err;
+              }
+              console.log(user_data);
+              session.user = user_data;
+              return response.sendSuccess(res, "Logged in successfully!");
+            })
+
+        } else {
+          console.log("Password did not match");
+          return response.sendUnauthorized(res, "Incorrect username or password")
         }
-        
-        console.log("Password did not match");
-        return response.sendUnauthorized(res, "Incorrect username or password")
         
       });
 
     }
   });
+}
 
+exports.updatePassword = function(req, res) {
+  console.log(`Update password request`);
   
-  
+  if (!req.body.user_id || !req.body.password || !req.body.new_password || !req.body.verify_password) {
+
+    return response.sendBadRequest(res, "Please check the fields enetered. Mandatory fields missing.");
+    
+  } 
+
+  User.findOne({ user_id: req.body.user_id })
+  .exec(function(err, user) {
+    if (err) {
+        console.log("Some error in user find");
+        throw err;
+    }
+
+    if (!user) {
+        
+      console.log("User not found");
+        return response.sendUnauthorized(res, "Incorrect username or password");
+
+    } 
+
+    user.verifyPassword(req.body.password, function(err, isMatch) {
+
+      if (err) { 
+          console.log("Some error in password compare");
+          throw err
+      }
+
+      if (!isMatch) {
+        console.log("Password did not match");
+        return response.sendUnauthorized(res, "Incorrect password")
+      }
+
+      if (req.body.new_password != req.body.verify_password) {
+        console.log("Passwords do not match.");
+        return response.sendBadRequest(res, "Passwords do not match");
+      }
+      
+      user.password = req.body.new_password;
+      var err = user.validateSync();
+      if (err) {
+        console.log("Password does not meet requirements");
+        return response.sendBadRequest(res, err.message);
+      }
+
+      user.save(function(err, user){
+        if (err) {
+          console.log("Error updating password");
+          throw err;
+        }
+
+        return response.sendSuccess(res, "Password updated successfully.");
+      })
+      
+    });
+}); 
 }
 
 exports.signOut = function(req, res) {
@@ -63,8 +131,137 @@ exports.signOut = function(req, res) {
   });
 }
 
+exports.resetPasswordEmail = function(req, res) {
+  if (!req.body.email) {
+    return response.sendBadRequest(res, "Please enter the email address");
+  }
+
+  User.findOne({ email: req.body.email })
+  .exec(function(err, user) {
+    if (err) {
+        console.log("Some error in user find");
+        throw err;
+    }
+
+    if (!user) {
+        
+      console.log("User not found");
+      return response.sendUnauthorized(res, "Incorrect username or password");
+
+    } 
+
+    var newToken = new Token(user.getToken());
+    var err = newToken.validateSync();
+    if (err) {
+      throw err;
+    }
+    
+    newToken.save(function(err, token) {
+      if (err){
+        throw err;
+      }
+
+      const subject = "Reset Password - The Culinary Theory";
+      const body = token.getResetEmail();
+      user.sendEmail(true, subject, body, function(){
+        return response.sendSuccess(res, "Please check your inbox for the link to reset your password.");
+      });
+    });
+    
+  });
+
+}
+
+exports.renderResetPage = function(req, res) {
+  if(!req.body.token){
+    return response.sendBadRequest(res, "No token");
+  }
+  req.session.token = req.body.token.token;
+  return res.sendFile("set_password.html", {root: path.join(path.dirname(__dirname), "views")});
+}
+
+exports.resetPassword = function(req, res, next) {
+  if(!req.body.token){
+    return response.sendBadRequest(res, "No token");
+  }
+
+  User.findOne({ user_id: req.body.token.user_id}).exec(
+    function(err, user){
+      if (err) {
+        console.log("Error finding the user");
+        throw err;
+      }
+
+      if(!user) {
+        console.log("User not found");
+        return response.sendBadRequest(res, "User not found");
+      }
+
+      if (req.body.password != req.body.verify_password) {
+        return response.sendBadRequest(res, "Passwords do not match. Try again");
+      }
+
+      user.password = req.body.password;
+      var err = user.validateSync();
+      if (err) {
+        console.log("Password does not meet requirements");
+        return response.sendBadRequest(res, err.message);
+      }
+
+      user.save(function(err, user){
+        if (err) {
+          console.log("Error updating password");
+          throw err;
+        }
+
+        return next();
+      })
+    }
+  );
+}
+
+exports.validateResetToken = function(req, res, next) {
+  if (!req.params.token && !req.session.token) {
+    console.log(req.body);
+    return response.sendBadRequest(res, "No valid token.");
+  }
+
+  const token_val = req.params.token || req.session.token;
+
+  Token.findOne({ token: token_val }).exec(
+    function(err, token){
+      if (err) {
+        console.log("Error finding token");
+        throw err;
+      }
+
+      if(!token) {
+        console.log("Token not present");
+        return response.sendUnauthorized(res, "Link not valid/expired");
+      }
+
+      if (token.expires_at > new Date()){
+        req.body.token = token;
+        return next();
+      } 
+      
+      return response.sendBadRequest(res, "Link expired. Please request a new one.")
+    });
+
+}
+
+exports.deleteToken = function(req, res) {
+  req.session.token = null;
+
+  Token.findOneAndDelete(({ token: req.body.token.token }),function(err,doc){   
+    return response.sendSuccess(res, "Password updated.");
+});
+
+}
+
 exports.ensureAuthenticated = function(req, res, next) {
     if (req.session.user) {
+      req.body.user_id = req.session.user.user_id;
       return next();
     }
     return response.sendUnauthorized(res, "Please login and retry");
@@ -87,3 +284,15 @@ exports.ensureOwner = function(req, res, next) {
   return next();
 }
 
+exports.ensureAdmin = function(req, res, next) {
+
+    if (req.session.user) {
+      if (req.session.user.role === "admin") {
+        return next();
+      } else {
+        return response.sendForbidden(res);
+      }
+    } else {
+      return response.sendUnauthorized(res, "Please login and retry");
+    }
+};

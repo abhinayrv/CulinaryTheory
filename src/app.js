@@ -7,6 +7,9 @@ const User = require('./models/user')
 const recipe = require("./models/recipe");
 const bookmarkModel = require('./models/BookmarkSchema')
 const likemodel = require('./models/LikeSchema');
+const Token = require('./models/token');
+const Premium = require('./models/premiumSubscription');
+const EmailSub = require('./models/emailSub');
 const commentModel = require('./models/commentsSchema');
 const reportModel = require('./models/ReportSchema');
 
@@ -14,7 +17,7 @@ const routes = require('./routes');
 const config = require("./config/config");
 
 
-
+const result = fetch("https://www.google.com");
 
 var app = express();
 
@@ -46,5 +49,6 @@ app.use(function(err, req, res, next) {
 const port = config.server.port;
 app.listen(port, debug=true);
 console.log('Node + Express REST API skeleton server started on port: ' + port);
+console.log(config.database.url);
 
 module.exports = app;
