@@ -285,15 +285,15 @@ exports.getReports = function (req, res)  {
 
 exports.closeReport = function(req, res) {
   if (!req.body.user_id) {
-    return response.sendBadRequest("No user id");
+    return response.sendBadRequest(res, "No user id");
   }
 
   if (!req.body.report_id) {
-    return response.sendBadRequest("No report id");
+    return response.sendBadRequest(res, "No report id");
   }
 
   if (!req.body.action) {
-    return response.sendBadRequest("Action not specified");
+    return response.sendBadRequest(res, "Action not specified");
   }
 
   reportModel.findOne({report_id: req.body.report_id}).exec(function(err, report){
