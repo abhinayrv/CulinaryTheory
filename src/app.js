@@ -5,6 +5,7 @@ const session = require('express-session');
 const db = require('./db');
 const User = require('./models/user')
 const recipe = require("./models/recipe");
+const draft = require("./models/draft");
 const bookmarkModel = require('./models/BookmarkSchema')
 const likemodel = require('./models/LikeSchema');
 const Token = require('./models/token');
@@ -15,9 +16,6 @@ const reportModel = require('./models/ReportSchema');
 
 const routes = require('./routes');
 const config = require("./config/config");
-
-
-const result = fetch("https://www.google.com");
 
 var app = express();
 
