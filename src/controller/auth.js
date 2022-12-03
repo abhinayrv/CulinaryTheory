@@ -289,6 +289,8 @@ exports.ensureAdmin = function(req, res, next) {
 
     if (req.session.user) {
       if (req.session.user.role === "admin") {
+        req.body.user_id = req.session.user.user_id;
+        req.params.user_id = req.session.user.user_id;
         return next();
       } else {
         return response.sendForbidden(res);
