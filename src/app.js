@@ -8,6 +8,12 @@ const recipe = require("./models/recipe");
 const draft = require("./models/draft");
 const bookmarkModel = require('./models/BookmarkSchema')
 const likemodel = require('./models/LikeSchema');
+const Token = require('./models/token');
+const Premium = require('./models/premiumSubscription');
+const EmailSub = require('./models/emailSub');
+const commentModel = require('./models/commentsSchema');
+const reportModel = require('./models/ReportSchema');
+
 const routes = require('./routes');
 const config = require("./config/config");
 
@@ -41,5 +47,6 @@ app.use(function(err, req, res, next) {
 const port = config.server.port;
 app.listen(port, debug=true);
 console.log('Node + Express REST API skeleton server started on port: ' + port);
+console.log(config.database.url);
 
 module.exports = app;
