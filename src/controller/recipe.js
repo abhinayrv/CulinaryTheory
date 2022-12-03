@@ -5,7 +5,22 @@ const request = require('../helpers/request');
 
 
 const RecipeModel = mongoose.model('Recipes');
-const DraftModel = mongoose.model('Drafts');
+
+function callback(res, err, docs, message){
+    if(err){
+        console.log("There is some error.");
+        throw err;
+    }
+    else if (!docs && typeof(docs) !== "undefined"){
+        console.log("Docs not found.")
+        return response.sendBadRequest(res, message);
+
+    }
+    else{
+        return response.sendSuccess(res, message, docs);
+    }
+
+}
 
 exports.create = function(req, res){
     console.log("In recipe create");
@@ -65,19 +80,32 @@ exports.edit = function(req, res){
     });
 });
 }
-exports.draft = function(req, res){
-    console.log("In draft create");
-    req.body.recipe_id = nanoid();
-    const newRecipe = new DraftModel(req.body);
-    const err = newRecipe.validateSync();
-    if (err){
-        console.log(err);
-        return response.sendBadRequest(res, "Please check the data entered.", err);
+
+exports.delete = function(req, res){
+
+    if(!req.body.user_id || !req.body.recipe_id){
+        console.log("No user id or recipe id present.");
+        response.sendBadRequest(res, "No user id or recipe id present.")
     }
-    newRecipe.save(function(err, recipe){
-        if (err) return response.sendBadRequest(res, err);
-        response.sendCreated(res, "Successfully created the draft", newRecipe.toJSON());
-    });
+    else{
+        if (req.session.user.role == "admin"){
+            console.log("Admin will delete the recipe.")
+            RecipeModel.updateOne({recipe_id : req.body.recipe_id},{$set : {adminDelete : true} }, function(err, doc){
+                var sucMessage = 'Successfully deleted the document by admin.';
+                return callback(res, err, doc, sucMessage);
+            });
+        }
+        else{
+            console.log("Deleting recipe by particular user.")
+            RecipeModel.deleteOne({user_id : req.body.user_id, recipe_id : req.body.recipe_id}, function(err){
+                var sucMessage = 'Successfully deleted the document by user.';
+                return callback(res, err, undefined, sucMessage);
+            });
+
+        }
+
+    }
+
 }
 
 function validateRequest(reqBody, next){

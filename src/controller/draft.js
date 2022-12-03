@@ -58,7 +58,9 @@ exports.edit = function(req, res){
         
        
         draft.updateDoc(req.body);
+        const err = newDraft.validateSync();
         draft.save(function(err, draft){
+        if (err) return response.sendBadRequest(res, "Please check the data entered.", err);
         response.sendSuccess(res, "Successfully updated the doc.", draft.toJSON());
     });
         
