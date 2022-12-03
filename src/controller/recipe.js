@@ -403,7 +403,7 @@ exports.userRecipe = function(req, res){
 }
 
 exports.userRecipePublic = function(req, res){
-    if(!req.params.user_id){
+    if(!req.params.query_user_id){
         res.sendBadRequest(res, "No user id found.");
     }
     else{

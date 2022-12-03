@@ -13,6 +13,7 @@ const Premium = require('./models/premiumSubscription');
 const EmailSub = require('./models/emailSub');
 const commentModel = require('./models/commentsSchema');
 const reportModel = require('./models/ReportSchema');
+const userprofile = require('./models/UserProfileSchema');
 
 const routes = require('./routes');
 const config = require("./config/config");
