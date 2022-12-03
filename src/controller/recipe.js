@@ -82,32 +82,7 @@ exports.edit = function(req, res){
 });
 }
 
-exports.delete = function(req, res){
 
-    if(!req.body.user_id || !req.body.recipe_id){
-        console.log("No user id or recipe id present.");
-        response.sendBadRequest(res, "No user id or recipe id present.")
-    }
-    else{
-        if (req.session.user.role == "admin"){
-            console.log("Admin will delete the recipe.")
-            RecipeModel.updateOne({recipe_id : req.body.recipe_id},{$set : {adminDelete : true} }, function(err, doc){
-                var sucMessage = 'Successfully deleted the document by admin.';
-                return callback(res, err, doc, sucMessage);
-            });
-        }
-        else{
-            console.log("Deleting recipe by particular user.")
-            RecipeModel.deleteOne({user_id : req.body.user_id, recipe_id : req.body.recipe_id}, function(err){
-                var sucMessage = 'Successfully deleted the document by user.';
-                return callback(res, err, undefined, sucMessage);
-            });
-
-        }
-
-    }
-
-}
 
 function validateRequest(reqBody, next){
     if(!reqBody.image_url || !reqBody.title || !reqBody.description || !reqBody.tags || !reqBody.steps || 
@@ -125,7 +100,7 @@ function callback(res, err, docs, message){
     }
     else if (!docs && typeof(docs) !== "undefined"){
         console.log("Docs not found.")
-        return response.sendBadRequest(res, message);
+        return response.sendBadRequest(res, "Docs not found.");
 
     }
     else{
@@ -285,9 +260,9 @@ exports.delete = function(req, res){
         }
         else{
             console.log("Deleting recipe by particular user.")
-            RecipeModel.deleteOne({user_id : req.body.user_id, recipe_id : req.body.recipe_id}, function(err){
+            RecipeModel.findOneAndDelete({user_id : req.body.user_id, recipe_id : req.body.recipe_id}, function(err, doc){
                 var sucMessage = 'Successfully deleted the document by user.';
-                return callback(res, err, undefined, sucMessage);
+                return callback(res, err, doc, sucMessage);
             });
 
         }
