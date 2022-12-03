@@ -5,6 +5,7 @@ const response = require('../helpers/response');
 const auth = require('../controller/auth');
 const users = require('../controller/users');
 const recipe = require('../controller/recipe')
+const draft = require('../controller/draft');
 const UserInteraction =require ("../controller/UserInteraction")
 
 
@@ -44,6 +45,10 @@ routes.delete('/deletelike', auth.ensureAuthenticated, auth.ensureOwner, UserInt
 
 routes.post('/create', auth.ensureAuthenticated, auth.ensureOwner, recipe.create);
 routes.post('/edit', auth.ensureAuthenticated, auth.ensureOwner, recipe.edit);
+routes.post('/delete', auth.ensureAuthenticated, auth.ensureOwner, recipe.delete);
+routes.post('/createdraft', auth.ensureAuthenticated, auth.ensureOwner, draft.create);
+routes.post('/editdraft', auth.ensureAuthenticated, auth.ensureOwner, draft.edit);
+routes.post('/deletedraft', auth.ensureAuthenticated, auth.ensureOwner, draft.delete);
 routes.get('/recipe', recipe.getRecipes);
 routes.get("/search",recipe.search);
 routes.delete("/deleterecipe",auth.ensureAuthenticated, auth.ensureOwner, recipe.delete);
