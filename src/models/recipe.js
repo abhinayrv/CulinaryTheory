@@ -63,10 +63,11 @@ const RecipeSchema = new Schema({
         ]
     },
     dietary_preferences: {type:String, required:true, enum:["vegetarian", "nonvegetarian","contains egg"]},
-    prep_time: {type:Number,required:true, enum:[30, 60, 90]},
+    prep_time: {type:Number,required:true},
     cuisine: String,
     is_public: {type:Boolean,default:true},
-    user_id: {type:String, required:true}
+    user_id: {type:String, required:true},
+    adminDelete : {type: Boolean, default : false}
 },
     {timestamps: true}
 );

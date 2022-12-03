@@ -49,6 +49,9 @@ routes.post('/delete', auth.ensureAuthenticated, auth.ensureOwner, recipe.delete
 routes.post('/createdraft', auth.ensureAuthenticated, auth.ensureOwner, draft.create);
 routes.post('/editdraft', auth.ensureAuthenticated, auth.ensureOwner, draft.edit);
 routes.post('/deletedraft', auth.ensureAuthenticated, auth.ensureOwner, draft.delete);
+routes.get('/recipe', recipe.getRecipes);
+routes.get("/search",recipe.search);
+routes.delete("/deleterecipe",auth.ensureAuthenticated, auth.ensureOwner, recipe.delete);
 
 routes.use(function(req, res) {
   response.sendNotFound(res);
