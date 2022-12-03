@@ -10,6 +10,9 @@ const likemodel = require('./models/LikeSchema');
 const Token = require('./models/token');
 const Premium = require('./models/premiumSubscription');
 const EmailSub = require('./models/emailSub');
+const commentModel = require('./models/commentsSchema');
+const reportModel = require('./models/ReportSchema');
+
 const routes = require('./routes');
 const config = require("./config/config");
 
