@@ -200,22 +200,22 @@ exports.deleteLikedislike = function(req,res){
       pageNumber = parseInt(req.query.pageNumber);
     }
   
-    commentModel.find({recipe_id: req.params.recipe_id}).sort({timestamps: -1}).exec(function(err, comments){
-    if (err){
-        throw err;
-    }    
-    commentModel.count({recipe_id: req.params.recipe_id}).exec(function(err, totalComments){
+    commentModel.find({recipe_id: req.params.recipe_id}, function(err, comments){
       if (err){
-             throw err;
-         }
-         data = {}
-         data['page'] = pageNumber;
-         data['total_count'] = totalComments;
-         data['total_pages'] = Math.ceil(totalComments / limit);
-         data['data'] = comments;
-         response.sendSuccess(res,"Successfully fetched comments." ,data);
-    });
-   }).limit(limit).skip(pageNumber * limit);
+          throw err;
+      }    
+      commentModel.count({recipe_id: req.params.recipe_id}).exec(function(err, totalComments){
+        if (err){
+               throw err;
+           }
+           data = {}
+           data['page'] = pageNumber;
+           data['total_count'] = totalComments;
+           data['total_pages'] = Math.ceil(totalComments / limit);
+           data['data'] = comments;
+           response.sendSuccess(res,"Successfully fetched comments." ,data);
+      });
+     }).sort({timestamps: -1}).limit(limit).skip(pageNumber * limit);
   }
   //Comments Get end
 
@@ -264,23 +264,23 @@ exports.getReports = function (req, res)  {
     pageNumber = parseInt(req.query.pageNumber);
   }
   
-  reportModel.find({closed:false}).sort({timestamps: -1}).exec(function(err, report){
-  if (err){
-      throw err;
-  }    
-  reportModel.count({closed:false}).exec(function(err, totalreports){
+  reportModel.find({closed:false}, function(err, report){
     if (err){
-           throw err;
-       }
-       data = {}
-       data['page'] = pageNumber;
-       data['total_count'] = totalComments;
-       data['total_pages'] = Math.ceil(totalreports / limit);
-       data['data'] = report;
-       response.sendSuccess(res,"Successfully fetched reported recipes." ,data);
-  
-  }) 
- }).limit(limit).skip(pageNumber * limit);
+        throw err;
+    }    
+    reportModel.count({closed:false}).exec(function(err, totalreports){
+      if (err){
+             throw err;
+         }
+         data = {}
+         data['page'] = pageNumber;
+         data['total_count'] = totalreports;
+         data['total_pages'] = Math.ceil(totalreports / limit);
+         data['data'] = report;
+         response.sendSuccess(res,"Successfully fetched reported recipes." ,data);
+    
+    }) 
+   }).sort({timestamps: -1}).limit(limit).skip(pageNumber * limit);
 }
 
 exports.closeReport = function(req, res) {
