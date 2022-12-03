@@ -285,7 +285,14 @@ exports.delete = function(req, res){
         }
         else{
             console.log("Deleting recipe by particular user.")
-            RecipeModel.deleteOne({user_id : req.body.user_id, recipe_id : req.body.recipe_id}, function(err){
+            RecipeModel.findOneAndDelete({user_id : req.body.user_id, recipe_id : req.body.recipe_id}, function(err, doc){
+                if (err) {
+                    throw err;
+                  } 
+                
+                if (!doc) {
+                  return response.sendNotFound(res,"Recipe not found");
+                }
                 var sucMessage = 'Successfully deleted the document by user.';
                 return callback(res, err, undefined, sucMessage);
             });
