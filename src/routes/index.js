@@ -52,12 +52,12 @@ routes.post('/unsubemail', auth.ensureAuthenticated, subscription.unsubEmail);
 routes.post('/bookmark', auth.ensureAuthenticated, recipe.checkRecipe, UserInteraction.add_bookmark);
 routes.get('/bookmarks/:user_id', auth.ensureAuthenticated, UserInteraction.getbookmarks)
 routes.delete('/bookmark/delete', auth.ensureAuthenticated, UserInteraction.deletebookmark);
-routes.get('/isbookmarked', auth.ensureAuthenticated, UserInteraction.isBookmarked);
+routes.get('/isbookmarked/:recipe_id', auth.ensureAuthenticated, UserInteraction.isBookmarked);
 
 routes.post('/like', auth.ensureAuthenticated, recipe.checkRecipe, UserInteraction.insertLikeDislike);
 routes.get('/likes/:recipe_id', UserInteraction.countLikeDislike);
 routes.delete('/like/delete', auth.ensureAuthenticated, UserInteraction.deleteLikedislike);
-routes.get('/isliked', auth.ensureAuthenticated, UserInteraction.isLiked);
+routes.get('/isliked/:recipe_id', auth.ensureAuthenticated, UserInteraction.isLiked);
 
 routes.post('/comment',auth.ensureAuthenticated, recipe.checkRecipe, UserInteraction.addComment);
 routes.get('/comments/:recipe_id',auth.ensureAuthenticated, UserInteraction.getcomments);
