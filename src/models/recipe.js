@@ -67,7 +67,9 @@ const RecipeSchema = new Schema({
     cuisine: String,
     is_public: {type:Boolean,default:true},
     user_id: {type:String, required:true},
-    adminDelete : {type: Boolean, default : false}
+    adminDelete : {type: Boolean, default : false},
+    likes : {type: Number, default:0},
+    dislikes : {type: Number, default:0}
 },
     {timestamps: true}
 );
