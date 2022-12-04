@@ -467,3 +467,24 @@ exports.isLiked = function(req, res){
     });
   }
 }
+
+exports.getUserNames = function(req, res, next){
+
+  if(!req.query.users){
+    return response.sendBadRequest(res, "No user ids given");
+  }
+
+ var user_ids = req.query.users;
+ user_ids = user_ids.split(",");
+
+ userprofileModel.find({user_id : {$in : user_ids}},{user_name:1, user_id:1}, function(err, docs){
+
+      if(err){
+          next(err);
+      }
+
+      else{
+          return response.sendSuccess(res, "Successfully fetched the recipes.", docs)
+      }
+  });
+}
