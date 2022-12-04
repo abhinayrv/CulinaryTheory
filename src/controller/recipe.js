@@ -274,7 +274,7 @@ exports.delete = function(req, res){
 exports.getSingleRecipe = function(req, res){
     if(!req.params.recipe_id || !req.params.user_id){
         console.log("No recipe id or user id present.");
-        response.sendBadRequest(res, "No recipe id or user id present.")
+        return response.sendBadRequest(res, "No recipe id or user id present.")
     }
     else {
         RecipeModel.find({recipe_id : req.params.recipe_id, user_id : req.params.user_id, adminDelete:false}, function(err, recipe){
@@ -335,7 +335,7 @@ exports.getRecipes = function(req, res){
 exports.checkRecipe = function(req, res, next){
 
     if(!req.body.recipe_id){
-        response.sendBadRequest(res, "Recipe Id does not exist.");
+        return response.sendBadRequest(res, "Recipe Id does not exist.");
     }
     else{
         RecipeModel.findOne({recipe_id : req.body.recipe_id, adminDelete:false}, function(err, doc){
@@ -343,11 +343,11 @@ exports.checkRecipe = function(req, res, next){
                 throw err;
             }
             if(!doc){
-                response.sendNotFound(res, "Recipe cannot be found.");
+                return response.sendNotFound(res, "Recipe cannot be found.");
             }
             else{
                 if(recipe.isPublic == false && recipe.adminDelete == false){
-                    response.sendForbidden(res, "Recipe is not public.");
+                    return response.sendForbidden(res, "Recipe is not public.");
                 }
                 else{
                     return next();
@@ -360,40 +360,80 @@ exports.checkRecipe = function(req, res, next){
 
 exports.userRecipe = function(req, res){
     if(!req.params.user_id){
-        res.sendBadRequest(res, "No user id found.");
+        return response.sendBadRequest(res, "No user id found.");
     }
-    else{
-        RecipeModel.find({user_id : req.params.user_id, adminDelete : false}, function(err, docs){
-            if(err){
-                throw err;
+    var limit = 5
+    if(req.query.limit){
+        limit = parseInt(req.query.limit)
+    }
+    var pageNumber = 0
+    if(req.query.pageNumber){
+        pageNumber = parseInt(req.query.pageNumber)
+    }
+    RecipeModel.find({user_id : req.params.user_id, adminDelete : false}, function(err1, docs){
+
+        RecipeModel.countDocuments({user_id : req.params.user_id, adminDelete : false}, function(err2, count){
+            if(err1){
+                throw err1;
             }
-            if(!doc){
-                response.sendNotFound(res, "No recipes by this user.");
+            else if(err2){
+                throw err2;
+            }
+
+            if(!docs){
+                return response.sendNotFound(res, "No recipes by this user.");
             }
             else{
-                response.sendSuccess(res, "Successfully fetched the recipes.", docs);
+                var data = {}
+                data['page'] = pageNumber;
+                data['total_count'] = count;
+                data['total_pages'] = Math.ceil(count / limit);
+                data['data'] = docs;
+                return response.sendSuccess(res, "Successfully fetched the recipes.", data);
             }
+
         });
-    }
+        
+    }).limit(limit).skip(pageNumber * limit);
 }
 
 exports.userRecipePublic = function(req, res){
+    console.log("IN recipe public.")
     if(!req.params.query_user_id){
-        res.sendBadRequest(res, "No user id found.");
+        return response.sendBadRequest(res, "No user id found.");
     }
-    else{
-        RecipeModel.find({user_id : req.params.query_user_id, isPublic : true, adminDelete : false}, function(err, docs){
-            if(err){
-                throw err;
+    var limit = 5
+    if(req.query.limit){
+        limit = parseInt(req.query.limit)
+    }
+    var pageNumber = 0
+    if(req.query.pageNumber){
+        pageNumber = parseInt(req.query.pageNumber)
+    }
+    RecipeModel.find({user_id : req.params.query_user_id, isPublic : true, adminDelete : false}, function(err1, docs){
+        RecipeModel.countDocuments({user_id : req.params.query_user_id, isPublic : true, adminDelete : false}, function(err2, count){
+            console.log("In count docs single recipe")
+            if(err1){
+                throw err1;
             }
-            if(!doc){
-                response.sendNotFound(res, "No recipes by this user.");
+            if(err2){
+                throw err2;
+            }
+            if(!docs){
+                return response.sendNotFound(res, "No recipes by this user.");
             }
             else{
-                response.sendSuccess(res, "Successfully fetched the recipes.", docs);
+                var data = {}
+                data['page'] = pageNumber;
+                data['total_count'] = count;
+                data['total_pages'] = Math.ceil(count / limit);
+                data['data'] = docs;
+                return response.sendSuccess(res, "Successfully fetched the recipes.", data);
             }
+
         });
-    }
+        
+    }).limit(limit).skip(pageNumber * limit);
 }
 
 
