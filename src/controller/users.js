@@ -40,9 +40,14 @@ exports.create = function(req, res) {
         }
 
         var session = req.session;
-        session.user = user.getSessionData();
-        return response.sendCreated(res, "Registration successful", user.toJSON());
+        user.getSessionData(function(err, session_data){
+          if(err){
+            return response.sendCreated(res, "Registration successful. User needs to login", user.toJSON());
+          }
 
+          session.user = session_data;
+          return response.sendCreated(res, "Registration successful", user.toJSON());
+        });
       });
     });
     

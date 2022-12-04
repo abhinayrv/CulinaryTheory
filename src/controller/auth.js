@@ -262,6 +262,7 @@ exports.deleteToken = function(req, res) {
 exports.ensureAuthenticated = function(req, res, next) {
     if (req.session.user) {
       req.body.user_id = req.session.user.user_id;
+      req.params.user_id = req.session.user.user_id;
       return next();
     }
     return response.sendUnauthorized(res, "Please login and retry");
@@ -288,6 +289,8 @@ exports.ensureAdmin = function(req, res, next) {
 
     if (req.session.user) {
       if (req.session.user.role === "admin") {
+        req.body.user_id = req.session.user.user_id;
+        req.params.user_id = req.session.user.user_id;
         return next();
       } else {
         return response.sendForbidden(res);

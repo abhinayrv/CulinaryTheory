@@ -53,7 +53,7 @@ exports.getbookmarks = function (req, res)  {
         throw err;
     }
 
-    response.sendSuccess(res, "Success", bookmarks);
+    return response.sendSuccess(res, "Success", bookmarks);
    });
   }
 
@@ -121,7 +121,7 @@ exports.insertLikeDislike = function(req,res){
 exports.countLikeDislike = function(req,res){
     
     if (!req.params.recipe_id){
-      response.sendBadRequest(res,"recipie id is missing or invalid");
+      return response.sendBadRequest(res,"recipie id is missing or invalid");
     }
 
     likemodel.count(({recipe_id:req.params.recipe_id,is_liked:true}),function(err,likes){
@@ -132,7 +132,7 @@ exports.countLikeDislike = function(req,res){
             if (err) {
               throw err;
             }
-            response.sendSuccess(res, "Success", {likes:likes, dislikes:dislikes});
+            return response.sendSuccess(res, "Success", {likes:likes, dislikes:dislikes});
         });  
     });
   };
@@ -142,7 +142,7 @@ exports.deleteLikedislike = function(req,res){
 
     if (!req.body.user_id || !req.body.recipe_id) 
     {
-      response.sendBadRequest(res, "Please check the userid or recipieid");
+      return response.sendBadRequest(res, "Please check the userid or recipieid");
     }
     
   
@@ -200,22 +200,22 @@ exports.deleteLikedislike = function(req,res){
       pageNumber = parseInt(req.query.pageNumber);
     }
   
-    commentModel.find({recipe_id: req.params.recipe_id}).sort({timestamps: -1}).exec(function(err, comments){
-    if (err){
-        throw err;
-    }    
-    commentModel.count({recipe_id: req.params.recipe_id}).exec(function(err, totalComments){
+    commentModel.find({recipe_id: req.params.recipe_id}, function(err, comments){
       if (err){
-             throw err;
-         }
-         data = {}
-         data['page'] = pageNumber;
-         data['total_count'] = totalComments;
-         data['total_pages'] = Math.ceil(totalComments / limit);
-         data['data'] = comments;
-         response.sendSuccess(res,"Successfully fetched comments." ,data);
-    });
-   }).limit(limit).skip(pageNumber * limit);
+          throw err;
+      }    
+      commentModel.count({recipe_id: req.params.recipe_id}).exec(function(err, totalComments){
+        if (err){
+               throw err;
+           }
+           data = {}
+           data['page'] = pageNumber;
+           data['total_count'] = totalComments;
+           data['total_pages'] = Math.ceil(totalComments / limit);
+           data['data'] = comments;
+           return response.sendSuccess(res,"Successfully fetched comments." ,data);
+      });
+     }).sort({timestamps: -1}).limit(limit).skip(pageNumber * limit);
   }
   //Comments Get end
 
@@ -264,23 +264,23 @@ exports.getReports = function (req, res)  {
     pageNumber = parseInt(req.query.pageNumber);
   }
   
-  reportModel.find({closed:false}).sort({timestamps: -1}).exec(function(err, report){
-  if (err){
-      throw err;
-  }    
-  reportModel.count({closed:false}).exec(function(err, totalreports){
+  reportModel.find({closed:false}, function(err, report){
     if (err){
-           throw err;
-       }
-       data = {}
-       data['page'] = pageNumber;
-       data['total_count'] = totalComments;
-       data['total_pages'] = Math.ceil(totalreports / limit);
-       data['data'] = report;
-       response.sendSuccess(res,"Successfully fetched reported recipes." ,data);
-  
-  }) 
- }).limit(limit).skip(pageNumber * limit);
+        throw err;
+    }    
+    reportModel.count({closed:false}).exec(function(err, totalreports){
+      if (err){
+             throw err;
+         }
+         data = {}
+         data['page'] = pageNumber;
+         data['total_count'] = totalreports;
+         data['total_pages'] = Math.ceil(totalreports / limit);
+         data['data'] = report;
+         return response.sendSuccess(res,"Successfully fetched reported recipes." ,data);
+    
+    }) 
+   }).sort({timestamps: -1}).limit(limit).skip(pageNumber * limit);
 }
 
 exports.closeReport = function(req, res) {
@@ -352,7 +352,7 @@ exports.getMyUserProfile= function (req, res)  {
       throw err;
   }
 
-  response.sendSuccess(res, "Success", profileUser);
+  return response.sendSuccess(res, "Success", profileUser);
  });
 }
 
@@ -366,7 +366,7 @@ exports.getUserProfile = function (req, res)  {
       throw err;
   }
 
-  response.sendSuccess(res, "Success", profileUser);
+  return response.sendSuccess(res, "Success", profileUser);
  });
 }
 //user profile get end
@@ -398,7 +398,7 @@ exports.editUserProfile = function(req, res){
             profileUser.updateDoc(req.body);
             profileUser.save(function(err, profileUser){
               if (err) return response.sendBadRequest(res, "Please check the data entered.", err);
-              response.sendSuccess(res, "Successfully updated the doc.", profileUser.toJSON());
+              return response.sendSuccess(res, "Successfully updated the doc.", profileUser.toJSON());
           });
       }
   });
@@ -416,7 +416,7 @@ function validateUserProfileRequest(reqBody, next){
 
 exports.isBookmarked = function(req, res){
   if(!req.params.user_id || !req.params.recipe_id){
-    response.sendBadRequest(res, "No user id found.");
+    return response.sendBadRequest(res, "No user id found.");
   }
   else{
     bookmarkModel.findOne({user_id : req.params.user_id, recipe_id : req.params.recipe_id}, function(err, docs){
@@ -425,10 +425,10 @@ exports.isBookmarked = function(req, res){
         throw err;
       }
       if(!docs){
-        response.sendSuccess(res, "User has not bookmarked any recipe.", {bookmarked : false});
+        return response.sendSuccess(res, "User has not bookmarked any recipe.", {bookmarked : false});
       }
       else{
-        response.sendSuccess(res, "User has not bookmarked any recipe.", {bookmarked : true});
+        return response.sendSuccess(res, "User has not bookmarked any recipe.", {bookmarked : true});
       }
     });
   }
@@ -436,7 +436,7 @@ exports.isBookmarked = function(req, res){
 
 exports.isLiked = function(req, res){
   if(!req.params.user_id || !req.params.recipe_id){
-    response.sendBadRequest(res, "No user id found.");
+    return response.sendBadRequest(res, "No user id found.");
   }
   else{
     likemodel.findOne({user_id : req.params.user_id, recipe_id : req.params.recipe_id}, function(err, docs){
@@ -445,14 +445,14 @@ exports.isLiked = function(req, res){
         throw err;
       }
       if(!docs){
-        response.sendSuccess(res, "User has not liked any recipe.", {liked : false, disliked: false});
+        return response.sendSuccess(res, "User has not liked any recipe.", {liked : false, disliked: false});
       }
       else{
         if(docs.is_liked){
-          response.sendSuccess(res, "User has liked this recipe.", {liked : true, disliked: false});
+          return response.sendSuccess(res, "User has liked this recipe.", {liked : true, disliked: false});
         }
         else{
-          response.sendSuccess(res, "User has not liked this recipe.", {liked : false, disliked: true});
+          return response.sendSuccess(res, "User has not liked this recipe.", {liked : false, disliked: true});
         }
         
       }

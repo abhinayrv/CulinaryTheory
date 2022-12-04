@@ -32,8 +32,6 @@ routes.get('/login/ui', (req, res) => {
   });
 
 routes.post('/login', auth.authenticate)
-
-
 routes.post('/register', users.create);
 routes.get('/logout', auth.signOut);
 routes.post('/reset', auth.resetPasswordEmail);
@@ -41,43 +39,51 @@ routes.get('/reset/:token', auth.validateResetToken, auth.renderResetPage);
 routes.post('/resetpassword', auth.validateResetToken, auth.resetPassword, auth.deleteToken);
 routes.post('/updatepassword', auth.ensureAuthenticated, auth.ensureOwner, auth.updatePassword);
 
-routes.post('/gensub', auth.ensureAuthenticated, auth.ensureOwner, subscription.generateSubscription);
-routes.post('/subscribe', auth.ensureAuthenticated, auth.ensureOwner, subscription.subscribe);
-routes.post('/cancelsub', auth.ensureAuthenticated, auth.ensureOwner, subscription.cancelSubscription);
-routes.post('/getsub', auth.ensureAuthenticated, auth.ensureOwner, subscription.getSubscription);
+routes.post('/gensub', auth.ensureAuthenticated, subscription.generateSubscription);
+routes.post('/subscribe', auth.ensureAuthenticated, subscription.subscribe);
+routes.post('/cancelsub', auth.ensureAuthenticated, subscription.cancelSubscription);
+routes.post('/getsub', auth.ensureAuthenticated, subscription.getSubscription);
 routes.get('/ispremium', subscription.isPremiumUser);
 
 routes.post('/subscribemail', auth.ensureAuthenticated, subscription.subscribeEmail);
 routes.get('/isemailsub', auth.ensureAuthenticated, subscription.isEmailSub);
 routes.post('/unsubemail', auth.ensureAuthenticated, subscription.unsubEmail);
 
-routes.post('/bookmark', auth.ensureAuthenticated, auth.ensureOwner, UserInteraction.add_bookmark);
-routes.get('/bookmarks/:user_id', auth.ensureAuthenticated, auth.ensureOwner, UserInteraction.getbookmarks)
-routes.delete('/deletebookmark', auth.ensureAuthenticated, auth.ensureOwner, UserInteraction.deletebookmark);
-routes.post('/like', auth.ensureAuthenticated, auth.ensureOwner, UserInteraction.insertLikeDislike);
+routes.post('/bookmark', auth.ensureAuthenticated, recipe.checkRecipe, UserInteraction.add_bookmark);
+routes.get('/bookmarks/:user_id', auth.ensureAuthenticated, UserInteraction.getbookmarks)
+routes.delete('/bookmark/delete', auth.ensureAuthenticated, UserInteraction.deletebookmark);
+routes.get('/isbookmarked/:recipe_id', auth.ensureAuthenticated, UserInteraction.isBookmarked);
+
+routes.post('/like', auth.ensureAuthenticated, recipe.checkRecipe, UserInteraction.insertLikeDislike);
 routes.get('/likes/:recipe_id', UserInteraction.countLikeDislike);
-routes.delete('/deletelike', auth.ensureAuthenticated, auth.ensureOwner, UserInteraction.deleteLikedislike);
-routes.post('/comment',auth.ensureAuthenticated, UserInteraction.addComment);
-routes.get('/comments/:recipe_id',auth.ensureAuthenticated, UserInteraction.getcomments)
-routes.post('/report',auth.ensureAuthenticated,UserInteraction.add_reported_recipe);
-routes.get('/reports',auth.ensureAuthenticated, UserInteraction.getReports);
-routes.post('/report/close',auth.ensureAuthenticated, UserInteraction.closeReport);
-routes.post('profile/create', auth.ensureAuthenticated, UserInteraction.createUserProfile);
-routes.post('profile/edit', auth.ensureAuthenticated, UserInteraction.editUserProfile);
+routes.delete('/like/delete', auth.ensureAuthenticated, UserInteraction.deleteLikedislike);
+routes.get('/isliked/:recipe_id', auth.ensureAuthenticated, UserInteraction.isLiked);
+
+routes.post('/comment',auth.ensureAuthenticated, recipe.checkRecipe, UserInteraction.addComment);
+routes.get('/comments/:recipe_id',auth.ensureAuthenticated, UserInteraction.getcomments);
+
+routes.post('/report',auth.ensureAuthenticated, recipe.checkRecipe, UserInteraction.add_reported_recipe);
+routes.get('/admin/reports',auth.ensureAdmin, UserInteraction.getReports);
+routes.post('/admin/report/close', auth.ensureAdmin, UserInteraction.closeReport);
+
+routes.post('/profile/create', auth.ensureAuthenticated, UserInteraction.createUserProfile);
+routes.post('/profile/edit', auth.ensureAuthenticated, UserInteraction.editUserProfile);
 routes.get('/myprofile', auth.ensureAuthenticated, UserInteraction.getMyUserProfile);
 routes.get('/profile/:query_user_id', auth.ensureAuthenticated, UserInteraction.getUserProfile);
-routes.get('/isbookmarked', auth.ensureAuthenticated, UserInteraction.isBookmarked);
-routes.get('/isliked', auth.ensureAuthenticated, UserInteraction.isLiked);
 
-routes.post('/create', auth.ensureAuthenticated, auth.ensureOwner, recipe.create);
-routes.post('/edit', auth.ensureAuthenticated, auth.ensureOwner, recipe.edit);
-routes.post('/delete', auth.ensureAuthenticated, auth.ensureOwner, recipe.delete);
-routes.post('/createdraft', auth.ensureAuthenticated, auth.ensureOwner, draft.create);
-routes.post('/editdraft', auth.ensureAuthenticated, auth.ensureOwner, draft.edit);
-routes.post('/deletedraft', auth.ensureAuthenticated, auth.ensureOwner, draft.delete);
-routes.get('/recipe', recipe.getRecipes);
-routes.get("/search",recipe.search);
-routes.delete("/deleterecipe",auth.ensureAuthenticated, auth.ensureOwner, recipe.delete);
+routes.post('/recipe/create', auth.ensureAuthenticated, recipe.create);
+routes.post('/recipe/edit', auth.ensureAuthenticated, recipe.edit);
+routes.post('/recipe/delete', auth.ensureAuthenticated, recipe.delete);
+routes.get("/recipe/search", recipe.search);
+routes.delete("/admin/recipe/delete", auth.ensureAdmin, recipe.delete);
+routes.get("/recipe/myrecipes", auth.ensureAuthenticated, recipe.userRecipe);
+routes.get("/recipe/user/:query_user_id", auth.ensureAuthenticated, recipe.userRecipePublic);
+routes.get("/recipe/:recipe_id", recipe.getSingleRecipe);
+
+routes.post('/draft/create', auth.ensureAuthenticated, draft.create);
+routes.post('/draft/edit', auth.ensureAuthenticated, draft.edit);
+routes.post('/draft/delete', auth.ensureAuthenticated, draft.delete);
+
 
 routes.use(function(req, res) {
   response.sendNotFound(res);
