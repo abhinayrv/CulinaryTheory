@@ -9,6 +9,9 @@ const draft = require('../controller/draft');
 const UserInteraction =require ("../controller/UserInteraction")
 const subscription = require("../controller/subscription");
 
+const multer = require('multer');
+const upload = multer({dest: '../uploads/'})
+
 
 const routes  = express.Router();
 
@@ -67,7 +70,7 @@ routes.get('/admin/reports',auth.ensureAdmin, UserInteraction.getReports);
 routes.post('/admin/report/close', auth.ensureAdmin, UserInteraction.closeReport);
 
 routes.post('/profile/create', auth.ensureAuthenticated, UserInteraction.createUserProfile);
-routes.post('/profile/edit', auth.ensureAuthenticated, UserInteraction.editUserProfile);
+routes.post('/profile/edit', auth.ensureAuthenticated, UserInteraction.editUserProfile, UserInteraction.createUserProfile);
 routes.get('/myprofile', auth.ensureAuthenticated, UserInteraction.getMyUserProfile);
 routes.get('/profile/:query_user_id', auth.ensureAuthenticated, UserInteraction.getUserProfile);
 
@@ -79,6 +82,7 @@ routes.delete("/admin/recipe/delete", auth.ensureAdmin, recipe.delete);
 routes.get("/recipe/myrecipes", auth.ensureAuthenticated, recipe.userRecipe);
 routes.get("/recipe/user/:query_user_id", auth.ensureAuthenticated, recipe.userRecipePublic);
 routes.get("/recipe/:recipe_id", recipe.getSingleRecipe);
+routes.post("/recipe/imageupload", upload.single('image'), auth.ensureAuthenticated, recipe.uploadImage);
 
 routes.post('/draft/create', auth.ensureAuthenticated, draft.create);
 routes.post('/draft/edit', auth.ensureAuthenticated, draft.edit);

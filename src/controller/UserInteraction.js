@@ -352,6 +352,10 @@ exports.getMyUserProfile= function (req, res)  {
       throw err;
   }
 
+  if(!profileUser){
+    return response.sendSuccess(res, "Success", new userprofileModel().toJSON());
+  }
+
   return response.sendSuccess(res, "Success", profileUser);
  });
 }
@@ -372,7 +376,7 @@ exports.getUserProfile = function (req, res)  {
 //user profile get end
 
 //User profile edit start
-exports.editUserProfile = function(req, res){
+exports.editUserProfile = function(req, res, next){
   console.log("In edit recipe.")
  
   if(!req.body.user_id || !req.body.user_name){
@@ -385,7 +389,11 @@ exports.editUserProfile = function(req, res){
           throw err;
       }
       if (!profileUser){
-          console.log("Profile not found.")
+          console.log("Profile not found");
+          if(req.session.user){
+            console.log("Logged in user. Calling create profile");
+            return next();
+          }
           return response.sendBadRequest(res, "No profile found for the given id.");
       }
       

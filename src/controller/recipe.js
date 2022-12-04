@@ -3,6 +3,7 @@ const nanoid = require('nanoid');
 const response = require('../helpers/response');
 const request = require('../helpers/request');
 const recipe = require('../models/recipe');
+const aws = require('../helpers/aws');
 
 
 const RecipeModel = mongoose.model('Recipes');
@@ -436,4 +437,17 @@ exports.userRecipePublic = function(req, res){
     }).limit(limit).skip(pageNumber * limit);
 }
 
+exports.uploadImage = function(req, res, next){
+    console.log(req.file.originalname.split('.')[1]);
+    console.log(req.file.originalname.split('.'));
+    var filename = `${req.file.filename}.${req.file.originalname.split('.')[1]}`;
+    aws.s3_upload(req.file.path, filename, function(err, fileurl){
+        if (err){
+            console.log("Error uploading image");
+            return next(err);
+        }
+
+        return response.sendSuccess(res, "Image successfully uploaded", {image_url: fileurl});
+    })
+}
 

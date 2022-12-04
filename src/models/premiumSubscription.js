@@ -49,6 +49,7 @@ PremiumSchema.methods.setBillingDate = function(next){
     console.log("Setting next billing date");
     console.log(this);
     paypal.get_subscription(this.paypal_id, function(err, details){
+        details = {};
         if (err){
             return next(err);
         }
@@ -59,7 +60,8 @@ PremiumSchema.methods.setBillingDate = function(next){
             // console.log(this);
             return next(false);
         } else{
-            return next(new Error("No next billing data"));
+            var err = Error("No next billing data");
+            return next(err);
         }
     }.bind(this));
 }

@@ -17,19 +17,23 @@ function generate_token(next){
         if (response.status === 200 || response.status === 201) {
             response.json().then((rjson)=>{
                 console.log("got resp json");
-                return next(rjson.access_token);
+                return next(false, rjson.access_token);
             });
           }
         else{
             response.text().then(function(errorMessage){
-                throw new Error(errorMessage);
+                next(new Error(errorMessage));
             });
         }
     });
 }
 
 exports.create_subscription = function(plan_id, name, email, start_date, next){
-    generate_token(function(access_token){
+    generate_token(function(err, access_token){
+        if(err){
+            console.log("Unable to generate paypal access token");
+            return next(err);
+        }
         const url = `${base}/v1/billing/subscriptions`;
 
         if (!start_date){
@@ -69,7 +73,11 @@ exports.create_subscription = function(plan_id, name, email, start_date, next){
 }
 
 exports.get_subscription = function(id, next){
-    generate_token(function(access_token){
+    generate_token(function(err, access_token){
+        if(err){
+            console.log("Unable to generate paypal access token");
+            return next(err);
+        }
         const url = `${base}/v1/billing/subscriptions/${id}`;
         fetch(url, {
             method: "get",
@@ -93,7 +101,11 @@ exports.get_subscription = function(id, next){
 }
 
 exports.cancel_subscription = function(id, cancel_reason, next){
-    generate_token(function(access_token){
+    generate_token(function(err, access_token){
+        if(err){
+            console.log("Unable to generate paypal access token");
+            return next(err);
+        }
         const url = `${base}/v1/billing/subscriptions/${id}/cancel`;
         fetch(url, {
             method: "post",
