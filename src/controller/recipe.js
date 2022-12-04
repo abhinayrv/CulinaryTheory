@@ -113,134 +113,99 @@ function callback(res, err, docs, message){
 exports.search = function(req, res){
     console.log("In recipe search");
 
-    if (!req.query.searchBy){
-        console.log("No search by field found.");
-        return response.sendBadRequest(res, "Search By field not present.");
-    }
-    if (!req.query.searchFor){
-        console.log("No search for field found.");
-        return response.sendBadRequest(res, "Search For field not present.");
-    }
-    var limit = 5
-    if(req.query.limit){
-        limit = parseInt(req.query.limit)
-    }
-    var pageNumber = 0
-    if(req.query.pageNumber){
-        pageNumber = parseInt(req.query.pageNumber)
+    var query = {}
+    var sortQuery = {}
+
+    if(req.query.dietary_preferences){
+        query["dietary_preferences"] = req.query.dietary_preferences
     }
 
-    console.log(limit);
-    console.log(pageNumber);
-    var searchBy = req.query.searchBy.toLowerCase();
-    var searchFor = req.query.searchFor;
-
-
-    console.log(searchBy);
-    console.log(searchFor);
-
-    if(searchBy == "title"){
-        RecipeModel.find({title : {$regex : searchFor, $options: 'i'}, isPublic: true, adminDelete:false}, function(err1, docs){
-            RecipeModel.countDocuments({title : {$regex : searchFor, $options: 'i'}, isPublic: true, adminDelete:false}, function(err2, count){
-                if(err1){
-                    throw err1;
-                }
-                else if(err2){
-                    throw err2;
-                }
-                else if(typeof(docs) == "undefined" || !docs){
-                    return res.sendBadRequest(res, "No docs found.");
-                }
-                else{
-                    var data = {}
-                    data['page'] = pageNumber;
-                    data['total_count'] = count;
-                    data['total_pages'] = Math.ceil(count / limit);
-                    data['data'] = docs;
-                    return response.sendSuccess(res, "Successfully fetched the recipes.",data);
-                }
-                
-            });
-        }).limit(limit).skip(pageNumber * limit);
+    if(req.query.prep_time){
+        var filterTime = req.query.prep_time.split(",");
+        query["prep_time"] = {"$in" : filterTime}
     }
-    else if(searchBy == "tags"){
-        const arraySearch = searchFor.split(" ")
-        console.log(arraySearch);
-        if(arraySearch.length == 0){
-            console.log("Tags array is null.")
-            response.sendBadRequest(res, "Tags array is null.")
-        }
-        else{
-            RecipeModel.find({tags : {$in: arraySearch}, isPublic: true, adminDelete:false}, function(err1, docs){
-
-                RecipeModel.countDocuments({tags : {$in: arraySearch}, isPublic: true, adminDelete:false}, function(err2, count){
-                    if(err1){
-                        throw err1;
-                    }
-                    else if(err2){
-                        throw err2;
-                    }
-                    else if(typeof(docs) == "undefined" || !docs){
-                        return res.sendBadRequest(res, "No docs found.");
-                    }
-                    else{
-                        var data = {}
-                        data['page'] = pageNumber;
-                        data['total_count'] = count;
-                        data['total_pages'] = Math.ceil(count / limit);
-                        data['data'] = docs;
-                        return response.sendSuccess(res, "Successfully fetched the recipes.",data);
-                    }
-
-
-                });
-            }).limit(limit).skip(pageNumber * limit);;
-        }
+    if(req.query.sortBy && req.query.sortAsc){
+        sortQuery[req.query.sortBy] = req.query.sortAsc;
     }
-    else if(searchBy == "ingredients"){
-        const arraySearch = searchFor.split(" ")
-        console.log(arraySearch);
-        if(arraySearch.length == 0){
-            console.log("Ingredients array is null.")
-            response.sendBadRequest(res, "Ingredients array is null.")
-        }
-        else{
-            const findBy = [];
-            for(let i = 0; i < arraySearch.length; i++){
-                var ele = { "ingredients.ingredient": {$regex: arraySearch[i], $options : "i" },
-                            "isPublic": true, "adminDelete":false};
-                findBy.push(ele);
-            }
-            console.log(findBy);
-            RecipeModel.find({$or : findBy}, function(err1, docs){
-                RecipeModel.countDocuments({$or : findBy}, function(err2, count){
-                    if(err1){
-                        throw err1;
-                    }
-                    else if(err2){
-                        throw err2;
-                    }
-                    else if(typeof(docs) == "undefined" || !docs){
-                        return res.sendBadRequest(res, "No docs found.");
-                    }
-                    else{
-                        var data = {}
-                        data['page'] = pageNumber;
-                        data['total_count'] = count;
-                        data['total_pages'] = Math.ceil(count / limit);
-                        data['data'] = docs;
-                        return response.sendSuccess(res, "Successfully fetched the recipes.",data);
-                    }
-
-                });
-            }).limit(limit).skip(pageNumber * limit);
-
-        }
+    if (!req.query.searchBy && !req.query.searchFor){
+        console.log("No search fields found.");
+        return response.sendBadRequest(res, "Search fields not present.");
     }
     else{
-        response.sendBadRequest(res, "Wrong type of search.");
-    }
+        var searchFor = req.query.searchFor;
+        var searchBy = req.query.searchBy;
 
+        if(searchBy == "title"){
+            query["title"] = {"$regex" : searchFor, $options: 'i'}
+            query["isPublic"] = true
+            query["adminDelete"] = false
+        }
+        else if(searchBy == "tags"){
+            const arraySearch = searchFor.split(" ")
+            query["tags"] = {"$in": arraySearch}
+            query["isPublic"] = true
+            query["adminDelete"] = false
+
+        }
+        else if(searchBy == "ingredients"){
+            const arraySearch = searchFor.split(" ")
+            if(arraySearch.length == 0){
+                console.log("Ingredients array is null.")
+                return response.sendBadRequest(res, "Ingredients array is null.")
+            }
+            else{
+
+                const findBy = [];
+                for(let i = 0; i < arraySearch.length; i++){
+                    var ele = query
+                    ele["ingredients.ingredient"] = {"$regex": arraySearch[i], "$options" : "i"};
+                    ele["isPublic"] = true;
+                    ele["adminDelete"] = false;
+                    findBy.push(ele);
+                }
+                query = {};
+                query["$or"] = findBy;
+            }
+        
+
+        }
+        else{
+            return response.sendBadRequest(res, "Wrong type of search.");
+        }
+
+        var limit = 5
+        if(req.query.limit){
+            limit = parseInt(req.query.limit)
+        }
+        var pageNumber = 0
+        if(req.query.pageNumber){
+            pageNumber = parseInt(req.query.pageNumber)
+        }
+        console.log(query);
+        RecipeModel.find(query, function(err1, docs){
+            if(err1){
+                throw err1;
+            }
+            else{
+                RecipeModel.countDocuments(query, function(err2, count){
+                    if(err2){
+                        throw err2;
+                    }
+                    else{
+                        var data = {}
+                        data['page'] = pageNumber;
+                        data['total_count'] = count;
+                        data['total_pages'] = Math.ceil(count / limit);
+                        data['data'] = docs;
+                        return response.sendSuccess(res, "Successfully fetched the recipes.",data);
+                    }
+
+                });
+            }
+
+        }).limit(limit).skip(pageNumber * limit).sort(sortQuery);
+        
+    }
 }
 
 
@@ -273,12 +238,12 @@ exports.delete = function(req, res){
 }
 
 exports.getSingleRecipe = function(req, res){
-    if(!req.params.recipe_id || !req.params.user_id){
-        console.log("No recipe id or user id present.");
-        return response.sendBadRequest(res, "No recipe id or user id present.")
+    if(!req.params.recipe_id){
+        console.log("No recipe id present.");
+        return response.sendBadRequest(res, "No recipe id present.")
     }
     else {
-        RecipeModel.find({recipe_id : req.params.recipe_id, user_id : req.params.user_id, adminDelete:false}, function(err, recipe){
+        RecipeModel.find({recipe_id : req.params.recipe_id, adminDelete:false}, function(err, recipe){
 
             if(!recipe){
                 return callback(res, err, recipe, "No such recipe found.");
@@ -435,6 +400,58 @@ exports.userRecipePublic = function(req, res){
         });
         
     }).limit(limit).skip(pageNumber * limit);
+}
+
+exports.addLike = function(req, res){
+    if (!req.body.recipe_id || req.body.is_liked==null){
+        return response.sendBadRequest(res, "Required fields missing.");
+    }
+    else{
+        RecipeModel.findOne({recipe_id : req.body.recipe_id}, function(err, recipe){
+
+            if (err){
+                throw err;
+            }
+            if (!recipe){
+                return response.sendBadRequest(res, "No recipe found with the given id.");
+            }
+            else{
+                if(req.body.is_liked){
+                    recipe.likes = recipe.likes + 1;
+                }
+                else{
+                    recipe.dislikes = recipe.dislikes + 1;
+                }
+                recipe.save(function(err, recipe){
+                    if(err){
+                        return response.sendBadRequest(res,"Some error in updating likes/dislikes.", err);
+                    }
+                    else{
+                        return response.sendSuccess(res, "Successfully updated the doc.");
+                    }
+                });
+            }
+        });
+    }
+
+}
+
+exports.getMultipleRecipes = function(req, res, next){
+
+    var ids = []
+    if(req.query.recipe_ids){
+        ids = req.query.recipe_ids.split(",");
+    }
+
+    RecipeModel.find({recipe_id : {$in : ids}},{title:1, recipe_id:1}, function(err, docs){
+
+        if(err){
+            next(err);
+        }
+        else{
+            return response.sendSuccess(res, "Successfully fetched the recipes.", docs);
+        }
+    });
 }
 
 exports.uploadImage = function(req, res, next){
