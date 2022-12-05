@@ -130,7 +130,7 @@ RecipeSchema.methods.updateDoc = function(newData){
     this.dietary_preferences = newData.dietary_preferences;
     this.prep_time = newData.prep_time;
     this.cuisine = newData.cuisine;
-    this.is_public = newData.isPublic;
+    this.is_public = newData.is_public;
 }
 
 RecipeSchema.set('toJSON', {

@@ -77,7 +77,7 @@ exports.deletebookmark = function (req, res) {
 
 };
 
-exports.insertLikeDislike = function(req,res){
+exports.insertLikeDislike = function(req,res, next){
 
     
   
@@ -89,7 +89,7 @@ exports.insertLikeDislike = function(req,res){
   
     likemodel.findOne({user_id:req.body.user_id, recipe_id:req.body.recipe_id}).exec((err,like)=>{
       if (err){
-        throw err;
+        next(err);
       }
       
       if (like){
@@ -107,10 +107,10 @@ exports.insertLikeDislike = function(req,res){
 
       like.save(function(err, like){
         if (err){
-          throw err;
+          next(err);
         }
 
-        return response.sendCreated(res, "Added like/dislike successfully.", like.toJSON());
+        return next();
       });
     
     });

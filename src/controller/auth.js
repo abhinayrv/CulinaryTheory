@@ -163,7 +163,10 @@ exports.resetPasswordEmail = function(req, res) {
 
       const subject = "Reset Password - The Culinary Theory";
       const body = token.getResetEmail();
-      user.sendEmail(true, subject, body, function(){
+      user.sendEmail(true, subject, body, function(err){
+        if(err){
+          next(err);
+        }
         return response.sendSuccess(res, "Please check your inbox for the link to reset your password.");
       });
     });
@@ -299,3 +302,17 @@ exports.ensureAdmin = function(req, res, next) {
       return response.sendUnauthorized(res, "Please login and retry");
     }
 };
+
+exports.ensurePremium = function(req, res, next){
+  if (req.session.user) {
+    if (req.session.user.prem) {
+      req.body.user_id = req.session.user.user_id;
+      req.params.user_id = req.session.user.user_id;
+      return next();
+    } else {
+      return response.sendForbidden(res, "Please subscribe to premium to save this recipe as a draft!");
+    }
+  } else {
+    return response.sendUnauthorized(res, "Please login and retry");
+  }
+}

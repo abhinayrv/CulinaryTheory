@@ -108,15 +108,16 @@ UserSchema.methods.sendEmail = function(isHTML, subject, body, next){
       subject: subject,
       html: body
     };
-    mailer.sendMail(mail, next());
+    mailer.sendMail(mail, next);
   } else {
+    console.log("sending text email");
     const mail = {
       from: process.env.email_user,
       to: this.email,
       subject: subject,
       text: body
     };
-    mailer.sendMail(mail, next());
+    mailer.sendMail(mail, next);
   }
 }
 

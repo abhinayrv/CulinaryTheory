@@ -20,10 +20,10 @@ exports.sendUnauthorized = function(res, message) {
   });
 };
 
-exports.sendForbidden = function(res) {
+exports.sendForbidden = function(res, message) {
   return res.status(403).send({ 
     success: false,
-    message: 'You do not have rights to access this resource.'
+    message: message || 'You do not have rights to access this resource.'
   });
 };
 
