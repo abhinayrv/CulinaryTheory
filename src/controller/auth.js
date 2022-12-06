@@ -253,16 +253,23 @@ exports.validateResetToken = function(req, res, next) {
 
 }
 
-exports.deleteToken = function(req, res) {
+exports.deleteToken = function(req, res, next) {
   req.session.token = null;
 
-  Token.findOneAndDelete(({ token: req.body.token.token }),function(err,doc){   
+  Token.findOneAndDelete(({ token: req.body.token.token }),function(err,doc){  
+    if(err){
+      next(err);
+    } 
+    
     return response.sendSuccess(res, "Password updated.");
 });
 
 }
 
 exports.ensureAuthenticated = function(req, res, next) {
+  if(req.body.user_id || req.params.user_id){
+    return response.sendBadRequest(res, "Unexpected parameter in request: user_id");
+  }
     if (req.session.user) {
       req.body.user_id = req.session.user.user_id;
       req.params.user_id = req.session.user.user_id;

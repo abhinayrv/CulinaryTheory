@@ -32,7 +32,7 @@ const UserSchema = new Schema({
     default: 'user'
   }
 },
-{timestamps: true});
+{ timestamps: true});
 
 UserSchema.set('toJSON', {
   transform: function(doc, ret, options) {

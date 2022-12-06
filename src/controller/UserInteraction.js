@@ -329,7 +329,7 @@ exports.createUserProfile = function(req,res){
   var err = userProfile.validateSync();
   
   if(err){
-    return response.sendBadRequest(res, "Please check the data");
+    return response.sendBadRequest(res, err.message);
   }
 
   userProfile.save(function (err, userprofile){
@@ -356,7 +356,7 @@ exports.getMyUserProfile= function (req, res)  {
     return response.sendSuccess(res, "Success", new userprofileModel().toJSON());
   }
 
-  return response.sendSuccess(res, "Success", profileUser);
+  return response.sendSuccess(res, "Success", profileUser.toJSON());
  });
 }
 
@@ -370,14 +370,14 @@ exports.getUserProfile = function (req, res)  {
       throw err;
   }
 
-  return response.sendSuccess(res, "Success", profileUser);
+  return response.sendSuccess(res, "Success", profileUser.toJSON());
  });
 }
 //user profile get end
 
 //User profile edit start
 exports.editUserProfile = function(req, res, next){
-  console.log("In edit recipe.")
+  console.log("In edit profile.")
  
   if(!req.body.user_id || !req.body.user_name){
       return response.sendBadRequest(res, "UserId is missing")
@@ -386,15 +386,16 @@ exports.editUserProfile = function(req, res, next){
   userprofileModel.findOne({user_id:req.body.user_id}).exec(function (err,profileUser){
       if (err){
           console.log("There is some error in find one.");
-          throw err;
+          next(err);
       }
       if (!profileUser){
           console.log("Profile not found");
           if(req.session.user){
             console.log("Logged in user. Calling create profile");
             return next();
+          } else {
+            return response.sendBadRequest(res, "No profile found for the given id.");
           }
-          return response.sendBadRequest(res, "No profile found for the given id.");
       }
       
       validateUserProfileRequest(req.body, function(result){
@@ -453,7 +454,7 @@ exports.isLiked = function(req, res){
         throw err;
       }
       if(!docs){
-        return response.sendSuccess(res, "User has not liked any recipe.", {liked : false, disliked: false});
+        return response.sendSuccess(res, "User has not liked/dislike the recipe.", {liked : false, disliked: false});
       }
       else{
         if(docs.is_liked){
@@ -477,7 +478,7 @@ exports.getUserNames = function(req, res, next){
  var user_ids = req.query.users;
  user_ids = user_ids.split(",");
 
- userprofileModel.find({user_id : {$in : user_ids}},{user_name:1, user_id:1}, function(err, docs){
+ userprofileModel.find({user_id : {$in : user_ids}},{user_name:1, user_id:1, profile_image:1}, function(err, docs){
 
       if(err){
           next(err);

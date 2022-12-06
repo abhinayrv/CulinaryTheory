@@ -37,10 +37,13 @@ routes.get('/login/ui', (req, res) => {
 routes.post('/login', auth.authenticate)
 routes.post('/register', users.create);
 routes.get('/logout', auth.signOut);
-routes.post('/reset', auth.resetPasswordEmail);
-routes.get('/reset/:token', auth.validateResetToken, auth.renderResetPage);
-routes.post('/resetpassword', auth.validateResetToken, auth.resetPassword, auth.deleteToken);
-routes.post('/updatepassword', auth.ensureAuthenticated, auth.ensureOwner, auth.updatePassword);
+routes.post('/auth/resetemail', auth.resetPasswordEmail);
+routes.get('/auth/reset/:token', auth.validateResetToken, auth.renderResetPage);
+routes.post('/auth/resetpassword', auth.validateResetToken, auth.resetPassword, auth.deleteToken);
+routes.post('/auth/updatepassword', auth.ensureAuthenticated, auth.ensureOwner, auth.updatePassword);
+routes.get('/auth/isloggedin', auth.ensureAuthenticated, function(req, res){
+    response.sendSuccess(res, "Logged in", {logged_in: true});
+})
 
 routes.post('/gensub', auth.ensureAuthenticated, subscription.generateSubscription);
 routes.post('/subscribe', auth.ensureAuthenticated, subscription.subscribe);
