@@ -9,6 +9,9 @@ const draft = require('../controller/draft');
 const UserInteraction =require ("../controller/UserInteraction")
 const subscription = require("../controller/subscription");
 
+const multer = require('multer');
+const upload = multer({dest: '../uploads/'})
+
 
 const routes  = express.Router();
 
@@ -34,10 +37,13 @@ routes.get('/login/ui', (req, res) => {
 routes.post('/login', auth.authenticate)
 routes.post('/register', users.create);
 routes.get('/logout', auth.signOut);
-routes.post('/reset', auth.resetPasswordEmail);
-routes.get('/reset/:token', auth.validateResetToken, auth.renderResetPage);
-routes.post('/resetpassword', auth.validateResetToken, auth.resetPassword, auth.deleteToken);
-routes.post('/updatepassword', auth.ensureAuthenticated, auth.ensureOwner, auth.updatePassword);
+routes.post('/auth/resetemail', auth.resetPasswordEmail);
+routes.get('/auth/reset/:token', auth.validateResetToken, auth.renderResetPage);
+routes.post('/auth/resetpassword', auth.validateResetToken, auth.resetPassword, auth.deleteToken);
+routes.post('/auth/updatepassword', auth.ensureAuthenticated, auth.ensureOwner, auth.updatePassword);
+routes.get('/auth/isloggedin', auth.ensureAuthenticated, function(req, res){
+    response.sendSuccess(res, "Logged in", {logged_in: true});
+})
 
 routes.post('/gensub', auth.ensureAuthenticated, subscription.generateSubscription);
 routes.post('/subscribe', auth.ensureAuthenticated, subscription.subscribe);
@@ -54,7 +60,7 @@ routes.get('/bookmarks/:user_id', auth.ensureAuthenticated, UserInteraction.getb
 routes.delete('/bookmark/delete', auth.ensureAuthenticated, UserInteraction.deletebookmark);
 routes.get('/isbookmarked/:recipe_id', auth.ensureAuthenticated, UserInteraction.isBookmarked);
 
-routes.post('/like', auth.ensureAuthenticated, recipe.checkRecipe, UserInteraction.insertLikeDislike);
+routes.post('/like', auth.ensureAuthenticated, recipe.checkRecipe, UserInteraction.insertLikeDislike, recipe.addLike);
 routes.get('/likes/:recipe_id', UserInteraction.countLikeDislike);
 routes.delete('/like/delete', auth.ensureAuthenticated, UserInteraction.deleteLikedislike);
 routes.get('/isliked/:recipe_id', auth.ensureAuthenticated, UserInteraction.isLiked);
@@ -63,13 +69,14 @@ routes.post('/comment',auth.ensureAuthenticated, recipe.checkRecipe, UserInterac
 routes.get('/comments/:recipe_id',auth.ensureAuthenticated, UserInteraction.getcomments);
 
 routes.post('/report',auth.ensureAuthenticated, recipe.checkRecipe, UserInteraction.add_reported_recipe);
-routes.get('/admin/reports',auth.ensureAdmin, UserInteraction.getReports);
+routes.get('/admin/reports', UserInteraction.getReports);
 routes.post('/admin/report/close', auth.ensureAdmin, UserInteraction.closeReport);
 
 routes.post('/profile/create', auth.ensureAuthenticated, UserInteraction.createUserProfile);
-routes.post('/profile/edit', auth.ensureAuthenticated, UserInteraction.editUserProfile);
+routes.post('/profile/edit', auth.ensureAuthenticated, UserInteraction.editUserProfile, UserInteraction.createUserProfile);
 routes.get('/myprofile', auth.ensureAuthenticated, UserInteraction.getMyUserProfile);
 routes.get('/profile/:query_user_id', auth.ensureAuthenticated, UserInteraction.getUserProfile);
+routes.get('/usernames', UserInteraction.getUserNames);
 
 routes.post('/recipe/create', auth.ensureAuthenticated, recipe.create);
 routes.post('/recipe/edit', auth.ensureAuthenticated, recipe.edit);
@@ -78,11 +85,12 @@ routes.get("/recipe/search", recipe.search);
 routes.delete("/admin/recipe/delete", auth.ensureAdmin, recipe.delete);
 routes.get("/recipe/myrecipes", auth.ensureAuthenticated, recipe.userRecipe);
 routes.get("/recipe/user/:query_user_id", auth.ensureAuthenticated, recipe.userRecipePublic);
-routes.get("/recipe/:recipe_id", recipe.getSingleRecipe);
+routes.get("/recipe/:recipe_id", recipe.checkRecipe,recipe.getSingleRecipe);
+routes.post("/recipe/imageupload", upload.single('image'), auth.ensureAuthenticated, recipe.uploadImage);
 
-routes.post('/draft/create', auth.ensureAuthenticated, draft.create);
-routes.post('/draft/edit', auth.ensureAuthenticated, draft.edit);
-routes.post('/draft/delete', auth.ensureAuthenticated, draft.delete);
+routes.post('/draft/create', auth.ensurePremium, draft.create);
+routes.post('/draft/edit', auth.ensurePremium, draft.edit);
+routes.post('/draft/delete', auth.ensurePremium, draft.delete);
 
 
 routes.use(function(req, res) {

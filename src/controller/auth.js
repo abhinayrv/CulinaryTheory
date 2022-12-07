@@ -163,7 +163,10 @@ exports.resetPasswordEmail = function(req, res) {
 
       const subject = "Reset Password - The Culinary Theory";
       const body = token.getResetEmail();
-      user.sendEmail(true, subject, body, function(){
+      user.sendEmail(true, subject, body, function(err){
+        if(err){
+          next(err);
+        }
         return response.sendSuccess(res, "Please check your inbox for the link to reset your password.");
       });
     });
@@ -250,16 +253,23 @@ exports.validateResetToken = function(req, res, next) {
 
 }
 
-exports.deleteToken = function(req, res) {
+exports.deleteToken = function(req, res, next) {
   req.session.token = null;
 
-  Token.findOneAndDelete(({ token: req.body.token.token }),function(err,doc){   
+  Token.findOneAndDelete(({ token: req.body.token.token }),function(err,doc){  
+    if(err){
+      next(err);
+    } 
+    
     return response.sendSuccess(res, "Password updated.");
 });
 
 }
 
 exports.ensureAuthenticated = function(req, res, next) {
+  if(req.body.user_id || req.params.user_id){
+    return response.sendBadRequest(res, "Unexpected parameter in request: user_id");
+  }
     if (req.session.user) {
       req.body.user_id = req.session.user.user_id;
       req.params.user_id = req.session.user.user_id;
@@ -299,3 +309,17 @@ exports.ensureAdmin = function(req, res, next) {
       return response.sendUnauthorized(res, "Please login and retry");
     }
 };
+
+exports.ensurePremium = function(req, res, next){
+  if (req.session.user) {
+    if (req.session.user.prem) {
+      req.body.user_id = req.session.user.user_id;
+      req.params.user_id = req.session.user.user_id;
+      return next();
+    } else {
+      return response.sendForbidden(res, "Please subscribe to premium to save this recipe as a draft!");
+    }
+  } else {
+    return response.sendUnauthorized(res, "Please login and retry");
+  }
+}

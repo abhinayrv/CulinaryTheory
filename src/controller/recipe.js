@@ -3,9 +3,11 @@ const nanoid = require('nanoid');
 const response = require('../helpers/response');
 const request = require('../helpers/request');
 const recipe = require('../models/recipe');
+const aws = require('../helpers/aws');
 
 
 const RecipeModel = mongoose.model('Recipes');
+const Users = mongoose.model('User');
 
 function callback(res, err, docs, message){
     if(err){
@@ -32,6 +34,9 @@ exports.create = function(req, res){
             return response.sendBadRequest(res, "One of the fields is missing.")
         }
         else{
+            if(!req.body.is_public && !req.session.user.prem){
+                return response.sendForbidden(res, "Please subscribe to premium to save this recipe.");
+            }
             req.body.recipe_id = nanoid();
             const newRecipe = new RecipeModel(req.body);
             const err = newRecipe.validateSync();
@@ -51,6 +56,13 @@ exports.edit = function(req, res){
     if(!req.body.recipe_id){
         return response.sendBadRequest(res, "Recipe Id not in request.")
     }
+
+    console.log(req.session.user);
+    console.log(req.body.is_public);
+    if(!req.body.is_public && !req.session.user.prem){
+        return response.sendForbidden(res, "Please subscribe to premium to save this recipe.");
+    }
+
 
     RecipeModel.findOne({recipe_id:req.body.recipe_id}).exec(function (err, recipe){
         if (err){
@@ -136,13 +148,13 @@ exports.search = function(req, res){
 
         if(searchBy == "title"){
             query["title"] = {"$regex" : searchFor, $options: 'i'}
-            query["isPublic"] = true
+            query["is_public"] = true
             query["adminDelete"] = false
         }
         else if(searchBy == "tags"){
             const arraySearch = searchFor.split(" ")
             query["tags"] = {"$in": arraySearch}
-            query["isPublic"] = true
+            query["is_public"] = true
             query["adminDelete"] = false
 
         }
@@ -158,7 +170,7 @@ exports.search = function(req, res){
                 for(let i = 0; i < arraySearch.length; i++){
                     var ele = query
                     ele["ingredients.ingredient"] = {"$regex": arraySearch[i], "$options" : "i"};
-                    ele["isPublic"] = true;
+                    ele["is_public"] = true;
                     ele["adminDelete"] = false;
                     findBy.push(ele);
                 }
@@ -209,7 +221,7 @@ exports.search = function(req, res){
 
 
 
-exports.delete = function(req, res){
+exports.delete = function(req, res, next){
 
     if(!req.body.user_id || !req.body.recipe_id){
         console.log("No user id or recipe id present.");
@@ -218,9 +230,35 @@ exports.delete = function(req, res){
     else{
         if (req.session.user.role == "admin"){
             console.log("Admin will delete the recipe.")
-            RecipeModel.updateOne({recipe_id : req.body.recipe_id},{$set : {adminDelete : true} }, function(err, doc){
-                var sucMessage = 'Successfully deleted the document by admin.';
-                return callback(res, err, doc, sucMessage);
+            RecipeModel.findOneAndUpdate({recipe_id : req.body.recipe_id},{$set : {adminDelete : true} },{returnDocument: "after"}, function(err, doc){
+                if (err) {
+                    return next(err);
+                }
+                if (!doc) {
+                    console.log("doc is null");
+                    return response.sendNotFound(res, "Recipe not found");
+                }
+                console.log(doc);
+                Users.findOne({user_id: doc.user_id}, function(err, user){
+                    if(err){
+                        console.log("error in finding user");
+                        return next(err);
+                    }
+
+                    if(!user){
+                        console.log(doc.user_id);
+                        console.log("user not found");
+                        return response.sendSuccess(res, "Successfully deleted the recipe");
+                    }
+                    console.log("user found");
+                    var body = `Hello, \n Your recipe with title ${doc.title} has been removed for violating the community standards.\n\n The Culinary Theory Team`
+                    user.sendEmail(false, "Recipe Removed for Violations", body, function(err){
+                        console.log("sent an email to the user");
+                        return response.sendSuccess(res, "Successfully deleted the recipe");
+                    })
+                });
+                // var sucMessage = 'Successfully deleted the document by admin.';
+                // return callback(res, err, doc, sucMessage);
             });
         }
         else{
@@ -248,7 +286,7 @@ exports.getSingleRecipe = function(req, res){
                 return callback(res, err, recipe, "No such recipe found.");
             }
             else{
-                if(recipe.isPublic == false){
+                if(recipe.is_public == false){
                     console.log("This recipe is private.")
                     return response.sendForbidden(res, "This recipe is private.");
                 }
@@ -311,7 +349,7 @@ exports.checkRecipe = function(req, res, next){
                 return response.sendNotFound(res, "Recipe cannot be found.");
             }
             else{
-                if(recipe.isPublic == false && recipe.adminDelete == false){
+                if(recipe.is_public == false && recipe.adminDelete == false){
                     return response.sendForbidden(res, "Recipe is not public.");
                 }
                 else{
@@ -335,9 +373,14 @@ exports.userRecipe = function(req, res){
     if(req.query.pageNumber){
         pageNumber = parseInt(req.query.pageNumber)
     }
-    RecipeModel.find({user_id : req.params.user_id, adminDelete : false}, function(err1, docs){
+    var query = {user_id : req.params.user_id, adminDelete : false};
+    if(!req.session.user.prem){
+        query["is_public"] = true;
+    }
+    console.log(query);
+    RecipeModel.find(query, function(err1, docs){
 
-        RecipeModel.countDocuments({user_id : req.params.user_id, adminDelete : false}, function(err2, count){
+        RecipeModel.countDocuments(query, function(err2, count){
             if(err1){
                 throw err1;
             }
@@ -375,8 +418,8 @@ exports.userRecipePublic = function(req, res){
     if(req.query.pageNumber){
         pageNumber = parseInt(req.query.pageNumber)
     }
-    RecipeModel.find({user_id : req.params.query_user_id, isPublic : true, adminDelete : false}, function(err1, docs){
-        RecipeModel.countDocuments({user_id : req.params.query_user_id, isPublic : true, adminDelete : false}, function(err2, count){
+    RecipeModel.find({user_id : req.params.query_user_id, is_public : true, adminDelete : false}, function(err1, docs){
+        RecipeModel.countDocuments({user_id : req.params.query_user_id, is_public : true, adminDelete : false}, function(err2, count){
             console.log("In count docs single recipe")
             if(err1){
                 throw err1;
@@ -453,4 +496,17 @@ exports.getMultipleRecipes = function(req, res, next){
     });
 }
 
+exports.uploadImage = function(req, res, next){
+    console.log(req.file.originalname.split('.')[1]);
+    console.log(req.file.originalname.split('.'));
+    var filename = `${req.file.filename}.${req.file.originalname.split('.')[1]}`;
+    aws.s3_upload(req.file.path, filename, function(err, fileurl){
+        if (err){
+            console.log("Error uploading image");
+            return next(err);
+        }
+
+        return response.sendSuccess(res, "Image successfully uploaded", {image_url: fileurl});
+    })
+}
 
