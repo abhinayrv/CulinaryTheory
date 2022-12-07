@@ -20,7 +20,7 @@ const UserSchema = new Schema({
   password: {
     type: String,
     required: true,
-    validate: [checkPassword, '{PATH} does not meet requirements. Must have at least 8 characters 1 Uppercase letter, 1 Lowercase letter, 1 Number and 1 Special Character.']
+    validate: [checkPassword, '{PATH} does not meet requirements. Must have at least 8 characters 1 Uppercase letter, 1 Lowercase letter, 1 Number and 1 of @,$,!,%,*,?,&,_,-']
   },
   salt: {
     type: String,

@@ -34,7 +34,7 @@ exports.create = function(req, res){
             return response.sendBadRequest(res, "One of the fields is missing.")
         }
         else{
-            if(!req.body.is_public && !req.session.user.prem){
+            if((req.body['is_public'] !== undefined && !req.body.is_public) && !req.session.user.prem){
                 return response.sendForbidden(res, "Please subscribe to premium to save this recipe.");
             }
             req.body.recipe_id = nanoid();

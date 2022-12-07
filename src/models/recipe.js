@@ -63,7 +63,11 @@ const RecipeSchema = new Schema({
         ]
     },
     dietary_preferences: {type:String, required:true, enum:["vegetarian", "nonvegetarian","contains egg"]},
-    prep_time: {type:Number,required:true},
+    prep_time: {
+        type:String,
+        required:true,
+        enum: ['0-30', '30-60', '60-90', '>90']
+    },
     cuisine: String,
     is_public: {type:Boolean,default:true},
     user_id: {type:String, required:true},
@@ -101,13 +105,13 @@ function stepsValid1(arr){
 }
 
 function stepsValid2(arr){
-    return arr.length >= 5;
+    return arr.length >= 5 && arr.length <= 20;
 }
 
 function ingredsValid1(arr){
     flag = true;
     for(i in arr){
-        flag = arr[i].ingredient.length <= 30
+        flag = arr[i].ingredient.length <= 100
         if(flag==false){
             break;
         }
@@ -116,7 +120,7 @@ function ingredsValid1(arr){
 
 }
 function ingredsValid2(arr){
-    return arr.length >= 3 && arr.length <= 20;
+    return arr.length >= 3 && arr.length <= 35;
 }
 
     
