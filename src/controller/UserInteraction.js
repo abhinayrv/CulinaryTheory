@@ -323,8 +323,17 @@ exports.createUserProfile = function(req,res){
   if (!req.body.user_id || !req.body.user_name) {
     return response.sendBadRequest(res, 'Required fields missing');
   }
-  
 
+  userprofileModel.findOne({user_id: req.body.user_id}).exec(function(err, profileUser){
+
+  if (err){
+      throw err;
+  }
+
+  if (profileUser){
+    return response.sendBadRequest(res, "User Profile  already exist!");
+  }
+  
   var userProfile = new userprofileModel(req.body);
   var err = userProfile.validateSync();
   
@@ -336,10 +345,10 @@ exports.createUserProfile = function(req,res){
     if (err){
       throw err;
     }
-
     return response.sendSuccess(res, "User Profile Saved", userprofile.toJSON());
   })
-    };
+})
+}
 //User Profile insert end 
 
 //user profile get start
