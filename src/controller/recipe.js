@@ -271,8 +271,14 @@ exports.getSingleRecipe = function(req, res, next){
             }
             else{
                 if(recipe.is_public == false){
-                    console.log("This recipe is private.")
-                    return response.sendForbidden(res, "This recipe is private.");
+                    if(req.session.user && req.session.user.user_id === recipe.user_id && req.session.prem){
+                        return callback(res, err, recipe, "Successfully fetched the recipe.", next);
+                    } else if (req.session.user && req.session.user.user_id === recipe.user_id){
+                        return response.sendForbidden(res, "Please subscribe to premium to see your private recipes");
+                    } else{
+                        console.log("This recipe is private.")
+                        return response.sendForbidden(res, "This recipe is private.");
+                    }
                 }
                 else{
                     return callback(res, err, recipe, "Successfully fetched the recipe.", next);
