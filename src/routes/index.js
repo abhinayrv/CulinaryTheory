@@ -85,7 +85,7 @@ routes.get("/recipe/search", recipe.search);
 routes.delete("/admin/recipe/delete", auth.ensureAdmin, recipe.delete);
 routes.get("/recipe/myrecipes", auth.ensureAuthenticated, recipe.userRecipe);
 routes.get("/recipe/user/:query_user_id", auth.ensureAuthenticated, recipe.userRecipePublic);
-routes.get("/recipe/:recipe_id", recipe.checkRecipe,recipe.getSingleRecipe);
+routes.get("/recipe/:recipe_id", recipe.getSingleRecipe);
 routes.post("/recipe/imageupload", upload.single('image'), auth.ensureAuthenticated, recipe.uploadImage);
 
 routes.post('/draft/create', auth.ensurePremium, draft.create);

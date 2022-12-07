@@ -5,7 +5,7 @@ const response = require('../helpers/response');
 const User = mongoose.model('User');
 const Token = mongoose.model('Token');
 
-exports.authenticate = function(req, res) {
+exports.authenticate = function(req, res, next) {
     console.log(`Login request`);
   
   if (!req.body.email || !req.body.password) {
@@ -18,7 +18,7 @@ exports.authenticate = function(req, res) {
   .exec(function(err, user) {
     if (err) {
         console.log("Some error in user find");
-        throw err;
+        return next(err);
     }
 
     if (!user) {
@@ -32,7 +32,7 @@ exports.authenticate = function(req, res) {
 
         if (err) { 
             console.log("Some error in password compare");
-            throw err
+            return next(err);
         }
 
         if (isMatch) {
@@ -41,7 +41,7 @@ exports.authenticate = function(req, res) {
               console.log("Inside session data");
               if(err){
                 console.log("Error creating session");
-                throw err;
+                return next(err);
               }
               console.log(user_data);
               session.user = user_data;
@@ -59,7 +59,7 @@ exports.authenticate = function(req, res) {
   });
 }
 
-exports.updatePassword = function(req, res) {
+exports.updatePassword = function(req, res, next) {
   console.log(`Update password request`);
   
   if (!req.body.user_id || !req.body.password || !req.body.new_password || !req.body.verify_password) {
@@ -72,7 +72,7 @@ exports.updatePassword = function(req, res) {
   .exec(function(err, user) {
     if (err) {
         console.log("Some error in user find");
-        throw err;
+        return next(err);
     }
 
     if (!user) {
@@ -86,7 +86,7 @@ exports.updatePassword = function(req, res) {
 
       if (err) { 
           console.log("Some error in password compare");
-          throw err
+          return next(err);
       }
 
       if (!isMatch) {
@@ -109,7 +109,7 @@ exports.updatePassword = function(req, res) {
       user.save(function(err, user){
         if (err) {
           console.log("Error updating password");
-          throw err;
+          return next(err);
         }
 
         return response.sendSuccess(res, "Password updated successfully.");
@@ -119,11 +119,11 @@ exports.updatePassword = function(req, res) {
 }); 
 }
 
-exports.signOut = function(req, res) {
+exports.signOut = function(req, res, next) {
   req.session.destroy(function(err){
     
     if(err){
-      throw err;
+      return next(err);
     }
 
     return response.sendSuccess(res, "Logged out.")
@@ -131,7 +131,7 @@ exports.signOut = function(req, res) {
   });
 }
 
-exports.resetPasswordEmail = function(req, res) {
+exports.resetPasswordEmail = function(req, res, next) {
   if (!req.body.email) {
     return response.sendBadRequest(res, "Please enter the email address");
   }
@@ -140,7 +140,7 @@ exports.resetPasswordEmail = function(req, res) {
   .exec(function(err, user) {
     if (err) {
         console.log("Some error in user find");
-        throw err;
+        return next(err);
     }
 
     if (!user) {
@@ -153,19 +153,19 @@ exports.resetPasswordEmail = function(req, res) {
     var newToken = new Token(user.getToken());
     var err = newToken.validateSync();
     if (err) {
-      throw err;
+      return next(err);
     }
     
     newToken.save(function(err, token) {
       if (err){
-        throw err;
+        return next(err);
       }
 
       const subject = "Reset Password - The Culinary Theory";
       const body = token.getResetEmail();
       user.sendEmail(true, subject, body, function(err){
         if(err){
-          next(err);
+          return next(err);
         }
         return response.sendSuccess(res, "Please check your inbox for the link to reset your password.");
       });
@@ -175,7 +175,7 @@ exports.resetPasswordEmail = function(req, res) {
 
 }
 
-exports.renderResetPage = function(req, res) {
+exports.renderResetPage = function(req, res, next) {
   if(!req.body.token){
     return response.sendBadRequest(res, "No token");
   }
@@ -192,7 +192,7 @@ exports.resetPassword = function(req, res, next) {
     function(err, user){
       if (err) {
         console.log("Error finding the user");
-        throw err;
+        return next(err);
       }
 
       if(!user) {
@@ -214,7 +214,7 @@ exports.resetPassword = function(req, res, next) {
       user.save(function(err, user){
         if (err) {
           console.log("Error updating password");
-          throw err;
+          return next(err);
         }
 
         return next();
@@ -235,7 +235,7 @@ exports.validateResetToken = function(req, res, next) {
     function(err, token){
       if (err) {
         console.log("Error finding token");
-        throw err;
+        return next(err);
       }
 
       if(!token) {
@@ -258,7 +258,7 @@ exports.deleteToken = function(req, res, next) {
 
   Token.findOneAndDelete(({ token: req.body.token.token }),function(err,doc){  
     if(err){
-      next(err);
+      return next(err);
     } 
     
     return response.sendSuccess(res, "Password updated.");

@@ -280,15 +280,29 @@ exports.getSingleRecipe = function(req, res){
         return response.sendBadRequest(res, "No recipe id present.")
     }
     else {
-        RecipeModel.find({recipe_id : req.params.recipe_id, adminDelete:false}, function(err, recipe){
+        console.log(req.params.recipe_id);
+        RecipeModel.findOne({recipe_id : req.params.recipe_id, adminDelete:false}, function(err, recipe){
 
             if(!recipe){
                 return callback(res, err, recipe, "No such recipe found.");
             }
             else{
+                var user_id = "" || req.body.user_id;
+                var self_recipe = false;
+                if(user_id === recipe.user_id){
+                    self_recipe = true;
+                }
+                recipe = recipe.toJSON();
+                recipe["self_recipe"] = self_recipe;
                 if(recipe.is_public == false){
-                    console.log("This recipe is private.")
-                    return response.sendForbidden(res, "This recipe is private.");
+                    if(req.session.user && req.session.user.user_id === recipe.user_id && req.session.prem){
+                        return callback(res, err, recipe, "Successfully fetched the recipe.");
+                    } else if (req.session.user && req.session.user.user_id === recipe.user_id){
+                        return response.sendForbidden(res, "Please subscribe to premium to see your private recipes");
+                    } else{
+                        console.log("This recipe is private.")
+                        return response.sendForbidden(res, "This recipe is private.");
+                    }
                 }
                 else{
                     return callback(res, err, recipe, "Successfully fetched the recipe.");
@@ -349,7 +363,7 @@ exports.checkRecipe = function(req, res, next){
                 return response.sendNotFound(res, "Recipe cannot be found.");
             }
             else{
-                if(recipe.is_public == false && recipe.adminDelete == false){
+                if(!recipe.is_public && !recipe.adminDelete){
                     return response.sendForbidden(res, "Recipe is not public.");
                 }
                 else{
