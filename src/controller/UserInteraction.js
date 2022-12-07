@@ -9,7 +9,7 @@ const userprofileModel = mongoose.model('userprofile');
 
 
 
-exports.add_bookmark = function (req, res)  {
+exports.add_bookmark = function (req, res, next)  {
       if (!req.body.user_id || !req.body.recipe_id) {
         return response.sendBadRequest(res, 'Required fields missing');
       }
@@ -17,7 +17,7 @@ exports.add_bookmark = function (req, res)  {
     
       bookmarkModel.findOne({user_id: req.body.user_id, recipe_id: req.body.recipe_id}).exec((err, bookmark)=>{
         if (err){
-          throw err;
+          return next(err);
         }
         
         if (bookmark){
@@ -34,7 +34,7 @@ exports.add_bookmark = function (req, res)  {
 
         bookmark.save(function (err, bookmark){
           if (err){
-            throw err;
+            return next(err);
           }
 
           return response.sendSuccess(res, "Recipe bookmarked", bookmark.toJSON());
@@ -43,21 +43,21 @@ exports.add_bookmark = function (req, res)  {
 
   };
 
-exports.getbookmarks = function (req, res)  {
+exports.getbookmarks = function (req, res, next)  {
     if (!req.params.user_id) {
       return response.sendBadRequest(res, 'user_id is required');
     }
  
    bookmarkModel.find({user_id: req.params.user_id}).exec(function(err, bookmarks){
     if (err){
-        throw err;
+        return next(err);
     }
 
     return response.sendSuccess(res, "Success", bookmarks);
    });
   }
 
-exports.deletebookmark = function (req, res) {
+exports.deletebookmark = function (req, res, next) {
   console.log('In delete bookmark');
   if (!req.body.user_id || !req.body.recipe_id) {
       return response.sendBadRequest(res, 'user_id and recipe id are required');
@@ -65,7 +65,7 @@ exports.deletebookmark = function (req, res) {
 
   bookmarkModel.findOneAndDelete(({user_id:req.body.user_id,recipe_id:req.body.recipe_id}),function(err,doc){
     if (err) {
-        throw err;
+        return next(err);
       } 
     
     if (!doc) {
@@ -89,7 +89,7 @@ exports.insertLikeDislike = function(req,res, next){
   
     likemodel.findOne({user_id:req.body.user_id, recipe_id:req.body.recipe_id}).exec((err,like)=>{
       if (err){
-        next(err);
+        return next(err);
       }
       
       if (like){
@@ -107,7 +107,7 @@ exports.insertLikeDislike = function(req,res, next){
 
       like.save(function(err, like){
         if (err){
-          next(err);
+          return next(err);
         }
 
         return next();
@@ -118,7 +118,7 @@ exports.insertLikeDislike = function(req,res, next){
 
 
 
-exports.countLikeDislike = function(req,res){
+exports.countLikeDislike = function(req,res, next){
     
     if (!req.params.recipe_id){
       return response.sendBadRequest(res,"recipie id is missing or invalid");
@@ -126,18 +126,18 @@ exports.countLikeDislike = function(req,res){
 
     likemodel.count(({recipe_id:req.params.recipe_id,is_liked:true}),function(err,likes){
         if (err) {
-            throw err;
+            return next(err);
         }
         likemodel.count(({recipe_id:req.params.recipe_id,is_liked:false}),function(err,dislikes){
             if (err) {
-              throw err;
+              return next(err);
             }
             return response.sendSuccess(res, "Success", {likes:likes, dislikes:dislikes});
         });  
     });
   };
 
-exports.deleteLikedislike = function(req,res){
+exports.deleteLikedislike = function(req,res, next){
   
 
     if (!req.body.user_id || !req.body.recipe_id) 
@@ -148,7 +148,7 @@ exports.deleteLikedislike = function(req,res){
   
     likemodel.findOneAndDelete(({user_id:req.body.user_id,recipe_id:req.body.recipe_id}),function(err,doc){
         if (err) {
-            throw err;
+            return next(err);
           } 
         
         if (!doc) {
@@ -160,7 +160,7 @@ exports.deleteLikedislike = function(req,res){
   };
    
   //Comments Insert Start
-  exports.addComment = function(req,res){
+  exports.addComment = function(req,res, next){
     
     if (!req.body.user_id || !req.body.recipe_id ||!req.body.comment_text) {
       return response.sendBadRequest(res, 'Required fields missing');
@@ -177,7 +177,7 @@ exports.deleteLikedislike = function(req,res){
 
         comment.save(function (err, comment){
           if (err){
-            throw err;
+            return next(err);
           }
 
           return response.sendSuccess(res, "Comment Saved", comment.toJSON());
@@ -186,7 +186,7 @@ exports.deleteLikedislike = function(req,res){
   //Comments Insert End
 
   //Comments Get start (message has total number of pages)
-  exports.getcomments = function (req, res)  {
+  exports.getcomments = function (req, res, next)  {
     if (!req.params.recipe_id) {
       return response.sendBadRequest(res, 'recipe_id  is required');
     }
@@ -202,11 +202,11 @@ exports.deleteLikedislike = function(req,res){
   
     commentModel.find({recipe_id: req.params.recipe_id}, function(err, comments){
       if (err){
-          throw err;
+          return next(err);
       }    
       commentModel.count({recipe_id: req.params.recipe_id}).exec(function(err, totalComments){
         if (err){
-               throw err;
+            return next(err);
            }
            data = {}
            data['page'] = pageNumber;
@@ -219,7 +219,7 @@ exports.deleteLikedislike = function(req,res){
   }
   //Comments Get end
 
-  exports.add_reported_recipe = function (req, res)  {
+  exports.add_reported_recipe = function (req, res, next)  {
     if (!req.body.user_id || !req.body.recipe_id) {
       return response.sendBadRequest(res, 'Reqired fields missing');
     }
@@ -227,7 +227,7 @@ exports.deleteLikedislike = function(req,res){
   
     reportModel.findOne({user_id: req.body.user_id, recipe_id: req.body.recipe_id}).exec((err, report)=>{
       if (err){
-        throw err;
+        return next(err);
       }
       
       if (report){
@@ -244,7 +244,7 @@ exports.deleteLikedislike = function(req,res){
 
       report.save(function (err, report){
         if (err){
-          throw err;
+          return next(err);
         }
 
         return response.sendSuccess(res, "Recipe Reported", report.toJSON());
@@ -253,7 +253,7 @@ exports.deleteLikedislike = function(req,res){
 
 };
 
-exports.getReports = function (req, res)  {
+exports.getReports = function (req, res, next)  {
 
   var limit = 5;
   var pageNumber = 0;
@@ -266,11 +266,11 @@ exports.getReports = function (req, res)  {
   
   reportModel.find({closed:false}, function(err, report){
     if (err){
-        throw err;
+        return next(err);
     }    
     reportModel.count({closed:false}).exec(function(err, totalreports){
       if (err){
-             throw err;
+             return next(err);
          }
          data = {}
          data['page'] = pageNumber;
@@ -283,7 +283,7 @@ exports.getReports = function (req, res)  {
    }).sort({timestamps: -1}).limit(limit).skip(pageNumber * limit);
 }
 
-exports.closeReport = function(req, res) {
+exports.closeReport = function(req, res, next) {
   if (!req.body.user_id) {
     return response.sendBadRequest(res, "No user id");
   }
@@ -299,7 +299,7 @@ exports.closeReport = function(req, res) {
   reportModel.findOne({report_id: req.body.report_id}).exec(function(err, report){
     if(err) {
       console.log("Error finding report")
-      throw err;
+      return next(err);
     }
 
     report.action = req.body.action;
@@ -309,7 +309,7 @@ exports.closeReport = function(req, res) {
     report.save(function(err, report){
       if(err) {
         console.log("Error closing the report");
-        throw err;
+        return next(err);
       }
 
       return response.sendSuccess(res, "Successfully closed the report");
@@ -318,13 +318,25 @@ exports.closeReport = function(req, res) {
 }
 
 //User Profile insert end
-exports.createUserProfile = function(req,res){
+exports.createUserProfile = function(req,res, next){
     
-  if (!req.body.user_id || !req.body.user_name) {
-    return response.sendBadRequest(res, 'Required fields missing');
+  if (!req.body.user_id) {
+    return response.sendBadRequest(res, 'User Id is missing.');
+  }
+  if(!req.body.user_name){
+    return response.sendBadRequest(res, 'User Name is missing.');
+  }
+
+  userprofileModel.findOne({user_id: req.body.user_id}).exec(function(err, profileUser){
+
+  if (err){
+      return next(err);
+  }
+
+  if (profileUser){
+    return response.sendBadRequest(res, "User Profile  already exist!");
   }
   
-
   var userProfile = new userprofileModel(req.body);
   var err = userProfile.validateSync();
   
@@ -334,22 +346,22 @@ exports.createUserProfile = function(req,res){
 
   userProfile.save(function (err, userprofile){
     if (err){
-      throw err;
+      return next(err);
     }
-
     return response.sendSuccess(res, "User Profile Saved", userprofile.toJSON());
   })
-    };
+})
+}
 //User Profile insert end 
 
 //user profile get start
-exports.getMyUserProfile= function (req, res)  {
+exports.getMyUserProfile= function (req, res, next)  {
   if (!req.body.user_id ) {
     return response.sendBadRequest(res, 'user_id is required');
   }
   userprofileModel.findOne({user_id: req.body.user_id}).exec(function(err, profileUser){
   if (err){
-      throw err;
+      return next(err);
   }
 
   if(!profileUser){
@@ -361,16 +373,22 @@ exports.getMyUserProfile= function (req, res)  {
 }
 
 // My
-exports.getUserProfile = function (req, res)  {
+exports.getUserProfile = function (req, res, next)  {
   if (!req.params.query_user_id) {
     return response.sendBadRequest(res, 'user_id is required');
   }
   userprofileModel.findOne({user_id: req.params.query_user_id}).exec(function(err,profileUser){
   if (err){
-      throw err;
+      return next(err);
+  }
+  if(!profileUser){
+    return response.sendNotFound(res, "No such user profile found.");
+  }
+  else{
+    return response.sendSuccess(res, "Success", profileUser.toJSON());
   }
 
-  return response.sendSuccess(res, "Success", profileUser.toJSON());
+  
  });
 }
 //user profile get end
@@ -379,14 +397,17 @@ exports.getUserProfile = function (req, res)  {
 exports.editUserProfile = function(req, res, next){
   console.log("In edit profile.")
  
-  if(!req.body.user_id || !req.body.user_name){
+  if(!req.body.user_id){
       return response.sendBadRequest(res, "UserId is missing")
+  }
+  if(!req.body.user_name){
+    return response.sendBadRequest(res, "User Name is missing")
   }
 
   userprofileModel.findOne({user_id:req.body.user_id}).exec(function (err,profileUser){
       if (err){
           console.log("There is some error in find one.");
-          next(err);
+          return next(err);
       }
       if (!profileUser){
           console.log("Profile not found");
@@ -423,7 +444,7 @@ function validateUserProfileRequest(reqBody, next){
 //User profile edit end
 
 
-exports.isBookmarked = function(req, res){
+exports.isBookmarked = function(req, res, next){
   if(!req.params.user_id || !req.params.recipe_id){
     return response.sendBadRequest(res, "No user id found.");
   }
@@ -431,7 +452,7 @@ exports.isBookmarked = function(req, res){
     bookmarkModel.findOne({user_id : req.params.user_id, recipe_id : req.params.recipe_id}, function(err, docs){
 
       if(err){
-        throw err;
+        return next(err);
       }
       if(!docs){
         return response.sendSuccess(res, "User has not bookmarked any recipe.", {bookmarked : false});
@@ -443,7 +464,7 @@ exports.isBookmarked = function(req, res){
   }
 }
 
-exports.isLiked = function(req, res){
+exports.isLiked = function(req, res, next){
   if(!req.params.user_id || !req.params.recipe_id){
     return response.sendBadRequest(res, "No user id found.");
   }
@@ -451,7 +472,7 @@ exports.isLiked = function(req, res){
     likemodel.findOne({user_id : req.params.user_id, recipe_id : req.params.recipe_id}, function(err, docs){
 
       if(err){
-        throw err;
+        return next(err);
       }
       if(!docs){
         return response.sendSuccess(res, "User has not liked/dislike the recipe.", {liked : false, disliked: false});
@@ -481,7 +502,7 @@ exports.getUserNames = function(req, res, next){
  userprofileModel.find({user_id : {$in : user_ids}},{user_name:1, user_id:1, profile_image:1}, function(err, docs){
 
       if(err){
-          next(err);
+          return next(err);
       }
 
       else{
