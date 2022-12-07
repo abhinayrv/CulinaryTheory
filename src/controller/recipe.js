@@ -9,23 +9,7 @@ const aws = require('../helpers/aws');
 const RecipeModel = mongoose.model('Recipes');
 const Users = mongoose.model('User');
 
-function callback(res, err, docs, message){
-    if(err){
-        console.log("There is some error.");
-        throw err;
-    }
-    else if (!docs && typeof(docs) !== "undefined"){
-        console.log("Docs not found.")
-        return response.sendBadRequest(res, message);
-
-    }
-    else{
-        return response.sendSuccess(res, message, docs);
-    }
-
-}
-
-exports.create = function(req, res){
+exports.create = function(req, res, next){
     console.log("In recipe create");
 
     validateRequest(req.body, function(result){
@@ -51,7 +35,7 @@ exports.create = function(req, res){
     });
 }
 
-exports.edit = function(req, res){
+exports.edit = function(req, res, next){
     console.log("In edit recipe.")
     if(!req.body.recipe_id){
         return response.sendBadRequest(res, "Recipe Id not in request.")
@@ -67,7 +51,7 @@ exports.edit = function(req, res){
     RecipeModel.findOne({recipe_id:req.body.recipe_id}).exec(function (err, recipe){
         if (err){
             console.log("There is some error in find one.");
-            throw err;
+            return next(err);
         }
         if (!recipe){
             console.log("Doc not found.")
@@ -105,10 +89,10 @@ function validateRequest(reqBody, next){
         return next(true);
 }
 
-function callback(res, err, docs, message){
+function callback(res, err, docs, message, next){
     if(err){
         console.log("There is some error.");
-        throw err;
+        return next(err);
     }
     else if (!docs && typeof(docs) !== "undefined"){
         console.log("Docs not found.")
@@ -121,7 +105,7 @@ function callback(res, err, docs, message){
 
 }
 
-exports.search = function(req, res){
+exports.search = function(req, res, next){
     console.log("In recipe search");
 
     var query = {}
@@ -195,12 +179,12 @@ exports.search = function(req, res){
         console.log(query);
         RecipeModel.find(query, function(err1, docs){
             if(err1){
-                throw err1;
+                return next(err1);
             }
             else{
                 RecipeModel.countDocuments(query, function(err2, count){
                     if(err2){
-                        throw err2;
+                        return next(err2);
                     }
                     else{
                         var data = {}
@@ -265,7 +249,7 @@ exports.delete = function(req, res, next){
             console.log("Deleting recipe by particular user.")
             RecipeModel.findOneAndDelete({user_id : req.body.user_id, recipe_id : req.body.recipe_id}, function(err, doc){
                 var sucMessage = 'Successfully deleted the document by user.';
-                return callback(res, err, doc, sucMessage);
+                return callback(res, err, doc, sucMessage, next);
             });
 
         }
@@ -274,7 +258,7 @@ exports.delete = function(req, res, next){
 
 }
 
-exports.getSingleRecipe = function(req, res){
+exports.getSingleRecipe = function(req, res, next){
     if(!req.params.recipe_id){
         console.log("No recipe id present.");
         return response.sendBadRequest(res, "No recipe id present.")
@@ -283,7 +267,7 @@ exports.getSingleRecipe = function(req, res){
         RecipeModel.find({recipe_id : req.params.recipe_id, adminDelete:false}, function(err, recipe){
 
             if(!recipe){
-                return callback(res, err, recipe, "No such recipe found.");
+                return callback(res, err, recipe, "No such recipe found.",next);
             }
             else{
                 if(recipe.is_public == false){
@@ -291,14 +275,14 @@ exports.getSingleRecipe = function(req, res){
                     return response.sendForbidden(res, "This recipe is private.");
                 }
                 else{
-                    return callback(res, err, recipe, "Successfully fetched the recipe.");
+                    return callback(res, err, recipe, "Successfully fetched the recipe.", next);
                 }
             }
         });
     }
 }
 
-exports.getRecipes = function(req, res){
+exports.getRecipes = function(req, res, next){
 
     var pageNumber = 0;
     var limit = 5;
@@ -312,10 +296,10 @@ exports.getRecipes = function(req, res){
     RecipeModel.find({adminDelete : false}, function(err1, docs){
         RecipeModel.countDocuments({adminDelete : false}, function(err2, count){
             if(err1){
-                throw err1;
+                return next(err1);
             }
             else if(err2){
-                throw err2;
+                return next(err2);
             }
             else if(typeof(docs) == "undefined" || !docs){
                 return response.sendBadRequest(res, "No docs found.");
@@ -343,7 +327,7 @@ exports.checkRecipe = function(req, res, next){
     else{
         RecipeModel.findOne({recipe_id : req.body.recipe_id, adminDelete:false}, function(err, doc){
             if(err){
-                throw err;
+                return next(err);
             }
             if(!doc){
                 return response.sendNotFound(res, "Recipe cannot be found.");
@@ -361,7 +345,7 @@ exports.checkRecipe = function(req, res, next){
     }
 }
 
-exports.userRecipe = function(req, res){
+exports.userRecipe = function(req, res, next){
     if(!req.params.user_id){
         return response.sendBadRequest(res, "No user id found.");
     }
@@ -382,10 +366,10 @@ exports.userRecipe = function(req, res){
 
         RecipeModel.countDocuments(query, function(err2, count){
             if(err1){
-                throw err1;
+                return next(err1);
             }
             else if(err2){
-                throw err2;
+                return next(err2);
             }
 
             if(!docs){
@@ -405,7 +389,7 @@ exports.userRecipe = function(req, res){
     }).limit(limit).skip(pageNumber * limit);
 }
 
-exports.userRecipePublic = function(req, res){
+exports.userRecipePublic = function(req, res, next){
     console.log("IN recipe public.")
     if(!req.params.query_user_id){
         return response.sendBadRequest(res, "No user id found.");
@@ -422,10 +406,10 @@ exports.userRecipePublic = function(req, res){
         RecipeModel.countDocuments({user_id : req.params.query_user_id, is_public : true, adminDelete : false}, function(err2, count){
             console.log("In count docs single recipe")
             if(err1){
-                throw err1;
+                return next(err1);
             }
             if(err2){
-                throw err2;
+                return next(err2);
             }
             if(!docs){
                 return response.sendNotFound(res, "No recipes by this user.");
@@ -444,7 +428,7 @@ exports.userRecipePublic = function(req, res){
     }).limit(limit).skip(pageNumber * limit);
 }
 
-exports.addLike = function(req, res){
+exports.addLike = function(req, res, next){
     if (!req.body.recipe_id || req.body.is_liked==null){
         return response.sendBadRequest(res, "Required fields missing.");
     }
@@ -452,7 +436,7 @@ exports.addLike = function(req, res){
         RecipeModel.findOne({recipe_id : req.body.recipe_id}, function(err, recipe){
 
             if (err){
-                throw err;
+                return next(err);
             }
             if (!recipe){
                 return response.sendBadRequest(res, "No recipe found with the given id.");
@@ -488,7 +472,7 @@ exports.getMultipleRecipes = function(req, res, next){
     RecipeModel.find({recipe_id : {$in : ids}},{title:1, recipe_id:1}, function(err, docs){
 
         if(err){
-            next(err);
+            return next(err);
         }
         else{
             return response.sendSuccess(res, "Successfully fetched the recipes.", docs);
