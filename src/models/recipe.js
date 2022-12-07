@@ -105,13 +105,13 @@ function stepsValid1(arr){
 }
 
 function stepsValid2(arr){
-    return arr.length >= 5;
+    return arr.length >= 5 && arr.length <= 20;
 }
 
 function ingredsValid1(arr){
     flag = true;
     for(i in arr){
-        flag = arr[i].ingredient.length <= 30
+        flag = arr[i].ingredient.length <= 100
         if(flag==false){
             break;
         }
@@ -120,7 +120,7 @@ function ingredsValid1(arr){
 
 }
 function ingredsValid2(arr){
-    return arr.length >= 3 && arr.length <= 20;
+    return arr.length >= 3 && arr.length <= 35;
 }
 
     
