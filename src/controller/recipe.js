@@ -270,6 +270,13 @@ exports.getSingleRecipe = function(req, res, next){
                 return callback(res, err, recipe, "No such recipe found.",next);
             }
             else{
+                var user_id = "" || req.body.user_id;
+                var self_recipe = false;
+                if(user_id === recipe.user_id){
+                    self_recipe = true;
+                }
+                recipe = recipe.toJSON();
+                recipe["self_recipe"] = self_recipe;
                 if(recipe.is_public == false){
                     if(req.session.user && req.session.user.user_id === recipe.user_id && req.session.prem){
                         return callback(res, err, recipe, "Successfully fetched the recipe.", next);
