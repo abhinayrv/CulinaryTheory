@@ -5,10 +5,10 @@ const request = require('../helpers/request');
 
 const DraftModel = mongoose.model('Drafts');
 
-function callback(res, err, docs, message){
+function callback(res, err, docs, message, next){
     if(err){
         console.log("There is some error.");
-        throw err;
+        return next(err);
     }
     else if (!docs && typeof(docs) !== "undefined"){
         console.log("Docs not found.")
@@ -21,7 +21,7 @@ function callback(res, err, docs, message){
 
 }
 
-exports.create = function(req, res){
+exports.create = function(req, res, next){
     console.log("In draft create");
     req.body.draft_id = nanoid();
     const newDraft = new DraftModel(req.body);
@@ -36,7 +36,7 @@ exports.create = function(req, res){
     });
 }
 
-exports.edit = function(req, res){
+exports.edit = function(req, res, next){
     console.log("In edit draft")
     if(!req.body.draft_id){
         return response.sendBadRequest(res, "Draft Id not in request.")
@@ -45,7 +45,7 @@ exports.edit = function(req, res){
     DraftModel.findOne({draft_id:req.body.draft_id}).exec(function (err, draft){
         if (err){
             console.log("There is some error in find one.");
-            throw err;
+            return next(err);
         }
         if (!draft){
             console.log("Doc not found.")
@@ -70,7 +70,7 @@ exports.edit = function(req, res){
 });
 }
 
-exports.delete = function(req, res){
+exports.delete = function(req, res, next){
     console.log("In delete draft");
     if(!req.body.user_id || !req.body.draft_id){
         console.log("No user id or draft id present.");
@@ -81,7 +81,7 @@ exports.delete = function(req, res){
         console.log("Deleting draft by particular user.")
         DraftModel.deleteOne({user_id : req.body.user_id, draft_id : req.body.draft_id}, function(err){
             var sucMessage = 'Successfully deleted the document by user.';
-            return callback(res, err, undefined, sucMessage);
+            return callback(res, err, undefined, sucMessage, next);
         });
 
     }
