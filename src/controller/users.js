@@ -6,7 +6,7 @@ const nanoid = require('nanoid');
 
 const User = mongoose.model('User');
 
-exports.create = function(req, res) {
+exports.create = function(req, res, next) {
     if (!req.body.email){
 
       return response.sendBadRequest(res, "Please check the data entered");
@@ -15,7 +15,7 @@ exports.create = function(req, res) {
 
     User.findOne({ email: req.body.email}).exec(function(err, user){
       if(err) {
-        throw err;
+        return next(err);
       }
 
       if(user){
@@ -36,7 +36,7 @@ exports.create = function(req, res) {
 
       newUser.save(function(err, user) {
         if (err){
-          throw err;
+          return next(err);
         }
 
         var session = req.session;

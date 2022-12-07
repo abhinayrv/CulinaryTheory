@@ -264,7 +264,8 @@ exports.getSingleRecipe = function(req, res, next){
         return response.sendBadRequest(res, "No recipe id present.")
     }
     else {
-        RecipeModel.find({recipe_id : req.params.recipe_id, adminDelete:false}, function(err, recipe){
+        console.log(req.params.recipe_id);
+        RecipeModel.findOne({recipe_id : req.params.recipe_id, adminDelete:false}, function(err, recipe){
 
             if(!recipe){
                 return callback(res, err, recipe, "No such recipe found.",next);
@@ -346,7 +347,7 @@ exports.checkRecipe = function(req, res, next){
                 return response.sendNotFound(res, "Recipe cannot be found.");
             }
             else{
-                if(recipe.is_public == false && recipe.adminDelete == false){
+                if(!recipe.is_public && !recipe.adminDelete){
                     return response.sendForbidden(res, "Recipe is not public.");
                 }
                 else{

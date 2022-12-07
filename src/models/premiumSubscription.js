@@ -49,7 +49,6 @@ PremiumSchema.methods.setBillingDate = function(next){
     console.log("Setting next billing date");
     console.log(this);
     paypal.get_subscription(this.paypal_id, function(err, details){
-        details = {};
         if (err){
             return next(err);
         }

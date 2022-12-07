@@ -8,7 +8,7 @@ const User = mongoose.model("User");
 const Premium = mongoose.model("Premium");
 const EmailSub = mongoose.model("EmailSub");
 
-exports.generateSubscription = function(req, res){
+exports.generateSubscription = function(req, res, next){
     if (!req.body.user_id){
         return response.sendBadRequest(res, "No user id");
     }
@@ -16,7 +16,7 @@ exports.generateSubscription = function(req, res){
     User.findOne({user_id: req.body.user_id}).exec(function(err, user){
         if (err){
             console.log("Error searching for the user");
-            throw err
+            return next(err);
         }
 
         if(!user){
@@ -27,7 +27,7 @@ exports.generateSubscription = function(req, res){
         Premium.findOne({user_id: req.body.user_id}).exec(function(err, premium_sub){
             if(err){
                 console.log("Error searching premium sub");
-                throw err;
+                return next(err);
             }
     
             if (premium_sub){
@@ -41,7 +41,7 @@ exports.generateSubscription = function(req, res){
                     paypal.create_subscription(config.paypal.non_trial_id, user.email, user.email, new_start, function(err, response_json){
                         if (err){
                             console.log("Error creating subscription");
-                            throw err
+                            return next(err);
                         }
 
                         return response.sendCreated(res, "Subscription created", response_json);
@@ -50,7 +50,7 @@ exports.generateSubscription = function(req, res){
                     paypal.create_subscription(config.paypal.non_trial_id, user.email, user.email, null, function(err, response_json){
                         if (err){
                             console.log("Error creating subscription");
-                            throw err
+                            return next(err);
                         }
 
                         return response.sendCreated(res, "Subscription created", response_json);
@@ -60,7 +60,7 @@ exports.generateSubscription = function(req, res){
                 paypal.create_subscription(config.paypal.trial_id, user.email, user.email, null, function(err, response_json){
                     if (err){
                         console.log("Error creating subscription");
-                        throw err
+                        return next(err);
                     }
 
                     return response.sendCreated(res, "Subscription created", response_json);
@@ -70,7 +70,7 @@ exports.generateSubscription = function(req, res){
     }); 
 }
 
-exports.cancelSubscription = function(req, res){
+exports.cancelSubscription = function(req, res, next){
     if (!req.body.user_id) {
         return response.sendBadRequest(res, "No user id");
     }
@@ -78,7 +78,7 @@ exports.cancelSubscription = function(req, res){
     User.findOne({user_id: req.body.user_id}).exec(function(err, user){
         if(err){
             console.log("Error looking for user");
-            throw err;
+            return next(err);
         }
 
         if(!user){
@@ -88,7 +88,7 @@ exports.cancelSubscription = function(req, res){
         Premium.findOne({user_id: req.body.user_id, subscribed: true}).exec(function(err, premium){
             if(err){
                 console.log("Error looking for subscription");
-                throw err;
+                return next(err);
             }
 
             if(!premium) {
@@ -98,7 +98,7 @@ exports.cancelSubscription = function(req, res){
             premium.cancelSub(function(err){
                 if (err){
                     console.log("Error cancelling subscription");
-                    throw err;
+                    return next(err);
                 }
 
                 premium.subscribed = false;
@@ -107,7 +107,7 @@ exports.cancelSubscription = function(req, res){
                 premium.save(function(err, premium){
                     if (err){
                         console.log("Error saving cancelled subscription");
-                        throw err;
+                        return next(err);
                     }
 
                     return response.sendSuccess(res, "Cancelled successfully", premium.toJSON());
@@ -118,7 +118,7 @@ exports.cancelSubscription = function(req, res){
 }
 
 
-exports.subscribe = function(req, res){
+exports.subscribe = function(req, res, next){
     if(!req.body.user_id || !req.body.paypal_id){
         return response.sendBadRequest(res, "No user id/subscription id");
     }
@@ -126,7 +126,7 @@ exports.subscribe = function(req, res){
     User.findOne({user_id: req.body.user_id}).exec(function(err, user){
         if(err){
             console.log("Error looking for user");
-            throw err;
+            return next(err);
         }
 
         if(!user){
@@ -139,13 +139,13 @@ exports.subscribe = function(req, res){
         premium_sub.setBillingDate(function(err){
             if (err) {
                 console.log("Error setting the next billing date");
-                throw err;
+                return next(err);
             }
             console.log(premium_sub);
             premium_sub.save(function(err, premium_sub){
                 if(err){
                     console.log("Error saving subscription details");
-                    throw err;
+                    return next(err);
                 }
                 email_sub.save(function(err, email_sub){
                     return response.sendCreated(res, "Subscription successful", premium_sub.toJSON());
@@ -157,7 +157,7 @@ exports.subscribe = function(req, res){
     });
 }
 
-exports.getSubscription = function(req, res){
+exports.getSubscription = function(req, res, next){
     if(!req.body.user_id){
         return response.sendBadRequest(res, "No user id");
     }
@@ -165,7 +165,7 @@ exports.getSubscription = function(req, res){
     Premium.findOne({user_id: req.body.user_id}).exec(function(err, premium){
         if (err){
             console.log("Error looking for premium sub details");
-            throw err;
+            return next(err);
         }
 
         if(!premium){
@@ -180,7 +180,7 @@ exports.getSubscription = function(req, res){
     })
 }
 
-exports.isPremiumUser = function(req, res){
+exports.isPremiumUser = function(req, res, next){
     if(req.session.user){
         if(req.session.user.prem){
             return response.sendSuccess(res, "Success", {status: true});
@@ -188,10 +188,10 @@ exports.isPremiumUser = function(req, res){
             return response.sendSuccess(res, "Success", {status: false});
         }
     }
-    return response.sendBadRequest(res, "Please login and retry");
+    return response.sendUnauthorized(res, "Please login and retry");
 }
 
-exports.isEmailSub = function(req, res){
+exports.isEmailSub = function(req, res, next){
     if (!req.body.user_id){
         return response.sendBadRequest(res, "No user id");
     }
@@ -199,7 +199,7 @@ exports.isEmailSub = function(req, res){
     EmailSub.findOne({user_id: req.body.user_id}).exec(function(err, email_sub){
         if(err){
             console.log("Error finding the email subscription");
-            throw err;
+            return next(err);
         }
 
         if(!email_sub){
@@ -210,7 +210,7 @@ exports.isEmailSub = function(req, res){
     });
 }
 
-exports.subscribeEmail = function(req, res){
+exports.subscribeEmail = function(req, res, next){
     if (!req.body.user_id){
         return response.sendBadRequest(res, "No user id");
     }
@@ -218,7 +218,7 @@ exports.subscribeEmail = function(req, res){
     User.findOne({user_id: req.body.user_id}).exec(function(err, user){
         if (err) {
             console.log("Error looking for user");
-            throw err;
+            return next(err);
         }
 
         if(!user) {
@@ -228,7 +228,7 @@ exports.subscribeEmail = function(req, res){
         EmailSub.findOne({user_id: user.user_id}).exec(function(err, email_sub){
             if(err) {
                 console.log("Error finding email subscription");
-                throw err;
+                return next(err);
             }
 
             if(email_sub) {
@@ -239,7 +239,7 @@ exports.subscribeEmail = function(req, res){
             new_email_sub.save(function(err, new_email_sub){
                 if(err) {
                     console.log("Error creating email subscription");
-                    throw err;
+                    return next(err);
                 }
 
                 return response.sendCreated(res, "Subscibed to emails", new_email_sub.toJSON());
@@ -248,7 +248,7 @@ exports.subscribeEmail = function(req, res){
     });
 }
 
-exports.unsubEmail = function(req, res){
+exports.unsubEmail = function(req, res, next){
     if (!req.body.user_id) {
         return response.sendBadRequest(res, "No user id");
     }
@@ -256,7 +256,7 @@ exports.unsubEmail = function(req, res){
     EmailSub.findOneAndDelete({user_id: req.body.user_id}).exec(function(err, email_sub){
         if(err) {
             console.log("Error looking for email subscription");
-            throw err;
+            return next(err);
         }
 
         if(!email_sub){
