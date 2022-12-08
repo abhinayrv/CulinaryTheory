@@ -345,7 +345,7 @@ exports.checkRecipe = function(req, res, next){
                 return response.sendNotFound(res, "Recipe cannot be found.");
             }
             else{
-                if(!recipe.is_public && !recipe.adminDelete){
+                if(!doc.is_public && !doc.adminDelete){
                     return response.sendForbidden(res, "Recipe is not public.");
                 }
                 else{
@@ -464,6 +464,7 @@ exports.addLike = function(req, res, next){
                 }
                 recipe.save(function(err, recipe){
                     if(err){
+                        console.log(err);
                         return response.sendBadRequest(res,"Some error in updating likes/dislikes.", err);
                     }
                     else{
