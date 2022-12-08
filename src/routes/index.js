@@ -56,7 +56,7 @@ routes.get('/isemailsub', auth.ensureAuthenticated, subscription.isEmailSub);
 routes.post('/unsubemail', auth.ensureAuthenticated, subscription.unsubEmail);
 
 routes.post('/bookmark', auth.ensureAuthenticated, recipe.checkRecipe, UserInteraction.add_bookmark);
-routes.get('/bookmarks/:user_id', auth.ensureAuthenticated, UserInteraction.getbookmarks)
+routes.get('/bookmarks', auth.ensureAuthenticated, UserInteraction.getbookmarks)
 routes.delete('/bookmark/delete', auth.ensureAuthenticated, UserInteraction.deletebookmark);
 routes.get('/isbookmarked/:recipe_id', auth.ensureAuthenticated, UserInteraction.isBookmarked);
 
