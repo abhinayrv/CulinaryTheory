@@ -510,3 +510,22 @@ exports.getUserNames = function(req, res, next){
       }
   });
 }
+
+exports.checkReport = function(req, res, next){
+  if(!req.body.report_id){
+    response.sendBadRequest(res, "No report id given")
+  }
+
+  reportModel.findOne({report_id: req.body.report_id, closed: false}, function(err, report){
+    if(err){
+      console.log(err);
+      return next(err);
+    }
+
+    if(!report){
+      console.log("Report is already closed");
+      return response.sendBadRequest(res, "The report is already closed");
+    }
+  })
+
+}

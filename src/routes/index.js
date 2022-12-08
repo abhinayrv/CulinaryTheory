@@ -95,6 +95,7 @@ routes.post("/recipe/imageupload", upload.single('image'), auth.ensureAuthentica
 routes.post('/draft/create', auth.ensurePremium, draft.create);
 routes.post('/draft/edit', auth.ensurePremium, draft.edit);
 routes.post('/draft/delete', auth.ensurePremium, draft.delete);
+routes.get('draft/:draft_id', auth.ensurePremium, draft.getDraft);
 
 
 routes.use(function(req, res) {
