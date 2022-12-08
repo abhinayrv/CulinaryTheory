@@ -25,8 +25,8 @@ const TokenSchema = new Schema({
 
 TokenSchema.methods.getResetEmail = function(){
     return `<html lang="en">
-    <p> Please <a href="http://localhost:9000/api/reset/${this.token}">click</a> here to reset your password or copy paste the below link in your browser. This link is valid only for one hour.</p><br>
-    <p>http://localhost:9000/api/reset/${this.token}</p>
+    <p> Please <a href="http://${process.env.host_addr}:9000/api/auth/reset/${this.token}">click</a> here to reset your password or copy paste the below link in your browser. This link is valid only for one hour.</p><br>
+    <p>http://${process.env.host_addr}:9000/api/auth/reset/${this.token}</p>
   </html>`
 }
 

@@ -32,6 +32,9 @@ app.use(session({
   rolling: true
 }));
 
+app.get("/", function(req, res){
+  res.send("The Culinary Theory");
+})
 app.use('/api', routes);
 
 app.use(function(err, req, res, next) {

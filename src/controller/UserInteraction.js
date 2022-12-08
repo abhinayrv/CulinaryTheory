@@ -69,7 +69,7 @@ exports.deletebookmark = function (req, res, next) {
       } 
     
     if (!doc) {
-      return response.sendNotFound(res);
+      return response.sendNotFound(res, "Bookmark not found.");
     }
     
     return response.sendSuccess(res, "Successfully deleted.", doc.toJSON());
@@ -455,10 +455,10 @@ exports.isBookmarked = function(req, res, next){
         return next(err);
       }
       if(!docs){
-        return response.sendSuccess(res, "User has not bookmarked any recipe.", {bookmarked : false});
+        return response.sendSuccess(res, "User has not bookmarked the recipe.", {bookmarked : false});
       }
       else{
-        return response.sendSuccess(res, "User has not bookmarked any recipe.", {bookmarked : true});
+        return response.sendSuccess(res, "This recipe has been bookmarked by the user", {bookmarked : true});
       }
     });
   }

@@ -355,7 +355,7 @@ exports.checkRecipe = function(req, res, next){
     
         });
     } else {
-        return response.sendBadRequest(res, "Recipe Id does not exist.");
+        return response.sendBadRequest(res, "Recipe ID not present in request");
     }
 }
 

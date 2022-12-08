@@ -14,7 +14,7 @@ exports.authenticate = function(req, res, next) {
     
   } 
 
-  User.findOne({ email: req.body.email })
+  User.findOne({ email: req.body.email.toLowerCase() })
   .exec(function(err, user) {
     if (err) {
         console.log("Some error in user find");
@@ -136,7 +136,7 @@ exports.resetPasswordEmail = function(req, res, next) {
     return response.sendBadRequest(res, "Please enter the email address");
   }
 
-  User.findOne({ email: req.body.email })
+  User.findOne({ email: req.body.email.toLowerCase() })
   .exec(function(err, user) {
     if (err) {
         console.log("Some error in user find");

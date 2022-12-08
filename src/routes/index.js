@@ -62,7 +62,7 @@ routes.post('/unsubemail', auth.ensureAuthenticated, subscription.unsubEmail);
 routes.post('/bookmark', auth.ensureAuthenticated, recipe.checkRecipe, UserInteraction.add_bookmark);
 routes.get('/bookmarks', auth.ensureAuthenticated, UserInteraction.getbookmarks)
 routes.delete('/bookmark/delete', auth.ensureAuthenticated, UserInteraction.deletebookmark);
-routes.get('/isbookmarked/:recipe_id', auth.ensureAuthenticated, UserInteraction.isBookmarked);
+routes.get('/isbookmarked/:recipe_id', auth.ensureAuthenticated, recipe.checkRecipe, UserInteraction.isBookmarked);
 
 routes.post('/like', auth.ensureAuthenticated, recipe.checkRecipe, UserInteraction.insertLikeDislike, recipe.addLike);
 routes.get('/likes/:recipe_id', recipe.checkRecipe, UserInteraction.countLikeDislike);

@@ -44,6 +44,7 @@ UserSchema.set('toJSON', {
 });
 
 UserSchema.pre('save', function(next) {
+  this.email = this.email.toLowerCase();
   console.log("Pre method of user");
   if (!this.isModified('password')){
      return next();
