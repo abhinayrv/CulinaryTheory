@@ -27,7 +27,10 @@ const DraftSchema = new Schema({
         validate: [ingredsValid, '{PATH} does not meet requirements.']
     },
     dietary_preferences: {type:String},
-    prep_time: {type:Number},
+    prep_time: {
+        type:String,
+        required:true,
+        enum: ['0-30', '30-60', '60-90', '>90']},
     cuisine: String,
     is_public: {type:Boolean,default:true},
     user_id: {type:String, required:true}
@@ -37,7 +40,7 @@ const DraftSchema = new Schema({
 function tagsValid(arr){
     flag = true;
     for(i in arr){
-        flag = arr[i].length <= 10
+        flag = arr[i].length <= 30
         if(flag==false){
             break;
         }
@@ -61,7 +64,7 @@ function stepsValid(arr){
 function ingredsValid(arr){
     flag = true;
     for(i in arr){
-        flag = arr[i].ingredient.length <= 30
+        flag = arr[i].ingredient.length <= 100
         if(flag==false){
             return false;
         }
