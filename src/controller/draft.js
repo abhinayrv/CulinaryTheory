@@ -12,7 +12,7 @@ function callback(res, err, docs, message, next){
     }
     else if (!docs && typeof(docs) !== "undefined"){
         console.log("Docs not found.")
-        return response.sendBadRequest(res, message);
+        return response.sendBadRequest(res, "Doc not found.");
 
     }
     else{
