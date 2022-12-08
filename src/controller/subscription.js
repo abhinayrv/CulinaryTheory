@@ -139,7 +139,7 @@ exports.subscribe = function(req, res, next){
         premium_sub.setBillingDate(function(err){
             if (err) {
                 console.log("Error setting the next billing date");
-                return next(err);
+                return response.sendBadRequest(res, "Not a valid paypal subscription");
             }
             console.log(premium_sub);
             premium_sub.save(function(err, premium_sub){
