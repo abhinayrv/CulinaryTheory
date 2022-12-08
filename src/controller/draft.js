@@ -87,3 +87,31 @@ exports.delete = function(req, res, next){
     }
 
 }
+
+exports.getDraft = function(req, res, next){
+
+    if(!req.params.draft_id){
+        return response.sendBadRequest(res, "No draft id found.");
+    }
+    if(!req.params.user_id){
+        return response.sendBadRequest(res, "No user id found.");
+    }
+    else{
+        DraftModel.findOne({draft_id : req.params.draft_id, user_id : req.params.user_id}, function(err, doc){
+
+            if(err){
+                return next(err);
+            }
+
+            if(!doc){
+                return response.sendNotFound(res, "Draft not found.");
+            }
+
+            else{
+                return response.sendSuccess(res, "Draft found with given id.",doc);
+            }
+
+        });
+    }
+
+}
