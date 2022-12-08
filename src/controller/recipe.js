@@ -335,11 +335,9 @@ exports.getRecipes = function(req, res, next){
 
 exports.checkRecipe = function(req, res, next){
 
-    if(!req.body.recipe_id){
-        return response.sendBadRequest(res, "Recipe Id does not exist.");
-    }
-    else{
-        RecipeModel.findOne({recipe_id : req.body.recipe_id, adminDelete:false}, function(err, doc){
+    if(req.body.recipe_id || req.params.recipe_id){
+        console.log(req.body.recipe_id || req.params.recipe_id);
+        RecipeModel.findOne({recipe_id : req.body.recipe_id || req.params.recipe_id, adminDelete:false}, function(err, doc){
             if(err){
                 return next(err);
             }
@@ -356,6 +354,8 @@ exports.checkRecipe = function(req, res, next){
             }
     
         });
+    } else {
+        return response.sendBadRequest(res, "Recipe Id does not exist.");
     }
 }
 

@@ -61,12 +61,12 @@ routes.delete('/bookmark/delete', auth.ensureAuthenticated, UserInteraction.dele
 routes.get('/isbookmarked/:recipe_id', auth.ensureAuthenticated, UserInteraction.isBookmarked);
 
 routes.post('/like', auth.ensureAuthenticated, recipe.checkRecipe, UserInteraction.insertLikeDislike, recipe.addLike);
-routes.get('/likes/:recipe_id', UserInteraction.countLikeDislike);
+routes.get('/likes/:recipe_id', recipe.checkRecipe, UserInteraction.countLikeDislike);
 routes.delete('/like/delete', auth.ensureAuthenticated, UserInteraction.deleteLikedislike);
 routes.get('/isliked/:recipe_id', auth.ensureAuthenticated, UserInteraction.isLiked);
 
 routes.post('/comment',auth.ensureAuthenticated, recipe.checkRecipe, UserInteraction.addComment);
-routes.get('/comments/:recipe_id',auth.ensureAuthenticated, UserInteraction.getcomments);
+routes.get('/comments/:recipe_id',auth.ensureAuthenticated, recipe.checkRecipe, UserInteraction.getcomments);
 
 routes.post('/report',auth.ensureAuthenticated, recipe.checkRecipe, UserInteraction.add_reported_recipe);
 routes.get('/admin/reports', UserInteraction.getReports);
