@@ -179,7 +179,6 @@ exports.renderResetPage = function(req, res, next) {
   if(!req.body.token){
     return response.sendBadRequest(res, "No token");
   }
-  req.session.token = req.body.token.token;
   return res.sendFile("set_password.html", {root: path.join(path.dirname(__dirname), "views")});
 }
 
@@ -224,12 +223,12 @@ exports.resetPassword = function(req, res, next) {
 }
 
 exports.validateResetToken = function(req, res, next) {
-  if (!req.params.token && !req.session.token) {
+  if (!req.params.token && !req.body.token) {
     console.log(req.body);
     return response.sendBadRequest(res, "No valid token.");
   }
 
-  const token_val = req.params.token || req.session.token;
+  const token_val = req.params.token || req.body.token;
 
   Token.findOne({ token: token_val }).exec(
     function(err, token){

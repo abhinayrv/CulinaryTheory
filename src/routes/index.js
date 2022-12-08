@@ -34,6 +34,10 @@ routes.get('/login/ui', (req, res) => {
     }
   });
 
+routes.get('/login/test', (req, res) => {
+    res.sendFile("set_password.html", {root: path.join(path.dirname(__dirname), "views")})
+  });
+
 routes.post('/login', auth.authenticate)
 routes.post('/register', users.create);
 routes.get('/logout', auth.signOut);
