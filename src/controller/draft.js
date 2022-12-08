@@ -79,9 +79,9 @@ exports.delete = function(req, res, next){
     else{
         
         console.log("Deleting draft by particular user.")
-        DraftModel.deleteOne({user_id : req.body.user_id, draft_id : req.body.draft_id}, function(err){
+        DraftModel.findOneAndDelete({user_id : req.body.user_id, draft_id : req.body.draft_id}, function(err, doc){
             var sucMessage = 'Successfully deleted the document by user.';
-            return callback(res, err, undefined, sucMessage, next);
+            return callback(res, err, doc, sucMessage, next);
         });
 
     }
