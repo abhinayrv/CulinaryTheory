@@ -148,6 +148,7 @@ exports.subscribe = function(req, res, next){
                     return next(err);
                 }
                 email_sub.save(function(err, email_sub){
+                    req.session.user.prem = true;
                     return response.sendCreated(res, "Subscription successful", premium_sub.toJSON());
                 })
 
