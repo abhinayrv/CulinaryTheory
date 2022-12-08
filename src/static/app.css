@@ -15,10 +15,13 @@ form {
     padding: 20px;
     background-color: #f44336;
     color: white;
+}
+
+#alert {
     display: none;
 }
 
-.success {
+#success {
     display: none;
 }
 

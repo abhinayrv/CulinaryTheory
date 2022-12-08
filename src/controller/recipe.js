@@ -43,7 +43,7 @@ exports.edit = function(req, res, next){
 
     console.log(req.session.user);
     console.log(req.body.is_public);
-    if(!req.body.is_public && !req.session.user.prem){
+    if((req.body['is_public'] !== undefined && !req.body.is_public) && !req.session.user.prem){
         return response.sendForbidden(res, "Please subscribe to premium to save this recipe.");
     }
 
