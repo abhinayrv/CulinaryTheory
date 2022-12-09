@@ -120,7 +120,7 @@ exports.search = function(req, res, next){
         query["prep_time"] = {"$in" : filterTime}
     }
     if(req.query.sortBy && req.query.sortAsc){
-        sortQuery[req.query.sortBy] = req.query.sortAsc;
+        sortQuery[req.query.sortBy] = parseInt(req.query.sortAsc);
     }
     if (!req.query.searchBy && !req.query.searchFor){
         console.log("No search fields found.");
