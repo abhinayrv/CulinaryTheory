@@ -35,7 +35,7 @@ app.use(session({
 app.get("/", function(req, res){
   res.send("The Culinary Theory");
 })
-app.use('/api', routes);
+app.use('/', routes);
 
 app.use(function(err, req, res, next) {
   // set locals, only providing error in development
