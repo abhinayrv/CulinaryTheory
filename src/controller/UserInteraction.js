@@ -260,7 +260,7 @@ exports.deleteLikedislike = function(req,res, next){
            data['data'] = comments;
            return response.sendSuccess(res,"Successfully fetched comments." ,data);
       });
-     }).sort({createdAt: 1}).limit(limit).skip(pageNumber * limit);
+     }).sort({createdAt: 1, _id:1}).limit(limit).skip(pageNumber * limit);
   }
   //Comments Get end
 
@@ -325,7 +325,7 @@ exports.getReports = function (req, res, next)  {
          return response.sendSuccess(res,"Successfully fetched reported recipes." ,data);
     
     }) 
-   }).sort({createdAt: 1}).limit(limit).skip(pageNumber * limit);
+   }).sort({createdAt: 1, _id:1}).limit(limit).skip(pageNumber * limit);
 }
 
 exports.closeReport = function(req, res, next) {

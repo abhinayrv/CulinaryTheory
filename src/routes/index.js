@@ -101,6 +101,7 @@ routes.post('/draft/create', auth.ensurePremium, draft.create);
 routes.post('/draft/edit', auth.ensurePremium, draft.edit);
 routes.post('/draft/delete', auth.ensurePremium, draft.delete);
 routes.get('draft/:draft_id', auth.ensurePremium, draft.getDraft);
+routes.get('draft/mydrafts', auth.ensurePremium, draft.getUserDrafts);
 
 
 routes.use(function(req, res) {
