@@ -45,7 +45,7 @@ routes.post('/admin/updaterole', auth.ensureRoot, auth.changeRole);
 routes.post('/gensub', auth.ensureAuthenticated, subscription.generateSubscription);
 routes.post('/subscribe', auth.ensureAuthenticated, subscription.subscribe);
 routes.post('/cancelsub', auth.ensureAuthenticated, subscription.cancelSubscription);
-routes.post('/getsub', auth.ensureAuthenticated, subscription.getSubscription);
+routes.get('/getsub', auth.ensureAuthenticated, subscription.getSubscription);
 routes.get('/ispremium', subscription.isPremiumUser);
 
 routes.post('/subscribemail', auth.ensureAuthenticated, subscription.subscribeEmail);
