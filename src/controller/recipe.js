@@ -168,7 +168,7 @@ exports.search = function(req, res, next){
             return response.sendBadRequest(res, "Wrong type of search.");
         }
 
-        var limit = 5
+        var limit = 6
         if(req.query.limit){
             limit = parseInt(req.query.limit)
         }
@@ -299,7 +299,7 @@ exports.getSingleRecipe = function(req, res, next){
 exports.getRecipes = function(req, res, next){
 
     var pageNumber = 0;
-    var limit = 5;
+    var limit = 6;
     if(req.query.pageNumber){
         pageNumber = parseInt(req.query.pageNumber);
     }
@@ -363,7 +363,7 @@ exports.userRecipe = function(req, res, next){
     if(!req.params.user_id){
         return response.sendBadRequest(res, "No user id found.");
     }
-    var limit = 5
+    var limit = 6;
     if(req.query.limit){
         limit = parseInt(req.query.limit)
     }
@@ -408,11 +408,11 @@ exports.userRecipePublic = function(req, res, next){
     if(!req.params.query_user_id){
         return response.sendBadRequest(res, "No user id found.");
     }
-    var limit = 5
+    var limit = 6;
     if(req.query.limit){
         limit = parseInt(req.query.limit)
     }
-    var pageNumber = 0
+    var pageNumber = 0;
     if(req.query.pageNumber){
         pageNumber = parseInt(req.query.pageNumber)
     }

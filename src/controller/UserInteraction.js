@@ -191,7 +191,7 @@ exports.deleteLikedislike = function(req,res, next){
       return response.sendBadRequest(res, 'recipe_id  is required');
     }
 
-    var limit = 5;
+    var limit = 6;
     var pageNumber = 0;
     if(req.query.limit){
       limit = parseInt(req.query.limit);
@@ -215,7 +215,7 @@ exports.deleteLikedislike = function(req,res, next){
            data['data'] = comments;
            return response.sendSuccess(res,"Successfully fetched comments." ,data);
       });
-     }).sort({timestamps: -1}).limit(limit).skip(pageNumber * limit);
+     }).sort({createdAt: 1}).limit(limit).skip(pageNumber * limit);
   }
   //Comments Get end
 
@@ -255,7 +255,7 @@ exports.deleteLikedislike = function(req,res, next){
 
 exports.getReports = function (req, res, next)  {
 
-  var limit = 5;
+  var limit = 6;
   var pageNumber = 0;
   if(req.query.limit){
     limit = parseInt(req.query.limit);
@@ -280,7 +280,7 @@ exports.getReports = function (req, res, next)  {
          return response.sendSuccess(res,"Successfully fetched reported recipes." ,data);
     
     }) 
-   }).sort({timestamps: -1}).limit(limit).skip(pageNumber * limit);
+   }).sort({createdAt: 1}).limit(limit).skip(pageNumber * limit);
 }
 
 exports.closeReport = function(req, res, next) {
