@@ -394,7 +394,7 @@ exports.getMyUserProfile= function (req, res, next)  {
   }
 
   if(!profileUser){
-    return response.sendSuccess(res, "Success", new userprofileModel().toJSON());
+    return response.sendSuccess(res, "Success", new userprofileModel({user_name: "The Culinary Theory"}).toJSON());
   }
 
   return response.sendSuccess(res, "Success", profileUser.toJSON());
