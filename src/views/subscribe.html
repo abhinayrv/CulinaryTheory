@@ -7,9 +7,10 @@
     <title>User Subscription | Culinary Theory</title>
 
     <script src="https://www.paypal.com/sdk/js?client-id=AZGq4OBfSJHnkSMOQpu-LuFebEFKfrXkEot9OXS4-PU5EcZd7adKZ1NrUj4UYkrUcdGAtFYmN-X4F-SN&currency=USD&vault=true&intent=subscription"></script>
-    <script>
+    <script src="/js/subscribe.js"></script>
+    <!-- <script>
       paypal.Buttons({}).render("#paypal-button-container");
-    </script>
+    </script> -->
     <!-- Fonts Inclusion -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -125,13 +126,15 @@
             </nav>
           </div>
         </header>
-
+        <div id="emptyCard" class= "emptyMessage" style="display:none">
+          <h1 class="h-1-main input-label help-margin-bt-32" id="emptyHeader"></h1>
+        </div>
         <!-- Subscription Card--------------------------------------------------->
         <section class="Subscription">
           <div class="container-background container">
-            <div class="close-button">
+            <!-- <div class="close-button">
               <div class="material-icons form-btn-icon">add_circle</div>
-            </div>
+            </div> -->
             <form class=“flex-column" action="#">
 
             <label
@@ -142,8 +145,8 @@
             <a href="#" class="recipe-card-btn">
               <div class="subscription-card help-margin-bt-32 flex-column">
                 <!-- ------------------- Price ------------------- -->
-                <div class="rc-price-container">
-                  <h1 class="Subscription_price">20$</h1>
+                <div class="rc-price-container flex-row">
+                  <h1 class="h-1-main price-style">1.99$/Month</h1>
                 </div>
                 <!-- ------------------- Recipe content ------------------- -->
                 <div class="rc-content-container flex-column">
@@ -152,36 +155,38 @@
                       Features:
                     </p>
                     <div class="Features_Description:">
+                      <ul class="features-list">
                       <li>
                         <p class="p-help-semibold help-margin-bt-8">
-                          Access to Newsletter
+                          Newsletter
                         </p>
                       </li>
                       <li>
                         <p class="p-help-semibold help-margin-bt-8">
-                          egff fdrrt jggf
+                          Private Recipes
                         </p>
                       </li>
                       <li>
                         <p class="p-help-semibold help-margin-bt-8">
-                          egff fdrrt jggf
+                          Recipe Drafts
                         </p>
                       </li>
                       <li>
                         <p class="p-help-semibold help-margin-bt-8">
-                          egff fdrrt jggf
+                          1 Month Trial (New Subscribers)
                         </p>
                       </li>
+                    </ul>
                     </div>
                   </div>
                 </div>
                 <div class="rc-food-type-indicate rc-egg"></div>
               </div>
             </a>
-            <div class="btn-list flex-row">
+            <!-- <div class="btn-list flex-row">
               <button class="btn h-5-main-semibold">Subscribe</button>
-            </div>
-            <div id="paypal-button-container"></div>
+            </div> -->
+            <div class="btn-list flex-row" id="paypal-button-container"></div>
           </div>
         </section>
       </div>

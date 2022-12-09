@@ -47,6 +47,9 @@
 
 /************************************************/
 /* Section Login Forms */
+.emptyMessage {
+  color: #ed3949;
+}
 .section-cr-form {
   padding: 6.4rem;
 }
@@ -123,17 +126,20 @@
 .Subscription {
   gap: 5rem;
 }
-.Subscription_price {
-  padding: 7rem 14rem;
-  font-weight: bolder;
-  font-size: 4rem;
+.price-style {
   color: #d57b08;
 }
 .rc-price-container {
   max-width: 100%;
-  height: 12rem;
+  height: 18rem;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
 }
+.features-list{
+  list-style: none;
+}
+
 .rc-title-container {
   width: 100%;
   height: 10rem;

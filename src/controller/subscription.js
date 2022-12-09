@@ -170,11 +170,19 @@ exports.getSubscription = function(req, res, next){
         }
 
         if(!premium){
-            return response.sendSuccess(res, "No premium subscription");
+            var data = {
+                active: false,
+                subscribed: false,
+            }
+            return response.sendSuccess(res, "No premium subscription", data);
         }
 
         if(!premium.active){
-            return response.sendSuccess(res, "No active subscription");
+            var data = {
+                active: false,
+                subscribed: false,
+            }
+            return response.sendSuccess(res, "No active subscription", data);
         }
 
         return response.sendSuccess(res, "Success", premium.toJSON());
