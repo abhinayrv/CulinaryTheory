@@ -126,3 +126,42 @@ exports.getDraft = function(req, res, next){
     }
 
 }
+
+exports.getUserDrafts = function(req, res, next){
+
+    var pageNumber = 0;
+    if(req.params.pageNumber){
+        pageNumber = parseInt(req.params.pageNumber);
+    }
+
+    var limit = 5;
+    if(req.params.limit){
+        limit = parseInt(req.params.limit);
+    }
+    if(!req.params.user_id){
+        return response.sendBadRequest(res, "No user id found.");
+    }
+    else{
+        DraftModel.find({user_id : req.params.user_id}, function(err1, docs){
+            if(err1){
+                return next(err1);
+            }
+            else{
+                DraftModel.countDocuments({user_id : req.params.user_id}, function(err2, count){
+                    if(err2){
+                        return next(err2);
+                    }
+                    else{
+                        var data = {}
+                        data['page'] = pageNumber;
+                        data['total_count'] = count;
+                        data['total_pages'] = Math.ceil(count / limit);
+                        data['data'] = docs;
+                    }
+
+                });
+            }
+    
+        });
+    }
+}

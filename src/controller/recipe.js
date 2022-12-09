@@ -177,6 +177,7 @@ exports.search = function(req, res, next){
             pageNumber = parseInt(req.query.pageNumber)
         }
         console.log(query);
+        sortQuery["_id"] = 1;
         RecipeModel.find(query, function(err1, docs){
             if(err1){
                 return next(err1);
