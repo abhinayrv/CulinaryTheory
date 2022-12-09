@@ -76,8 +76,8 @@ routes.post('/comment',auth.ensureAuthenticated, recipe.checkRecipe, UserInterac
 routes.get('/comments/:recipe_id',auth.ensureAuthenticated, recipe.checkRecipe, UserInteraction.getcomments);
 
 routes.post('/report',auth.ensureAuthenticated, recipe.checkRecipe, UserInteraction.add_reported_recipe);
-routes.get('/admin/reports', UserInteraction.getReports);
-routes.post('/admin/report/close', UserInteraction.closeReport);
+routes.get('/admin/reports', auth.ensureAdmin, UserInteraction.getReports);
+routes.post('/admin/report/close', auth.ensureAdmin, UserInteraction.closeReport);
 
 routes.post('/profile/create', auth.ensureAuthenticated, UserInteraction.createUserProfile);
 routes.post('/profile/edit', auth.ensureAuthenticated, UserInteraction.editUserProfile, UserInteraction.createUserProfile);
@@ -91,7 +91,7 @@ routes.post('/recipe/create', auth.ensureAuthenticated, recipe.create);
 routes.post('/recipe/edit', auth.ensureAuthenticated, recipe.edit);
 routes.post('/recipe/delete', auth.ensureAuthenticated, recipe.delete);
 routes.get("/recipe/search", recipe.search);
-routes.delete("/admin/recipe/delete", UserInteraction.checkReport, recipe.delete);
+routes.delete("/admin/recipe/delete", auth.ensureAdmin, UserInteraction.checkReport, recipe.delete);
 routes.get("/recipe/myrecipes", auth.ensureAuthenticated, recipe.userRecipe);
 routes.get("/recipe/user/:query_user_id", auth.ensureAuthenticated, users.checkUser, recipe.userRecipePublic);
 routes.get("/recipe/:recipe_id", recipe.getSingleRecipe);
