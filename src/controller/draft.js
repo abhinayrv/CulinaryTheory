@@ -79,7 +79,18 @@ exports.delete = function(req, res, next){
     else{
         
         console.log("Deleting draft by particular user.")
-        DraftModel.findOneAndDelete({user_id : req.body.user_id, draft_id : req.body.draft_id}, function(err, doc){
+        DraftModel.findOneAndDelete({draft_id : req.body.draft_id}, function(err, doc){
+            if(err){
+                return next(err);
+            }
+
+            if(!doc){
+                return response.sendBadRequest(res, "No such draft exists.");
+            }
+
+            if(doc.user_id != req.body.user_id){
+                return response.sendForbidden(res, "You do not have rights to delete this");
+            }
             var sucMessage = 'Successfully deleted the document by user.';
             return callback(res, err, doc, sucMessage, next);
         });

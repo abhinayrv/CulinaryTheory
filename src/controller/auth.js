@@ -322,3 +322,51 @@ exports.ensurePremium = function(req, res, next){
     return response.sendUnauthorized(res, "Please login and retry");
   }
 }
+
+exports.changeRole = function(req, res, next){
+  if (!req.body.target_user) {
+    return response.sendBadRequest(res, "No user specified");
+  }
+
+  if (!req.body.target_role) {
+    return response.sendBadRequest(res, "No target role specified");
+  }
+
+  if(!(req.body.target_role == "admin" || req.body.target_role == "user")){
+    return response.sendBadRequest(res, "Target role is not valid");
+  }
+
+  User.findOne({email: req.body.target_user}, function(err, user){
+    if(err) {
+      return next(err);
+    }
+
+    if(!user) {
+      return response.sendBadRequest(res, "User does not exist");
+    }
+
+    user.role = req.body.target_role;
+    user.save(function(err, user){
+      if(err){
+        return next(err);
+      }
+
+      return response.sendSuccess(res, "User role changed successfully!", user.toJSON());
+
+    });
+  });
+}
+
+exports.ensureRoot = function(req, res, next){
+  if(req.session.user){
+    if (req.session.user.role == "superadmin"){
+      req.body.user_id = req.session.user.user_id;
+      req.params.user_id = req.session.user.user_id;
+      return next();
+    } else {
+      return response.sendForbidden(res);
+    }
+  } else {
+    return response.sendUnauthorized(res, "Please login and retry");
+  }
+}

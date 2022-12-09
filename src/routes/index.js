@@ -47,7 +47,10 @@ routes.post('/auth/resetpassword', auth.validateResetToken, auth.resetPassword, 
 routes.post('/auth/updatepassword', auth.ensureAuthenticated, auth.ensureOwner, auth.updatePassword);
 routes.get('/auth/isloggedin', auth.ensureAuthenticated, function(req, res){
     response.sendSuccess(res, "Logged in", {logged_in: true});
-})
+});
+
+routes.get('/admin/getuser', auth.ensureRoot, users.getUser);
+routes.post('/admin/updaterole', auth.ensureRoot, auth.changeRole);
 
 routes.post('/gensub', auth.ensureAuthenticated, subscription.generateSubscription);
 routes.post('/subscribe', auth.ensureAuthenticated, subscription.subscribe);
@@ -79,8 +82,10 @@ routes.post('/admin/report/close', auth.ensureAdmin, UserInteraction.closeReport
 routes.post('/profile/create', auth.ensureAuthenticated, UserInteraction.createUserProfile);
 routes.post('/profile/edit', auth.ensureAuthenticated, UserInteraction.editUserProfile, UserInteraction.createUserProfile);
 routes.get('/myprofile', auth.ensureAuthenticated, UserInteraction.getMyUserProfile);
-routes.get('/profile/:query_user_id', auth.ensureAuthenticated, UserInteraction.getUserProfile);
+routes.get('/profile/:query_user_id', auth.ensureAuthenticated, users.checkUser, UserInteraction.getUserProfile);
 routes.get('/usernames', UserInteraction.getUserNames);
+
+routes.post("/imageupload", upload.single('image'), auth.ensureAuthenticated, recipe.uploadImage);
 
 routes.post('/recipe/create', auth.ensureAuthenticated, recipe.create);
 routes.post('/recipe/edit', auth.ensureAuthenticated, recipe.edit);
@@ -88,9 +93,8 @@ routes.post('/recipe/delete', auth.ensureAuthenticated, recipe.delete);
 routes.get("/recipe/search", recipe.search);
 routes.delete("/admin/recipe/delete", auth.ensureAdmin, UserInteraction.checkReport, recipe.delete);
 routes.get("/recipe/myrecipes", auth.ensureAuthenticated, recipe.userRecipe);
-routes.get("/recipe/user/:query_user_id", auth.ensureAuthenticated, recipe.userRecipePublic);
+routes.get("/recipe/user/:query_user_id", auth.ensureAuthenticated, users.checkUser, recipe.userRecipePublic);
 routes.get("/recipe/:recipe_id", recipe.getSingleRecipe);
-routes.post("/recipe/imageupload", upload.single('image'), auth.ensureAuthenticated, recipe.uploadImage);
 routes.get('/recipes', recipe.getMultipleRecipes);
 
 routes.post('/draft/create', auth.ensurePremium, draft.create);

@@ -247,11 +247,24 @@ exports.delete = function(req, res, next){
         }
         else{
             console.log("Deleting recipe by particular user.")
-            RecipeModel.findOneAndDelete({user_id : req.body.user_id, recipe_id : req.body.recipe_id}, function(err, doc){
-                var sucMessage = 'Successfully deleted the document by user.';
-                return callback(res, err, doc, sucMessage, next);
-            });
+            RecipeModel.findOne({recipe_id: req.body.recipe_id}, function(err, recipe){
+                if(err){
+                    return next(err);
+                }
 
+                if(!recipe){
+                    return response.sendNotFound(res, "No such recipe");
+                }
+
+                if(recipe.user_id != req.body.recipe_id){
+                    return response.sendForbidden(res, "You do not have rights to delete this recipe");
+                }
+
+                RecipeModel.findOneAndDelete({user_id : req.body.user_id, recipe_id : req.body.recipe_id}, function(err, doc){
+                    var sucMessage = 'Successfully deleted the document by user.';
+                    return callback(res, err, doc, sucMessage, next);
+                });
+            });
         }
 
     }

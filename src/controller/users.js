@@ -52,3 +52,43 @@ exports.create = function(req, res, next) {
     });
     
   }
+
+exports.checkUser = function(req, res, next){
+  if (req.query.query_user_id || req.params.query_user_id) {
+    var query_user_id = req.query.query_user_id || req.params.query_user_id;
+    User.findOne({user_id: query_user_id}, function(err, user){
+      if(err){
+        return next(err);
+      }
+
+      if(!user){
+        return response.sendBadRequest(res, "User does not exist");
+      }
+
+      return next()
+    })
+  }
+  else {
+    return response.sendBadRequest(res, "No user id specified");
+  }
+}
+
+exports.getUser = function(req, res, next){
+  if (req.query.query_user) {
+    var query_user = req.query.query_user;
+    User.findOne({email: query_user}, function(err, user){
+      if(err){
+        return next(err);
+      }
+
+      if(!user){
+        return response.sendBadRequest(res, "User does not exist");
+      }
+
+      return response.sendSuccess(res, "User fetched", user.toJSON());
+    })
+  }
+  else {
+    return response.sendBadRequest(res, "No user id specified");
+  }
+}
