@@ -439,9 +439,12 @@ exports.getMyUserProfile= function (req, res, next)  {
   }
 
   if(!profileUser){
-    return response.sendSuccess(res, "Success", new userprofileModel({user_name: "The Culinary Theory"}).toJSON());
+    var data = new userprofileModel({user_id:req.body.user_id, user_name: "The Culinary Theory"}).toJSON();
+    data["is_premium"] = req.session.user.prem;
+    return response.sendSuccess(res, "Success", data);
   }
-
+  var data = profileUser.toJSON();
+  data["is_premium"] = req.session.user.prem;
   return response.sendSuccess(res, "Success", profileUser.toJSON());
  });
 }

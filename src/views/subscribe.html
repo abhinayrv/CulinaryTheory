@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>User Subscription | Culinary Theory</title>
 
+    <script src="https://www.paypal.com/sdk/js?client-id=AZGq4OBfSJHnkSMOQpu-LuFebEFKfrXkEot9OXS4-PU5EcZd7adKZ1NrUj4UYkrUcdGAtFYmN-X4F-SN&currency=USD&vault=true&intent=subscription"></script>
+    <script>
+      paypal.Buttons({}).render("#paypal-button-container");
+    </script>
     <!-- Fonts Inclusion -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -177,6 +181,7 @@
             <div class="btn-list flex-row">
               <button class="btn h-5-main-semibold">Subscribe</button>
             </div>
+            <div id="paypal-button-container"></div>
           </div>
         </section>
       </div>
