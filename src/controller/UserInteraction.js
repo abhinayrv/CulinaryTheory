@@ -47,15 +47,60 @@ exports.getbookmarks = function (req, res, next)  {
     if (!req.params.user_id) {
       return response.sendBadRequest(res, 'user_id is required');
     }
- 
-   bookmarkModel.find({user_id: req.params.user_id}).exec(function(err, bookmarks){
-    if (err){
-        return next(err);
-    }
 
-    return response.sendSuccess(res, "Success", bookmarks);
-   });
-  }
+    var limit = 6;
+    var pageNumber = 0
+    if(req.query.pageNumber){
+      pageNumber = parseInt(req.query.pageNumber);
+    }
+ 
+  //  bookmarkModel.find({user_id: req.params.user_id}).exec(function(err, bookmarks){
+  //   if (err){
+  //       return next(err);
+  //   }
+
+
+  //   return response.sendSuccess(res, "Success", bookmarks);
+  //  });
+
+  bookmarkModel.find({user_id: req.params.user_id}, function(err1, bookmarks){
+
+    bookmarkModel.countDocuments({user_id: req.params.user_id}, function(err2, count){
+        if(err1){
+            return next(err1);
+        }
+        else if(err2){
+            return next(err2);
+        }
+
+        if(!bookmarks){
+            return response.sendNotFound(res, "No bookmarks found");
+        } 
+        else{
+            var data = {}
+            data['page'] = pageNumber;
+            data['total_count'] = count;
+            data['total_pages'] = Math.ceil(count / limit);
+            if (bookmarks.length == 0){
+              data['data'] = []
+              return response.sendSuccess(res, "Successfully fetched the bookmarsk", data)
+            } else{
+              var bookmarks_arr = []
+              bookmarks.forEach(function(bookmark){
+                bookmarks_arr.push(bookmark.recipe_id);
+              })
+              data['data'] = bookmarks_arr;
+              req.bookmarks = data
+              next();
+              // return response.sendSuccess(res, "Successfully fetched the recipes.", data);
+            }
+        }
+
+    });
+    
+  }).limit(limit).skip(pageNumber * limit);
+
+}
 
 exports.deletebookmark = function (req, res, next) {
   console.log('In delete bookmark');

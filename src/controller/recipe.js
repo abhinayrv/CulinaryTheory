@@ -423,11 +423,11 @@ exports.userRecipePublic = function(req, res, next){
     }
     var limit = 6;
     if(req.query.limit){
-        limit = parseInt(req.query.limit)
+        limit = parseInt(req.query.limit);
     }
     var pageNumber = 0;
     if(req.query.pageNumber){
-        pageNumber = parseInt(req.query.pageNumber)
+        pageNumber = parseInt(req.query.pageNumber);
     }
     RecipeModel.find({user_id : req.params.query_user_id, is_public : true, adminDelete : false}, function(err1, docs){
         RecipeModel.countDocuments({user_id : req.params.query_user_id, is_public : true, adminDelete : false}, function(err2, count){
@@ -499,6 +499,8 @@ exports.getMultipleRecipes = function(req, res, next){
     var ids = []
     if(req.query.recipe_ids){
         ids = req.query.recipe_ids.split(",");
+    } else {
+        return response.sendBadRequest(res, "No recipe IDs specified");
     }
 
     RecipeModel.find({recipe_id : {$in : ids}},{title:1, recipe_id:1}, function(err, docs){
@@ -531,5 +533,28 @@ exports.uploadImage = function(req, res, next){
 
         return response.sendSuccess(res, "Image successfully uploaded", {image_url: fileurl});
     })
+}
+
+exports.getBookmarkedRecipes = function(req, res, next){
+    if (!req.bookmarks){
+        return next(new Error("Bookmarks data not present"));
+    }
+
+    var recipe_ids = req.bookmarks.data;
+
+    RecipeModel.find({recipe_id : {$in : recipe_ids}},{title:1, recipe_id:1, likes:1, dislikes:1, user_id:1}, function(err, docs){
+
+        if(err){
+            return next(err);
+        }
+        if(docs){
+            var data = req.bookmarks;
+            data["data"] = docs;
+            return response.sendSuccess(res, "Successfully fetched the recipes.", data);
+        }
+        else{
+            return response.sendSuccess(res, "Successfully fetched the recipes.", {});
+        }
+    });
 }
 
