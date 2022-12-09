@@ -27,6 +27,7 @@ const ReportSchema = new mongoose.Schema({
     },
     action: {
         type: String,
+        enum: ['delete', 'close']
     }
     },
     {timestamps: true}

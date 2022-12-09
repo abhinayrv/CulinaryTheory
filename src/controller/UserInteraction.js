@@ -296,24 +296,53 @@ exports.closeReport = function(req, res, next) {
     return response.sendBadRequest(res, "Action not specified");
   }
 
+  
   reportModel.findOne({report_id: req.body.report_id}).exec(function(err, report){
     if(err) {
       console.log("Error finding report")
       return next(err);
     }
 
-    report.action = req.body.action;
-    report.closed = true;
-    report.action_by = req.body.user_id;
-
-    report.save(function(err, report){
-      if(err) {
-        console.log("Error closing the report");
-        return next(err);
+    if (req.body.action === "delete"){
+      var query = {
+        recipe_id: report.recipe_id,
+        closed: false
       }
 
-      return response.sendSuccess(res, "Successfully closed the report");
-    });
+      var update = {
+        $set : {
+          action: req.body.action,
+          closed: true,
+          action_by: req.body.user_id
+        }
+      }
+
+      reportModel.updateMany(query, update, function(err, result){
+        if(err){
+          return next(err);
+        }
+
+        if(!result){
+          return response.sendBadRequest(res);
+        }
+
+        return response.sendSuccess(res, "Successfully closed the report", {closed_count: result.modifiedCount});
+
+      })
+    } else {
+      report.action = req.body.action;
+      report.closed = true;
+      report.action_by = req.body.user_id;
+
+      report.save(function(err, report){
+        if(err) {
+          console.log("Error closing the report");
+          return next(err);
+        }
+
+        return response.sendSuccess(res, "Successfully closed the report");
+      });
+    }
   });
 }
 
@@ -498,6 +527,7 @@ exports.getUserNames = function(req, res, next){
 
  var user_ids = req.query.users;
  user_ids = user_ids.split(",");
+ console.log(user_ids);
 
  userprofileModel.find({user_id : {$in : user_ids}},{user_name:1, user_id:1, profile_image:1}, function(err, docs){
 
@@ -505,8 +535,15 @@ exports.getUserNames = function(req, res, next){
           return next(err);
       }
 
+      if(docs){
+        var transformed_docs = {};
+        docs.forEach(function(doc){
+          transformed_docs[doc.user_id] = doc;
+        })
+        return response.sendSuccess(res, "Successfully fetched the recipes.", transformed_docs)
+      }
       else{
-          return response.sendSuccess(res, "Successfully fetched the recipes.", docs)
+          return response.sendSuccess(res, "Successfully fetched the recipes.", {})
       }
   });
 }
@@ -526,6 +563,10 @@ exports.checkReport = function(req, res, next){
       console.log("Report is already closed");
       return response.sendBadRequest(res, "The report is already closed");
     }
+
+    return next();
   })
 
 }
+
+

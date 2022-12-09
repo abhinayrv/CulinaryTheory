@@ -456,10 +456,14 @@ exports.addLike = function(req, res, next){
                 return response.sendBadRequest(res, "No recipe found with the given id.");
             }
             else{
+                console.log(req.body.is_liked);
+                console.log(!req.body.is_liked);
                 if(req.body.is_liked){
+                    console.log("here");
                     recipe.likes = recipe.likes + 1;
                 }
                 else{
+                    console.log("disliking");
                     recipe.dislikes = recipe.dislikes + 1;
                 }
                 recipe.save(function(err, recipe){
@@ -489,8 +493,15 @@ exports.getMultipleRecipes = function(req, res, next){
         if(err){
             return next(err);
         }
+        if(docs){
+            var transformed_docs = {};
+            docs.forEach(function(doc){
+            transformed_docs[doc.recipe_id] = doc;
+            });
+            return response.sendSuccess(res, "Successfully fetched the recipes.", transformed_docs);
+        }
         else{
-            return response.sendSuccess(res, "Successfully fetched the recipes.", docs);
+            return response.sendSuccess(res, "Successfully fetched the recipes.", {});
         }
     });
 }
