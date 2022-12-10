@@ -62,7 +62,7 @@ routes.get('/isbookmarked/:recipe_id', auth.ensureAuthenticated, recipe.checkRec
 
 routes.post('/like', auth.ensureAuthenticated, recipe.checkRecipe, UserInteraction.insertLikeDislike, recipe.addLike);
 routes.get('/likes/:recipe_id', recipe.checkRecipe, UserInteraction.countLikeDislike);
-routes.delete('/like/delete', auth.ensureAuthenticated, UserInteraction.deleteLikedislike);
+routes.delete('/like/delete', auth.ensureAuthenticated, UserInteraction.deleteLikedislike, recipe.removeLike);
 routes.get('/isliked/:recipe_id', auth.ensureAuthenticated, UserInteraction.isLiked);
 
 routes.post('/comment',auth.ensureAuthenticated, users.ensureAccountAge, recipe.checkRecipe, UserInteraction.addComment);

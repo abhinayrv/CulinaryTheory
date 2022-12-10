@@ -48,57 +48,65 @@ exports.getbookmarks = function (req, res, next)  {
       return response.sendBadRequest(res, 'user_id is required');
     }
 
-    var limit = 6;
-    var pageNumber = 0
-    if(req.query.pageNumber){
-      pageNumber = parseInt(req.query.pageNumber);
-    }
- 
-  //  bookmarkModel.find({user_id: req.params.user_id}).exec(function(err, bookmarks){
-  //   if (err){
-  //       return next(err);
-  //   }
+    // var limit = 6;
+    // var pageNumber = 0
+    // if(req.query.pageNumber){
+    //   pageNumber = parseInt(req.query.pageNumber);
+    // }
 
+  // bookmarkModel.find({user_id: req.params.user_id}, function(err1, bookmarks){
 
-  //   return response.sendSuccess(res, "Success", bookmarks);
-  //  });
+  //   bookmarkModel.countDocuments({user_id: req.params.user_id}, function(err2, count){
+  //       if(err1){
+  //           return next(err1);
+  //       }
+  //       else if(err2){
+  //           return next(err2);
+  //       }
 
-  bookmarkModel.find({user_id: req.params.user_id}, function(err1, bookmarks){
+  //       if(!bookmarks){
+  //           return response.sendNotFound(res, "No bookmarks found");
+  //       } 
+  //       else{
+  //           var data = {}
+  //           data['page'] = pageNumber;
+  //           data['total_count'] = count;
+  //           data['total_pages'] = Math.ceil(count / limit);
+  //           if (bookmarks.length == 0){
+  //             data['data'] = []
+  //             return response.sendSuccess(res, "Successfully fetched the bookmarsk", data)
+  //           } else{
+  //             var bookmarks_arr = []
+  //             bookmarks.forEach(function(bookmark){
+  //               bookmarks_arr.push(bookmark.recipe_id);
+  //             })
+  //             data['data'] = bookmarks_arr;
+  //             req.bookmarks = data
+  //             next();
+  //             // return response.sendSuccess(res, "Successfully fetched the recipes.", data);
+  //           }
+  //       }
 
-    bookmarkModel.countDocuments({user_id: req.params.user_id}, function(err2, count){
-        if(err1){
-            return next(err1);
-        }
-        else if(err2){
-            return next(err2);
-        }
-
-        if(!bookmarks){
-            return response.sendNotFound(res, "No bookmarks found");
-        } 
-        else{
-            var data = {}
-            data['page'] = pageNumber;
-            data['total_count'] = count;
-            data['total_pages'] = Math.ceil(count / limit);
-            if (bookmarks.length == 0){
-              data['data'] = []
-              return response.sendSuccess(res, "Successfully fetched the bookmarsk", data)
-            } else{
-              var bookmarks_arr = []
-              bookmarks.forEach(function(bookmark){
-                bookmarks_arr.push(bookmark.recipe_id);
-              })
-              data['data'] = bookmarks_arr;
-              req.bookmarks = data
-              next();
-              // return response.sendSuccess(res, "Successfully fetched the recipes.", data);
-            }
-        }
-
-    });
+  //   });
     
-  }).limit(limit).skip(pageNumber * limit);
+  // }).limit(limit).skip(pageNumber * limit);
+
+  bookmarkModel.find({user_id: req.params.user_id}, function(err, bookmarks){
+    if (err){
+      return next(err);
+    }
+
+    if(!bookmarks){
+      return response.sendNotFound(res, "No bookmarks found");
+    } else {
+      var bookmarks_arr = [];
+      bookmarks.forEach(function(bookmark){
+      bookmarks_arr.push(bookmark.recipe_id);
+      })
+      req.bookmarks = bookmarks_arr;
+      return next();
+    }
+  });
 
 }
 
@@ -199,8 +207,11 @@ exports.deleteLikedislike = function(req,res, next){
         if (!doc) {
           return response.sendNotFound(res);
         }
-        
-        return response.sendSuccess(res, "Successfully deleted.", doc.toJSON());
+        else{
+          req.like = doc.toJSON();
+          return next();
+          // return response.sendSuccess(res, "Successfully deleted.", doc.toJSON());
+        }
     })
   };
    

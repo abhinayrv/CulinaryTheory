@@ -541,21 +541,70 @@ exports.getBookmarkedRecipes = function(req, res, next){
         return next(new Error("Bookmarks data not present"));
     }
 
-    var recipe_ids = req.bookmarks.data;
+    var recipe_ids = req.bookmarks;
 
-    RecipeModel.find({recipe_id : {$in : recipe_ids}},{dietary_preferences:1, image_url:1, title:1, recipe_id:1, likes:1, dislikes:1, user_id:1}, function(err, docs){
+    var limit = 6;
+    var pageNumber = 0;
+    if(req.query.pageNumber) {
+        pageNumber = parseInt(req.query.pageNumber);
+    }
 
-        if(err){
-            return next(err);
-        }
-        if(docs){
-            var data = req.bookmarks;
-            data["data"] = docs;
-            return response.sendSuccess(res, "Successfully fetched the recipes.", data);
-        }
-        else{
-            return response.sendSuccess(res, "Successfully fetched the recipes.", {});
-        }
-    });
+    RecipeModel.find({recipe_id : {$in : recipe_ids}, adminDelete:false, is_public:true},{dietary_preferences:1, image_url:1, title:1, recipe_id:1, likes:1, dislikes:1, user_id:1}, function(err, docs){
+        RecipeModel.countDocuments({user_id : req.params.query_user_id, is_public : true, adminDelete : false}, function(err2, count){
+
+            if(err){
+                return next(err);
+            }
+
+            if(err2){
+                return next(err2);
+            }
+            if(!docs){
+                return response.sendNotFound(res, "No bookmarked recipes by this user.");
+            }
+            else{
+                var data = {}
+                data['page'] = pageNumber;
+                data['total_count'] = count;
+                data['total_pages'] = Math.ceil(count / limit);
+                data['data'] = docs;
+                return response.sendSuccess(res, "Successfully fetched the recipes.", data);
+            }
+        }); 
+    }).limit(limit).skip(pageNumber * limit);
+}
+
+exports.removeLike = function(req, res, next){
+    if (!req.like){
+        return response.sendBadRequest(res, "Required fields missing.");
+    }
+    else{
+        RecipeModel.findOne({recipe_id : req.like.recipe_id}, function(err, recipe){
+
+            if (err){
+                return next(err);
+            }
+            if (!recipe){
+                return response.sendBadRequest(res, "No recipe found with the given id.");
+            }
+            else{
+                if(req.like.is_liked){
+                    recipe.likes = recipe.likes - 1;
+                }
+                else{
+                    recipe.dislikes = recipe.dislikes - 1;
+                }
+                recipe.save(function(err, recipe){
+                    if(err){
+                        console.log(err);
+                        return response.sendBadRequest(res,"Some error in deleting likes/dislikes.", err);
+                    }
+                    else{
+                        return response.sendSuccess(res, "Successfully updated the doc.");
+                    }
+                });
+            }
+        });
+    }
 }
 
