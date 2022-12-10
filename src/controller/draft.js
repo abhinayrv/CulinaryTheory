@@ -157,6 +157,7 @@ exports.getUserDrafts = function(req, res, next){
                         data['total_count'] = count;
                         data['total_pages'] = Math.ceil(count / limit);
                         data['data'] = docs;
+                        return response.sendSuccess(res, "Successfully fetched the drafts.",data);
                     }
 
                 });
