@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Admin Console</title>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="/adminDashboardStyles.css" />
+    <!-- <script defer src="/js/superAdmin.js" type="module"></script> -->
+
+  </head>
+
+  <body>
+    <div id="app" class="card">
+      <form method="get">
+          Email:   <input type="text" name="Email" id="email" size="25"><br/>
+          <br>
+          <input id="submitButton" class = "card" type="button" value="Submit" onClick="getUser()">
+        </form>
+    </div>
+    <div id="userDisplay" class = "card"></div>
+    <div id="promote"  style="display:none">
+      <button class="card">Promote</button>
+    </div>
+
+    <div id="demote"  style="display:none">
+      <button class="card">Demote</button>
+    </div>
+
+    <div id="success_text"  style="display:none">
+      <button class="card"></button>
+    </div>
+
+    <script>
+
+    var emailAPI = `/api/admin/getuser?query_user=`;
+    var updateAPI = `/api/admin/updaterole`;
+
+      function getUser()
+      {
+        var emailAPI2 = emailAPI;
+        emailAPI2+=encodeURIComponent(document.getElementById("email").value);
+
+        fetch(emailAPI2,{
+          mode: "cors",
+          referrerPolicy: "unsafe-url"
+        })
+          .then(function(response){
+            return response.json();
+          })
+          .then(function(result){
+            if(result){
+              console.log(result);
+              if(result.data.role=="user"){
+                var display = document.getElementById("userDisplay");
+                display.innerHTML = "<p>Email: </p>" + result.data.email +
+                "<br><br><p>Role: </p>" + result.data.role+"<br><br>";
+                document.getElementById("promote").style = "display:block";
+                document.getElementById("promote").onclick = function(){
+                  promoteUser(result.data.email, "admin");
+                }
+              }
+              else{
+                var display = document.getElementById("userDisplay");
+                display.innerHTML = "<p>Email: </p>" + result.data.email +
+                "<br><br><p>Role: </p>" + result.data.role+"<br><br>";
+                var button = document.getElementById("demote");
+                button.style = "display:block";
+                document.getElementById("demote").style = "display:block";
+                document.getElementById("demote").onclick = function(){
+                  demoteUser(result.data.email, "user");
+                };
+                
+              }
+            }
+          })
+          .catch(function(error){
+            // console.log("error");
+          });
+      }
+      function promoteUser(email, role)
+      {
+        document.getElementById("promote").style = "display:block";
+
+              var myHeaders = new Headers();
+            myHeaders.append("Content-Type", "application/json");
+
+            var raw = JSON.stringify({
+              "target_user": String(email),
+              "target_role": String(role)
+            });
+
+            var requestOptions = {
+              method: 'POST',
+              headers: myHeaders,
+              body: raw,
+              redirect: 'follow'
+            };
+
+            fetch("/api/admin/updaterole", requestOptions)
+              .then(function(response){
+                if(response.status===403){
+                  alert("You must be an admin to perform this action.");
+                  return;
+                }
+              })
+              .then(function(result){
+                console.log(result);
+              })
+              .catch(error => console.log('error', error));
+      }
+
+      function demoteUser(email, role)
+      {
+        var myHeaders = new Headers();
+        myHeaders.append("Content-Type", "application/json");
+
+        var raw = JSON.stringify({
+          "target_user": String(email),
+          "target_role": String(role)
+        });
+
+        var requestOptions = {
+          method: 'POST',
+          headers: myHeaders,
+          body: raw,
+          redirect: 'follow'
+        };
+
+        fetch("/api/admin/updaterole", requestOptions)
+          .then(function(response){
+            if(response.status===403){
+              alert("You must be an admin to perform this action.");
+              return;
+            }
+            return response;
+          })
+          .then(function(result){
+            console.log(result);
+          })
+          .catch(error => console.log('error', error));
+      }
+
+    </script>
+
+    <!-- <div id="emptyCard" class= "emptyMessage" style="display:none">
+      <h1 id="emptyHeader">No reports to display</h1>
+    </div>
+    <div id="loadMore" class="load-more">
+      <button id="loadMoreButton">Load More</button>
+    </div> -->
+    <!-- <script src="src/index.js"></script> -->
+  </body>
+</html>
