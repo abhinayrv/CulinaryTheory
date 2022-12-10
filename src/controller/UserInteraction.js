@@ -348,6 +348,10 @@ exports.closeReport = function(req, res, next) {
       return next(err);
     }
 
+    if(report.closed) {
+      return response.sendBadRequest(res, "The report is already closed.");
+    }
+
     if (req.body.action === "delete"){
       var query = {
         recipe_id: report.recipe_id,
@@ -385,7 +389,7 @@ exports.closeReport = function(req, res, next) {
           return next(err);
         }
 
-        return response.sendSuccess(res, "Successfully closed the report");
+        return response.sendSuccess(res, "Successfully closed the report", {closed_count: 1});
       });
     }
   });

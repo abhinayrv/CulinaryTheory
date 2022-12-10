@@ -24,4 +24,8 @@ routes.get('/subscribe', (req, res) => {
     res.sendFile('subscribe.html', {root: path.join(path.dirname(__dirname), "views")});
 });
 
+routes.get('/admindashboard', (req, res) => {
+    res.sendFile('admin_dashboard.html', {root: path.join(path.dirname(__dirname), "views")});
+});
+
 module.exports = routes;
