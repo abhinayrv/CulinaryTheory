@@ -12,6 +12,7 @@ async function logincheck(){
     emptyHeader.innerText = String(rjson.message);
     document.getElementById("emptyCard").style = "display:block";
     document.getElementById("subscription-section").style.display = "none";
+    document.getElementById("nav-profile-sec").style.display = "none";
     setTimeout(()=>{
       window.location.href = "/";
     }, 3000);

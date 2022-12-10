@@ -149,3 +149,28 @@ header h1 {
   box-shadow: none;
   transform: translateY(0);
 }
+/* _______________SUPER ADMIN_________________*/
+
+/* .userdisplay {
+  display: none;
+}
+
+#main {
+  font-family: "Poppins", sans-serif;
+  font-size: 2em;
+}
+
+.super-ad-btn{
+  position: relative;
+  float: center;
+  margin-right: 10px;
+  color: #fff;
+  background-color: #ed8909;
+  border: 2px solid #1a1a1a;
+  border-radius: 15px;
+  box-sizing: border-box;
+  width: 100px;
+  height: 50px;
+  cursor: pointer;
+  outline: none;
+} */
