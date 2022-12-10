@@ -30,10 +30,10 @@
     <link href="/subscription_general.css" rel="stylesheet" />
     <link href="/subscription_style.css" rel="stylesheet" />
   </head>
-  <body>
+  <body onload="logincheck()">
     <div class="page-container flex-column">
       <div>
-        <header class="header section-spacing-bt">
+        <header class="header ">
           <!-- ------------------- Main Navigation Bar ------------------- -->
           <div class="main-nav-bar flex-row nav-bar-flex help-margin-bt-24">
             <a href="#" class="logo-nav-bar">
@@ -118,19 +118,35 @@
             <nav class="nav-bar">
               <ul class="nav-list flex-row nav-list-flex h-5-main-bold">
                 <li class="nav-list-item">
-                  <a href="./../homePage/home.html" class="nav-item-link"
-                    <p> Home</p></a
-                  >
+                  <a href="#" class="nav-item-link  nav-item-flex nav-link-active">
+                    <p>Home</p>
+                  </a>
+                </li>
+                <li class="nav-list-item">
+                  <a href="#" class="nav-item-link flex-row nav-item-flex nav-link-active">
+                    <div class="nav-item-img-container">
+                      <img
+                        id="profile-image"
+                        class="nav-item-img"
+                        src="../img/people/aiony-haust-3TLl_97HNJo-unsplash.jpg"
+                        alt="Photo of the user"
+                      />
+                    </div>
+                    <p id="user-name">Cameron Williamson</p></a>
+                  <!-- <a href="#" class="nav-item-link  nav-item-flex nav-link-active">
+                    <p>Profile</p>
+                  </a> -->
                 </li>
               </ul>
+              
             </nav>
           </div>
         </header>
         <div id="emptyCard" class= "emptyMessage" style="display:none">
-          <h1 class="h-1-main input-label help-margin-bt-32" id="emptyHeader"></h1>
+          <h1 id="emptyHeader"></h1>
         </div>
         <!-- Subscription Card--------------------------------------------------->
-        <section class="Subscription">
+        <section id="subscription-section" class="Subscription">
           <div class="container-background container">
             <!-- <div class="close-button">
               <div class="material-icons form-btn-icon">add_circle</div>

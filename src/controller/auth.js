@@ -325,7 +325,7 @@ exports.ensurePremium = function(req, res, next){
       req.params.user_id = req.session.user.user_id;
       return next();
     } else {
-      return response.sendForbidden(res, "Please subscribe to premium to save this recipe as a draft!");
+      return response.sendForbidden(res, "Please subscribe to premium to access this feature!");
     }
   } else {
     return response.sendUnauthorized(res, "Please login and retry");

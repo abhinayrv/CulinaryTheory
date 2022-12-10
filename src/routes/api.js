@@ -41,6 +41,9 @@ routes.get('/auth/isloggedin', auth.ensureAuthenticated, function(req, res){
 
 routes.get('/admin/getuser', auth.ensureRoot, users.getUser);
 routes.post('/admin/updaterole', auth.ensureRoot, auth.changeRole);
+routes.get('/issuperadmin', auth.ensureRoot, function(req, res){
+  response.sendSuccess(res, "Logged in", {superadmin: true});
+});
 
 routes.post('/gensub', auth.ensureAuthenticated, subscription.generateSubscription);
 routes.post('/subscribe', auth.ensureAuthenticated, subscription.subscribe);
@@ -48,9 +51,9 @@ routes.post('/cancelsub', auth.ensureAuthenticated, subscription.cancelSubscript
 routes.get('/getsub', auth.ensureAuthenticated, subscription.getSubscription);
 routes.get('/ispremium', subscription.isPremiumUser);
 
-routes.post('/subscribemail', auth.ensureAuthenticated, subscription.subscribeEmail);
+routes.post('/subscribemail', auth.ensurePremium, subscription.subscribeEmail);
 routes.get('/isemailsub', auth.ensureAuthenticated, subscription.isEmailSub);
-routes.post('/unsubemail', auth.ensureAuthenticated, subscription.unsubEmail);
+routes.post('/unsubemail', auth.ensurePremium, subscription.unsubEmail);
 
 routes.post('/bookmark', auth.ensureAuthenticated, recipe.checkRecipe, UserInteraction.add_bookmark);
 routes.get('/bookmarks', auth.ensureAuthenticated, UserInteraction.getbookmarks, recipe.getBookmarkedRecipes);
@@ -90,8 +93,8 @@ routes.get('/recipes', recipe.getMultipleRecipes);
 routes.post('/draft/create', auth.ensurePremium, draft.create);
 routes.post('/draft/edit', auth.ensurePremium, draft.edit);
 routes.post('/draft/delete', auth.ensurePremium, draft.delete);
-routes.get('draft/:draft_id', auth.ensurePremium, draft.getDraft);
-routes.get('draft/mydrafts', auth.ensurePremium, draft.getUserDrafts);
+routes.get('/draft/:draft_id', auth.ensurePremium, draft.getDraft);
+routes.get('/drafts/mydrafts', auth.ensurePremium, draft.getUserDrafts);
 
 
 routes.use(function(req, res) {

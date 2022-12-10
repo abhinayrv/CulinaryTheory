@@ -543,7 +543,7 @@ exports.getBookmarkedRecipes = function(req, res, next){
 
     var recipe_ids = req.bookmarks.data;
 
-    RecipeModel.find({recipe_id : {$in : recipe_ids}},{image_url:1, title:1, recipe_id:1, likes:1, dislikes:1, user_id:1}, function(err, docs){
+    RecipeModel.find({recipe_id : {$in : recipe_ids}},{dietary_preferences:1, image_url:1, title:1, recipe_id:1, likes:1, dislikes:1, user_id:1}, function(err, docs){
 
         if(err){
             return next(err);

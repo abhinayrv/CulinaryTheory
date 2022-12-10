@@ -8,47 +8,32 @@ var reportRecipeMap = {};
 
 var mainContainer = document.getElementById("app");
 
-// var header = document.createElement("header");
-// header.innerHTML = "Admin Console <a>";
-
-// mainContainer.appendChild(header);
-
-
 
 var cardDiv = document.createElement("div");
 mainContainer.appendChild(cardDiv);
 cardDiv.classList.add("card-display");
 
-window.onload = adminLogin(fetchAPI);
+window.onload = logincheck(fetchAPI);
 
-function adminLogin(url)
-{
-      var myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
+async function logincheck(url){
+  var response = await fetch("/api/myprofile");
+  var rjson = await response.json();
 
-    var urlencoded = new URLSearchParams();
-    urlencoded.append("email", "ajain3982+1@gmail.com");
-    urlencoded.append("password", "Test@123");
-
-    var requestOptions = {
-      method: 'POST',
-      headers: myHeaders,
-      body: urlencoded,
-      redirect: 'follow'
-    };
-
-    fetch("/api/login", requestOptions)
-      .then(function(response){
-        return response.json();
-      })
-      .then(function(result){
-        if(result){
-          JSONFetchFunction(url);
-        }
-      })
-      .catch(function(error){
-        // console.log("error");
-      });
+  if(response.ok){
+    document.getElementById("user-name").innerText = rjson.data.user_name;
+    document.getElementById("profile-image").src = rjson.data.profile_image;
+    JSONFetchFunction(url);
+    return false;
+  } else {
+    var emptyHeader = document.getElementById("emptyHeader");
+    emptyHeader.innerText = String(rjson.message);
+    document.getElementById("emptyCard").style = "display:block";
+    document.getElementById("subscription-section").style.display = "none";
+    setTimeout(()=>{
+      window.location.href = "/";
+    }, 3000);
+    return false;
+  }
 }
 
 function JSONFetchFunction(url){
@@ -57,15 +42,18 @@ function JSONFetchFunction(url){
       referrerPolicy: "unsafe-url"
     })
       .then(function (response) {
-        if(response.status!==200)
+        if(!response.ok)
         {
-          var emptyHeader = document.getElementById("emptyHeader");
-          emptyHeader.innerText = String(response.statusText);
-          document.getElementById("emptyCard").style = "display:block";
-          console.log("returning from here 2");
-          return false;
+          return response.json().then(rjson => {
+            var emptyHeader = document.getElementById("emptyHeader");
+            emptyHeader.innerText = String(rjson.message);
+            document.getElementById("emptyCard").style = "display:block";
+            console.log("returning from here 2");
+            throw Error(rjson.message);
+          });
+        } else{
+          return response.json();
         }
-        return response.json();
       })
       .then(function (JSONdata) {
 
