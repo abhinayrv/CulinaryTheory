@@ -173,7 +173,7 @@ exports.getSubscription = function(req, res, next){
         return response.sendBadRequest(res, "No user id");
     }
 
-    Premium.findOne({user_id: req.body.user_id}).exec(function(err, premium){
+    Premium.findOne({user_id: req.body.user_id, active: true}).exec(function(err, premium){
         if (err){
             console.log("Error looking for premium sub details");
             return next(err);

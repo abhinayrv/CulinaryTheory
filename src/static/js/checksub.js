@@ -1,5 +1,5 @@
 async function logincheck(){
-  document.getElementById("active_month").style.display = "none";
+  // document.getElementById("active_month_div").style.display = "none";
   document.getElementById("subscription-section").style.display = "none";
   var response = await fetch("/api/myprofile");
   var rjson = await response.json();
@@ -44,6 +44,7 @@ async function subfetch(){
       } else if (rjson.data.active && rjson.data.active_till) {
         var r = new Date(rjson["data"]["active_till"]).toLocaleDateString("en-US", {year: 'numeric', month: 'long', day: 'numeric'});
         document.getElementById("active_month").innerHTML = r;
+        // document.getElementById("active_month_div").style.display = "block";
         document.getElementById("active_month").style.display = "block";
         document.getElementById("bill_month").innerHTML = "";
       }
