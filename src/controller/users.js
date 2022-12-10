@@ -104,6 +104,8 @@ exports.ensureAccountAge = function(req, res, next){
       }
       if (Math.round((new Date(new Date() - user.createdAt)/(1000 * 60 * 60 * 24))) >= 2){
         return next();
+      } else{
+        return response.sendForbidden(res, "Your account has to be at least 2 days old to comment/report!")
       }
     });
   } else {

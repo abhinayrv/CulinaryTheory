@@ -1,8 +1,10 @@
 async function logincheck(){
+  document.getElementById("subscription-section").style.display = "none";
   var response = await fetch("/api/myprofile");
   var rjson = await response.json();
 
   if(response.ok){
+    document.getElementById("subscription-section").style.display = "block";
     document.getElementById("user-name").innerText = rjson.data.user_name;
     document.getElementById("profile-image").src = rjson.data.profile_image;
     return false;
@@ -47,7 +49,7 @@ paypal.Buttons({
             return fetch("/api/subscribe", {
                 headers: {"Content-Type":"application/json"},
                 body: JSON.stringify(request_data),
-                method: "post",
+                method: "POST",
               })
                 .then((response) => {
                   if (!response.ok) {
@@ -65,6 +67,7 @@ paypal.Buttons({
                     }, 2000)
                 })
                 .catch((err)=> {
+                  console.log("error");
                   document.getElementById("emptyHeader").innerHTML = err.message;
                   document.getElementById("emptyCard").style.display = "block";
                 });

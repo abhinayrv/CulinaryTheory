@@ -46,8 +46,8 @@ routes.get('/issuperadmin', auth.ensureRoot, function(req, res){
 });
 
 routes.post('/gensub', auth.ensureAuthenticated, subscription.generateSubscription);
-routes.post('/subscribe', auth.ensureAuthenticated, subscription.subscribe);
-routes.post('/cancelsub', auth.ensureAuthenticated, subscription.cancelSubscription);
+routes.post('/subscribe', auth.ensureAuthenticated, subscription.subscribe, subscription.sendSubEmail);
+routes.post('/cancelsub', auth.ensureAuthenticated, subscription.cancelSubscription, subscription.sendSubEmail);
 routes.get('/getsub', auth.ensureAuthenticated, subscription.getSubscription);
 routes.get('/ispremium', subscription.isPremiumUser);
 
@@ -65,10 +65,10 @@ routes.get('/likes/:recipe_id', recipe.checkRecipe, UserInteraction.countLikeDis
 routes.delete('/like/delete', auth.ensureAuthenticated, UserInteraction.deleteLikedislike);
 routes.get('/isliked/:recipe_id', auth.ensureAuthenticated, UserInteraction.isLiked);
 
-routes.post('/comment',auth.ensureAuthenticated, recipe.checkRecipe, UserInteraction.addComment);
+routes.post('/comment',auth.ensureAuthenticated, users.ensureAccountAge, recipe.checkRecipe, UserInteraction.addComment);
 routes.get('/comments/:recipe_id',auth.ensureAuthenticated, recipe.checkRecipe, UserInteraction.getcomments);
 
-routes.post('/report',auth.ensureAuthenticated, recipe.checkRecipe, UserInteraction.add_reported_recipe);
+routes.post('/report',auth.ensureAuthenticated, users.ensureAccountAge, recipe.checkRecipe, UserInteraction.add_reported_recipe);
 routes.get('/admin/reports', auth.ensureAdmin, UserInteraction.getReports);
 routes.post('/admin/report/close', auth.ensureAdmin, UserInteraction.closeReport);
 

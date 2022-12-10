@@ -1,8 +1,11 @@
 async function logincheck(){
+  document.getElementById("active_month").style.display = "none";
+  document.getElementById("subscription-section").style.display = "none";
   var response = await fetch("/api/myprofile");
   var rjson = await response.json();
 
   if(response.ok){
+    document.getElementById("subscription-section").style.display = "block";
     subfetch();
     document.getElementById("user-name").innerText = rjson.data.user_name;
     document.getElementById("profile-image").src = rjson.data.profile_image;
@@ -22,27 +25,6 @@ async function logincheck(){
 
 async function subfetch(){
 
-//   fetch("/api/isemailsub")
-//   .then((response) => {
-//     if(!response.ok){
-//       return response.json().then(rjson => {throw Error(rjson.message)});
-//     }
-//     return response.json();
-//   }).then(function(response){
-//     console.log(response);
-//     if(response["data"]["subscribed"]){
-//       document.getElementById("email_sub").innerHTML = "Cancel Newsletter Subscription";
-//       document.getElementById("email_sub").onclick = unsubEmail;
-//     }
-//     else{
-//       document.getElementById("email_sub").innerHTML = "Subscribe to newsletter"
-//       document.getElementById("email_sub").onclick = subEmail;
-//     }
-
-// }).catch((err) =>{
-//   console.log(err);
-// });
-
   var response = await fetch("/api/getSub");
   var rjson = await response.json();
 
@@ -55,11 +37,17 @@ async function subfetch(){
   } else {
     
       if(rjson.data.next_billing){
-        var r = new Date(response["data"]["active_till"]).toLocaleDateString("en-US", {year: 'numeric', month: 'long', day: 'numeric'});
+        var r = new Date(rjson["data"]["next_billing"]).toLocaleDateString("en-US", {year: 'numeric', month: 'long', day: 'numeric'});
         document.getElementById("bill_month").innerHTML = r;
-        document.getElementById("substatus").innerHTML = "Subscribed";
+        // document.getElementById("substatus").innerHTML = "Subscribed";
 
-      } else {
+      } else if (rjson.data.active && rjson.data.active_till) {
+        var r = new Date(rjson["data"]["active_till"]).toLocaleDateString("en-US", {year: 'numeric', month: 'long', day: 'numeric'});
+        document.getElementById("active_month").innerHTML = r;
+        document.getElementById("active_month").style.display = "block";
+        document.getElementById("bill_month").innerHTML = "";
+      }
+      else {
         document.getElementById("bill_month").innerHTML = "";
       }
 
