@@ -20,7 +20,7 @@ const UserSchema = new Schema({
   password: {
     type: String,
     required: true,
-    validate: [checkPassword, '{PATH} does not meet requirements. Must have at least 8 characters 1 Uppercase letter, 1 Lowercase letter, 1 Number and 1 of @,$,!,%,*,?,&,_,-']
+    // validate: [checkPassword, '{PATH} does not meet requirements. Must have at least 8 characters 1 Uppercase letter, 1 Lowercase letter, 1 Number and 1 of @,$,!,%,*,?,&,_,-']
   },
   salt: {
     type: String,
@@ -49,12 +49,20 @@ UserSchema.pre('save', function(next) {
   if (!this.isModified('password')){
      return next();
   }
-
-  var salt = crypto.randomBytes(16).toString("hex");
-  this.salt = salt;
-  this.password = crypto.pbkdf2Sync(this.password, salt, 310000, 32, 'sha256').toString('hex');
-  return next();
+  // else if (!checkPassword(this.password)){
+  //   return next(Error('Password does not meet requirements. Must have at least 8 characters 1 Uppercase letter, 1 Lowercase letter, 1 Number and 1 of @,$,!,%,*,?,&,_,-'));
+  // } 
+  else {
+    var salt = crypto.randomBytes(16).toString("hex");
+    this.salt = salt;
+    this.password = crypto.pbkdf2Sync(this.password, salt, 310000, 32, 'sha256').toString('hex');
+    return next();
+  }
 });
+
+UserSchema.methods.passwordCheck = function(){
+  return checkPassword(this.password);
+}
 
 UserSchema.methods.getSessionData = function(next) {
   checkPremium(this.user_id, function(err, is_prem){

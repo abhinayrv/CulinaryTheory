@@ -26,6 +26,9 @@ exports.create = function(req, res, next) {
 
       req.body.user_id = nanoid();
       const newUser = new User(req.body);
+      if (!newUser.passwordCheck()){
+        return response.sendBadRequest(res, "Password does not meet requirements. Must have at least 8 characters 1 Uppercase letter, 1 Lowercase letter, 1 Number and 1 of @,$,!,%,*,?,&,_,-")
+      }
       newUser.role = 'user';
       var err = newUser.validateSync();
       if (err) {
@@ -90,5 +93,20 @@ exports.getUser = function(req, res, next){
   }
   else {
     return response.sendBadRequest(res, "No user id specified");
+  }
+}
+
+exports.ensureAccountAge = function(req, res, next){
+  if(req.session.user){
+    User.findOne({user_id: req.session.user.user_id}, function(err, user){
+      if(err){
+        return next(err);
+      }
+      if (Math.round((new Date(new Date() - user.createdAt)/(1000 * 60 * 60 * 24))) >= 2){
+        return next();
+      }
+    });
+  } else {
+    return response.sendUnauthorized(res, "Please login and retry!");
   }
 }

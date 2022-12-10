@@ -6,6 +6,9 @@ const User = mongoose.model('User');
 const Token = mongoose.model('Token');
 
 exports.authenticate = function(req, res, next) {
+  if (req.session.user){
+    return response.sendBadRequest(res, "A user is already logged-in!");
+  }
     console.log(`Login request`);
   
   if (!req.body.email || !req.body.password) {
@@ -100,6 +103,9 @@ exports.updatePassword = function(req, res, next) {
       }
       
       user.password = req.body.new_password;
+      if (!user.passwordCheck()){
+        return response.sendBadRequest(res, "Password does not meet requirements. Must have at least 8 characters 1 Uppercase letter, 1 Lowercase letter, 1 Number and 1 of @,$,!,%,*,?,&,_,-")
+      }
       var err = user.validateSync();
       if (err) {
         console.log("Password does not meet requirements");
@@ -204,6 +210,9 @@ exports.resetPassword = function(req, res, next) {
       }
 
       user.password = req.body.password;
+      if (!user.passwordCheck()){
+        return response.sendBadRequest(res, "Password does not meet requirements. Must have at least 8 characters 1 Uppercase letter, 1 Lowercase letter, 1 Number and 1 of @,$,!,%,*,?,&,_,-")
+      }
       var err = user.validateSync();
       if (err) {
         console.log("Password does not meet requirements");
