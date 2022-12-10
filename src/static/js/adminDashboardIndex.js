@@ -16,10 +16,12 @@ cardDiv.classList.add("card-display");
 window.onload = logincheck(fetchAPI);
 
 async function logincheck(url){
+  document.getElementById("main").style.display = "none";
   var response = await fetch("/api/myprofile");
   var rjson = await response.json();
 
   if(response.ok){
+    document.getElementById("main").style.display = "block";
     document.getElementById("user-name").innerText = rjson.data.user_name;
     document.getElementById("profile-image").src = rjson.data.profile_image;
     JSONFetchFunction(url);

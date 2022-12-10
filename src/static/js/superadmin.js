@@ -2,6 +2,7 @@ var emailAPI = `/api/admin/getuser?query_user=`;
 var updateAPI = `/api/admin/updaterole`;
 
 async function logincheck(){
+    document.getElementById("main").style.display = "none";
     var response = await fetch("/api/issuperadmin");
     var rjson = await response.json();
 
@@ -10,6 +11,7 @@ async function logincheck(){
         var rjson = await response.json()
 
         if (response.ok){
+            document.getElementById("main").style.display = "block";
             document.getElementById("user-name").innerText = rjson.data.user_name;
             document.getElementById("profile-image").src = rjson.data.profile_image;
             return false;
