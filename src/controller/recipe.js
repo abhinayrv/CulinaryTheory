@@ -557,7 +557,7 @@ exports.getBookmarkedRecipes = function(req, res, next){
     }
 
     RecipeModel.find({recipe_id : {$in : recipe_ids}, adminDelete:false, is_public:true},{dietary_preferences:1, image_url:1, title:1, recipe_id:1, likes:1, dislikes:1, user_id:1}, function(err, docs){
-        RecipeModel.countDocuments({user_id : req.params.query_user_id, is_public : true, adminDelete : false}, function(err2, count){
+        RecipeModel.countDocuments({recipe_id : {$in : recipe_ids}, is_public : true, adminDelete : false}, function(err2, count){
 
             if(err){
                 return next(err);
