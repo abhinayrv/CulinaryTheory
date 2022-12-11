@@ -173,7 +173,7 @@ const updateMainNav = function () {
       userProfile.user_name;
 
     //setting href
-    recipeCreateBtn.setAttribute("href", "/create");
+    recipeCreateBtn.setAttribute("href", "/createrecipe");
     accountBtn.setAttribute("href", "/myprofile");
     aboutUsBtn.setAttribute("href", "/about");
   } else {
