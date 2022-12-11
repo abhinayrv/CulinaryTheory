@@ -532,7 +532,7 @@ const srtByDislikeBtn = document.querySelector(".js-srtByDislike");
 
 srtByLikeBtn.addEventListener("click", function (e) {
   sortEnabled = true;
-  apiSortFetchUrl = `${apiFetchUrl}&sortBy=likes&sortAsc=1`;
+  apiSortFetchUrl = `${apiFetchUrl}&sortBy=likes&sortAsc=-1`;
   fetchRecipeBySerch(apiSortFetchUrl, searchRCardBox, searchNameDisplayMsg);
 });
 srtByDislikeBtn.addEventListener("click", function (e) {
