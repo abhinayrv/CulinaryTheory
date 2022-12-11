@@ -63,7 +63,7 @@ paypal.Buttons({
                   document.getElementById("emptyCard").style = "display:block";
                   document.getElementById("emptyCard").style.color = "#32a852";
                     setTimeout(()=>{
-                        window.location.href = "/api/myprofile"
+                        window.location.href = "/managesubscription"
                     }, 2000)
                 })
                 .catch((err)=> {

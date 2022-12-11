@@ -117,6 +117,7 @@ exports.search = function(req, res, next){
 
     if(req.query.prep_time){
         var filterTime = req.query.prep_time.split(",");
+        console.log(`filter time ${filterTime}`);
         query["prep_time"] = {"$in" : filterTime}
     }
     if(req.query.sortBy && req.query.sortAsc){
@@ -285,15 +286,21 @@ exports.getSingleRecipe = function(req, res, next){
                 return callback(res, err, recipe, "No such recipe found.",next);
             }
             else{
-                var user_id = "" || req.body.user_id;
+                var user_id = "" ;
+                if(req.session.user){
+                    user_id = req.session.user.user_id;
+                }
                 var self_recipe = false;
                 if(user_id === recipe.user_id){
                     self_recipe = true;
                 }
+                console.log(user_id);
+                console.log(recipe.user_id);
                 recipe = recipe.toJSON();
                 recipe["self_recipe"] = self_recipe;
                 if(recipe.is_public == false){
-                    if(req.session.user && req.session.user.user_id === recipe.user_id && req.session.prem){
+                    console.log(req.session.user);
+                    if(req.session.user && req.session.user.user_id === recipe.user_id && req.session.user.prem){
                         return callback(res, err, recipe, "Successfully fetched the recipe.", next);
                     } else if (req.session.user && req.session.user.user_id === recipe.user_id){
                         return response.sendForbidden(res, "Please subscribe to premium to see your private recipes");

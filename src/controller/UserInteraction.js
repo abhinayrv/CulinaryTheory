@@ -460,7 +460,7 @@ exports.getMyUserProfile= function (req, res, next)  {
   }
   var data = profileUser.toJSON();
   data["is_premium"] = req.session.user.prem;
-  return response.sendSuccess(res, "Success", profileUser.toJSON());
+  return response.sendSuccess(res, "Success", data);
  });
 }
 
