@@ -2,7 +2,7 @@ var currPage=0;
 var totalPage=0;
 var recipeIds = "";
 var fetchAPI = `/api/admin/reports?pageNumber=${currPage}`;
-var recipeLink = `/api/recipe/`;
+var recipeLink = `/recipe/`;
 var reportRecipeMap = {};
 
 
@@ -222,7 +222,7 @@ function appendData(data, recipeData) {
             div.setAttribute("id",reports[i].report_id);
 
             var recipeImg = document.createElement("div");
-            var recipeImgURL = String(recipeLink + reports[i].recipe_id);
+            var recipeImgURL = String(recipeLink + `?recipe_id=${reports[i].recipe_id}`);
 
             recipeImg.innerHTML =
             recipeImg.innerHTML + "<h1>Recipe: </h1>" + `<a href='${recipeImgURL}'>${recipeData.data[reports[i].recipe_id].title}</a>`;
