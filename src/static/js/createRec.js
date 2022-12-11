@@ -299,13 +299,13 @@ const ingrediantsData = function () {
   let tempIngred = [...ingredBoxArr].map((box, i) => {
     let ingObj = {
       ingre_no: i + 1,
-      ingredients: box.querySelector(".ing-name").value,
+      ingredient: box.querySelector(".ing-name").value,
       quantity: box.querySelector(".ing-quan").value,
     };
     return ingObj;
   });
   tempIngred.forEach((x) => {
-    if (!x.ingredients || !x.quantity) ingredients = false;
+    if (!x.ingredient || !x.quantity) ingredients = false;
   });
   return tempIngred;
 };
@@ -325,30 +325,30 @@ const stepsData = function () {
   });
   return tempStep;
 };
-// async function uploadFile() {
-//   let fileinput = inpImage;
-//   let file_data = fileinput.files[0];
-//   let formdata = new FormData();
-//   formdata.append("image", file_data);
-//   let options = {
-//     method: "POST",
-//     headers: { "Content-Type": "multipart/form-data" },
-//     body: formdata,
-//   };
-//   let response = await fetch("/api/imageupload", options);
-//   let rjson = await response.json();
-//   if (response.ok) {
-//     imageVal = rjson.data.image_url;
-//     return true;
-//   } else {
-//     alert("image upload failed");
-//     return false;
-//   }
-// }
+async function uploadFile() {
+  let fileinput = inpImage;
+  let file_data = fileinput.files[0];
+  let formdata = new FormData();
+  formdata.append("image", file_data);
+  let options = {
+    method: "POST",
+    // headers: { "Content-Type": "multipart/form-data" },
+    body: formdata,
+  };
+  let response = await fetch("/api/imageupload", options);
+  let rjson = await response.json();
+  if (response.ok) {
+    imageVal = rjson.data.image_url;
+    return true;
+  } else {
+    alert("image upload failed");
+    return false;
+  }
+}
 
-const objecBuild = function () {
+const objecBuild = async function () {
   getTitleAndDes();
-  // if (image === true) image = uploadFile();
+  if (image === true) image = await uploadFile();
   ingredientsVal = ingrediantsData();
   stepsVal = stepsData();
   getAdditionalInfo();
@@ -384,7 +384,27 @@ const objecBuild = function () {
       prep_time: prepTimeVal,
       cuisine: cuisineVal,
     };
-    return true;
+    
+    var options = {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(reciptObj),
+    }
+
+    var response = await fetch("/api/recipe/create", options);
+    var rjson = await response.json();
+    if(response.ok){
+      displayError(rjson.message, false);
+      setTimeout(()=>{
+        console.log(rjson.data);
+        window.location.href = `/recipe?recipe_id=${rjson.data.recipe_id}`
+      }, 2000);
+      return;
+    } else {
+      displayError(rjson.message);
+      return;
+    }
+
   } else {
     return false;
   }
@@ -412,7 +432,12 @@ const errorPopup = document.getElementById("error-popup");
 errorPopup.addEventListener("click", function (e) {
   if (e.target.classList.contains("err-cls-btn")) hideDisplay(errorPopup);
 });
-const displayError = function (errMessage) {
+const displayError = function (errMessage, iserr=true) {
+  if(iserr){
+    errorPopup.style.backgroundColor = "#be2e3a";
+  } else {
+    errorPopup.style.backgroundColor = "#16a085";
+  }
   showDisplay(errorPopup);
   errorPopup.firstElementChild.textContent = errMessage;
   setTimeout(() => hideDisplay(errorPopup), 5000);
