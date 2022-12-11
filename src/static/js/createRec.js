@@ -1,5 +1,5 @@
 `use strict`;
-const apiHost = "http://localhost:9000";
+const apiHost = "";
 // //////////////////////////////////////////////////////////////////
 //header and page start related code.
 let userProfile;
