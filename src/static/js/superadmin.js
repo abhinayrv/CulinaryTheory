@@ -22,7 +22,7 @@ async function logincheck(){
             document.getElementById("main").style.display = "none";
             document.getElementById("nav-profile-sec").style.display = "none";
             setTimeout(()=>{
-                window.location.href = "/";
+                window.location.href = "/home";
             }, 3000);
             return false;
     
@@ -35,7 +35,7 @@ async function logincheck(){
     document.getElementById("main").style.display = "none";
     document.getElementById("nav-profile-sec").style.display = "none";
     setTimeout(()=>{
-        window.location.href = "/";
+        window.location.href = "/home";
     }, 3000);
     return false;
     }

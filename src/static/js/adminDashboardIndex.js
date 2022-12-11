@@ -32,7 +32,7 @@ async function logincheck(url){
     document.getElementById("emptyCard").style = "display:block";
     document.getElementById("nav-profile-sec").style.display = "none";
     setTimeout(()=>{
-      window.location.href = "/";
+      window.location.href = "/home";
     }, 3000);
     return false;
   }

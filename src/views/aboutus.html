@@ -1,13 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <script src="/js/checksub.js" type="text/javascript">
-     
-    </script>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title> Subscription | Culinary Theory</title>
+    <title>About us | Culinary Theory</title>
 
     <!-- Fonts Inclusion -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -25,13 +22,13 @@
     />
 
     <!-- css style sheets Inclusion -->
-    <link href="/subscription_general.css" rel="stylesheet" />
-    <link href="subscription_style.css" rel="stylesheet" />
+    <link href="/general.css" rel="stylesheet" />
+    <link href="/ocss/style.css" rel="stylesheet" />
   </head>
-  <body onload="logincheck()">
+  <body>
     <div class="page-container flex-column">
       <div>
-        <header class="header ">
+        <header class="header section-spacing-bt">
           <!-- ------------------- Main Navigation Bar ------------------- -->
           <div class="main-nav-bar flex-row nav-bar-flex help-margin-bt-24">
             <a href="#" class="logo-nav-bar">
@@ -116,75 +113,58 @@
             <nav class="nav-bar">
               <ul class="nav-list flex-row nav-list-flex h-5-main-bold">
                 <li class="nav-list-item">
-                  <a href="/home" class="nav-item-link  nav-item-flex nav-link-active">
-                    <p>Home</p>
-                  </a>
-                </li>
-                <li class="nav-list-item" id="nav-profile-sec">
-                  <a href="/myprofile" class="nav-item-link flex-row nav-item-flex nav-link-active">
-                    <div class="nav-item-img-container">
-                      <img
-                        id="profile-image"
-                        class="nav-item-img"
-                        src=""
-                        alt="Photo of the user"
-                      />
-                    </div>
-                    <p id="user-name"></p></a>
-                  <!-- <a href="#" class="nav-item-link  nav-item-flex nav-link-active">
-                    <p>Profile</p>
-                  </a> -->
+                  <a href="/home" class="nav-item-link"
+                    ><p>Home</p></a
+                  >
                 </li>
               </ul>
-              
             </nav>
           </div>
         </header>
-        
-        <div id="emptyCard" class= "emptyMessage" style="display:none">
-          <h1 id="emptyHeader"></h1>
-        </div>
-        <main class="section-spacing-bt"></main>
-        
+
         <!-- Subscription Card--------------------------------------------------->
-        <section id="subscription-section" class="Subscription">
-          <div class="container-background container">
-            <form class="flex-column ov-form formalign" action="#">
-              
-            <label
-              for="Subscription"
-              class="h-1-main input-label help-margin-bt-32"
-              >Your Subscription</label
+        <section class="About_Us">
+          <div class="container-background container ">
+            <form class="flex-column aboutus "  action="#">
+
+            <label for="AboutUs" class="h-1-main input-label help-margin-bt-32 "
+              >About US</label
             >
 
-            <div class="Subscription flex-column">
-              <div class="Subscription_details flex-row">
-              <h1 class="Status_heading">Subscription Status</h1>
-              <h1 id="substatus" class="Status_Detail"></h1>
-            </div>
-            <div class="Subscription_details flex-row">
-              <h1 class="Billing_heading"> Active Till</h1>
-              <h1 id = "active_month" class="Billing_Details"></h1>
-            </div>
+            <div class="About_Us_Description h-5-main-semibold">
+             
+              <p class="h-5-main-semibold help-margin-bt-8">
+                Mission
+              </p>
+              <p class="p-help-reg help-margin-bt-16">
+                The Culinary Theory is here to make food preparation enjoyable
+                and stress-free. We provide culinary tips and recipes written
+                just for home cooks. We're all for assisting in "kitchen wins,"
+                after all.
+              </p>
+              
+              <p class="h-5-main-semibold help-margin-bt-8">
+                Diversity and Inclusion
+              </p>
+              <p class="p-help-reg help-margin-bt-16">
+                 The Culinary Theory is open to everyone, regardless of their
+                color, religion, gender, sexual orientation, age, background, or
+                abilities. Every aspect of the website, from the people we hire
+                to the recipes we offer, reflects our purposeful effort to be a
+                resource for every home cook.
+              </p>
+              <p class="h-5-main-semibold help-margin-bt-8 flex-row">Meet Our Team</p> 
+              <p class="p-help-reg help-margin-bt-16">Abhinay Reddy Vongur | Abhishek Jain | Aditya Jain | Ariel G Olovyannikov | Dheeraj Goli | Jenil Ashwin Jain | Parth Hasmukh Jain| Shreyas Kulkarni | Srujan Kashyap Dendukuri | Swathi Gopal | Udit Wadhera | Venkata Sri Ram Srujan Nidadavolu</p>
+              <p class="p-help-reg help-margin-bt-16">
+                This website is created as part of our Masters course in Software engineering guided by Ivan Marsic, Rutgers University.
+              </p>
+              <p class="h-5-main-semibold help-margin-bt-8 flex-row">Contact Us</p>         
+              <a class="gmail p-help-reg help-margin-bt-64" href="#">culinaryTheory@gmail.com</a>
+          </div>
+        </section>
+      </div>
+    </div>
 
-            <div class="Subscription_details flex-row">
-              <h1 class="Billing_heading"> Next Billing Period</h1>
-              <h1 id = "bill_month" class="Billing_Details"></h1>
-            </div>
-  
-            <div class="btn-list flex-row" >
-              <button id= "cancel_sub" href="/api/cancelsub" class="btn h-5-main-semibold help-margin-bt-32" onclick>Cancel Subscription</button>
-              <button id = "email_sub" class="btn h-5-main-semibold help-margin-bt-32">Email  Subscription</button>
-            </div>
-            
-      
-            </div>
-            <div>
-      </div>
-    </div>
-    </section>
-      </div>
-    </div>
     <footer class="footer flex-column">
       <p class="h-3-main">&copy; The Culinary Theory Group</p>
       <p class="p-help-semibold">180 College ave, New Brunswick, 08901, NJ</p>
