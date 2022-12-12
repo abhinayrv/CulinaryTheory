@@ -590,7 +590,7 @@ exports.getUserNames = function(req, res, next){
 
  var user_ids = req.query.users;
  user_ids = user_ids.split(",");
- console.log(user_ids);
+//  console.log(user_ids);
 
  userprofileModel.find({user_id : {$in : user_ids}},{user_name:1, user_id:1, profile_image:1}, function(err, docs){
 

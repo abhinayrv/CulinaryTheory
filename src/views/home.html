@@ -112,19 +112,25 @@
                   class="h-3-main input-label help-margin-bt-24"
                   >Sign Up</label
                 >
-                <!-- <input
+                <p
+                  class="p-help-semibold err-display-c help-margin-bt-8 display-hide"
+                  id="signup-err-msg"
+                >
+                  * email or password incorrect
+                </p>
+                <input
                   type="text"
                   class="input-box h-5-main-semibold ov-input-box-med help-margin-bt-8"
                   id="user-name-signup"
-                  placeholder="Name"
+                  placeholder="Username"
                   required
-                /> -->
+                />
               </div>
               <div>
                 <input
                   type="email"
                   class="input-box h-5-main-semibold ov-input-box-med help-margin-bt-8"
-                  id="user-email"
+                  id="user-email-signup"
                   placeholder="Enter you email"
                   required
                 />
@@ -133,7 +139,7 @@
                 <input
                   type="password"
                   class="input-box h-5-main-semibold ov-input-box-med help-margin-bt-8"
-                  id="user-password"
+                  id="user-password-signup"
                   placeholder="Enter your password"
                   required
                 />
@@ -142,14 +148,14 @@
                 <input
                   type="password"
                   class="input-box h-5-main-semibold ov-input-box-med help-margin-bt-8"
-                  id="user-password"
+                  id="user-password-signup-confirm"
                   placeholder="Confirm password"
                   required
                 />
               </div>
             </div>
             <div class="ov-btn-list flex-column">
-              <button class="btn h-5-main-semibold" id="login-btn">
+              <button class="btn h-5-main-semibold" id="signup-btn">
                 Submit
               </button>
             </div>

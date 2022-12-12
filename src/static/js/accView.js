@@ -68,9 +68,188 @@ const accountBtn = document.getElementById("account-btn");
 
 const editProfileForm = document.querySelector(".edit-profile-form");
 const editFrmClose = document.getElementById("edit-frm-close");
+
+const updatePwdForm = document.querySelector(".update-password-form");
+const updatePwdFormClose = document.getElementById("pwd-frm-close");
+const updatePwdErrDisplay = document.getElementById("pwd-err-msg");
+
+const editProfileName = document.getElementById("user-name");
+const editProfileBio = document.getElementById("user-bio");
+const editProfileImg = document.getElementById("profile-image");
+const editProfileSubmitBtn = document.getElementById("profile-update");
+const editErrDisplay = document.getElementById("edit-err-msg");
+
 editFrmClose.addEventListener("click", function () {
   hideDisplay(editProfileForm);
 });
+
+updatePwdFormClose.addEventListener("click", function () {
+  hideDisplay(updatePwdForm);
+});
+
+async function prefill_profile_form(){
+  editProfileName.value = userProfile.user_name;
+  editProfileBio.value = userProfile.bio_info;
+}
+
+editProfileSubmitBtn.addEventListener("click", function(e){
+  e.preventDefault();
+  complete_update();
+})
+
+async function complete_update(){
+  var username = editProfileName.value;
+  var user_bio = editProfileBio.value;
+  var profile_image = editProfileImg.value;
+  if(!username){
+    console.log("Username empty");
+    editProfileName.focus();
+    editErrDisplay.textContent = "Username cannot be empty";
+    showDisplay(editErrDisplay);
+  } else if(user_bio.length > 300){
+    editProfileBio.focus();
+    editErrDisplay.textContent = "Bio length must be less than 100 character";
+    showDisplay(editErrDisplay);
+  } else if(profile_image){
+    try {
+      var image_url = await upload_image_api(editProfileImg);
+      var profile_json = {
+        user_name: username,
+        bio_info: user_bio || userProfile.bio_info,
+        profile_image: image_url
+      }
+      await update_profile_api(profile_json);
+      await loginSessionCheck();
+      hideDisplay(editErrDisplay);
+      hideDisplay(editProfileForm);
+    } catch (error) {
+      editErrDisplay.textContent = error.message;
+      showDisplay(editErrDisplay);
+    }
+  } else {
+    try {
+      var profile_json = {
+        user_name: username,
+        bio_info: userProfile.bio_info,
+        profile_image: userProfile.profile_image
+      }
+      await update_profile_api(profile_json);
+      await loginSessionCheck();
+      hideDisplay(editErrDisplay);
+      hideDisplay(editProfileForm);
+    } catch (error) {
+      editErrDisplay.textContent = error.message;
+      showDisplay(editErrDisplay);
+    }
+  }
+}
+
+async function upload_image_api(image_input){
+  let file_data = image_input.files[0];
+  let formdata = new FormData();
+  formdata.append("image", file_data);
+  let options = {
+    method: "POST",
+    body: formdata,
+  };
+  let response = await fetch("/api/imageupload", options);
+  let rjson = await response.json();
+  if (response.ok) {
+    return rjson.data.image_url;
+  } else {
+    throw Error(rjson.message);
+  }
+}
+
+async function update_profile_api(profile_json){
+  var options = {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(profile_json)
+  }
+  
+  var response = await fetch("/api/profile/edit", options);
+  var rjson = await response.json();
+
+  if(!response.ok){
+    throw Error(rjson.message);
+  } else{
+    return;
+  }
+}
+
+// Update password section
+const updatePwdBtn = document.getElementById("change-password");
+const updatePwdPassword = document.getElementById("curr-password");
+const updatePwdNewPassword = document.getElementById("new-password");
+const updatePwdConfPassword = document.getElementById("new-password-conf");
+
+updatePwdBtn.addEventListener("click", function(e){
+  e.preventDefault();
+  // updatePwdErrDisplay.textContent = "Update password clicked";
+  // showDisplay(updatePwdErrDisplay);
+  change_password();
+});
+
+async function change_password(){
+  var password = updatePwdPassword.value;
+  var new_password = updatePwdNewPassword.value;
+  var conf_password = updatePwdConfPassword.value;
+
+  if(!password){
+    updatePwdPassword.focus();
+    updatePwdErrDisplay.textContent = "Please enter your current password";
+    showDisplay(updatePwdErrDisplay);
+  } else if(!new_password){
+    updatePwdNewPassword.focus();
+    updatePwdErrDisplay.textContent = "Please enter a new password";
+    showDisplay(updatePwdErrDisplay);
+  } else if(!conf_password){
+    updatePwdConfPassword.focus();
+    updatePwdErrDisplay.textContent = "Please confirm your new password";
+    showDisplay(updatePwdErrDisplay);
+  } else if(new_password !== conf_password){
+    updatePwdNewPassword.focus();
+    updatePwdErrDisplay.textContent = "Passwords do not match";
+    showDisplay(updatePwdErrDisplay);
+  } else {
+
+    try {
+      await update_password_api({password: password, new_password: new_password, verify_password: conf_password});
+      updatePwdErrDisplay.textContent = "Successfully updated the password!";
+      updatePwdErrDisplay.style.color = "#16a085";
+      showDisplay(updatePwdErrDisplay);
+      setTimeout(()=>{
+        hideDisplay(updatePwdForm);
+        updatePwdErrDisplay.style.color = "#be2e3a";
+      }, 2000);
+    } catch (error) {
+      console.log(error);
+      updatePwdPassword.value = updatePwdNewPassword.value = updatePwdConfPassword.value = "";
+      updatePwdPassword.focus();
+      updatePwdErrDisplay.textContent = error.message;
+      showDisplay(updatePwdErrDisplay);
+    }
+
+  }
+}
+
+async function update_password_api(pwd_json){
+  var options = {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(pwd_json)
+  }
+
+  var response = await fetch("/api/auth/updatepassword", options);
+  var rjson = await response.json();
+  if(response.ok){
+    return
+  } else {
+    throw Error(rjson.message);
+  }
+}
+
 //func to activate or deactivate main nav buttons
 const activMainNavbtn = function (btn) {
   btn.classList.add("nav-link-active");
@@ -160,7 +339,10 @@ editProfileBtn.addEventListener("click", function () {
   deactivMainNavbtn(mngSubBtn);
   deactivMainNavbtn(logoutBtn);
 
+  
+  prefill_profile_form();
   showDisplay(editProfileForm);
+  hideDisplay(editErrDisplay);
   //rest of the functions
 });
 
@@ -171,6 +353,8 @@ changePassBtn.addEventListener("click", function () {
   deactivMainNavbtn(mngSubBtn);
   deactivMainNavbtn(logoutBtn);
 
+  showDisplay(updatePwdForm);
+  hideDisplay(updatePwdErrDisplay);
   //rest of the functions
 });
 mngSubBtn.addEventListener("click", function () {

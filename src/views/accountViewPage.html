@@ -46,11 +46,16 @@
                     class="h-3-main input-label help-margin-bt-24"
                     >Edit Profile</label
                   >
+                  <p
+                  class="p-help-semibold err-display-c help-margin-bt-8 display-hide"
+                  id="edit-err-msg"
+                >
+                </p>
 
                   <input
                     type="text"
                     class="input-box h-5-main-semibold ov-input-box-med help-margin-bt-16"
-                    id="user-email"
+                    id="user-name"
                     placeholder="Name"
                     required
                   />
@@ -62,9 +67,9 @@
                   <input
                     type="text"
                     class="input-box h-5-main-semibold ov-input-box-med help-margin-bt-8"
-                    id="user-password"
+                    id="user-bio"
                     placeholder="About Me"
-                    required
+                    
                   />
                 </div>
                 
@@ -78,17 +83,74 @@
                   class="btn-upload h-5-main-semibold"
                   id="profile-image"
                   placeholder="profile-image"
-                  required
+                  
                 />
               </div>
               <div class="btn-list flex-row">
-                <button class="btn h-5-main-bold">Update</button>
+                <button class="btn h-5-main-bold" id="profile-update">Update</button>
+              </div>
+            </form>
+          </div>
+        </section>
+        <!-- ------------------- Update Password ------------------- -->
+        <section class="update-password-form overlay-display display-hide">
+          <div class="container-background ov-container flex-column">
+            <div class="ov-close-btn-box flex-row">
+              <div class="material-icons form-btn-icon" id="pwd-frm-close">
+                cancel
+              </div>
+            </div>
+            <form class="flex-column ov-form formalign" action="#">
+              <div class="help-margin-bt-32">
+                <div>
+                  <label
+                    for="user-email"
+                    class="h-3-main input-label help-margin-bt-24"
+                    >Update Password</label
+                  >
+                  <p
+                  class="p-help-semibold err-display-c help-margin-bt-8 display-hide"
+                  id="pwd-err-msg"
+                >
+                </p>
+
+                  <input
+                    type="password"
+                    class="input-box h-5-main-semibold ov-input-box-med help-margin-bt-16"
+                    id="curr-password"
+                    placeholder="Password"
+                    required
+                  />
+                </div>
+                <div>
+                  <input
+                    type="password"
+                    class="input-box h-5-main-semibold ov-input-box-med help-margin-bt-8"
+                    id="new-password"
+                    placeholder="New Password"
+                    
+                  />
+                </div>
+
+                <div>
+                  <input
+                    type="password"
+                    class="input-box h-5-main-semibold ov-input-box-med help-margin-bt-8"
+                    id="new-password-conf"
+                    placeholder="Confirm Password"
+                    
+                  />
+                </div>
+                
+              <div class="btn-list flex-row">
+                <button class="btn h-5-main-bold" id="change-password">Update</button>
               </div>
             </form>
           </div>
         </section>
 
         <header class="header section-spacing-bt">
+
           <!-- ------------------- Main Navigation Bar ------------------- -->
           <div class="main-nav-bar flex-row nav-bar-flex help-margin-bt-24">
             <a href="#" class="logo-nav-bar">

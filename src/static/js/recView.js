@@ -183,9 +183,11 @@ function renderComments(data) {
   commentsContainer.insertAdjacentHTML("afterbegin", innerHTML);
 }
 
-viewBtn.addEventListener("click", function () {
+const makingPrivate = function () {
   make_private(recipeJson);
-});
+}
+
+viewBtn.addEventListener("click", makingPrivate);
 
 deleteBtn.addEventListener("click", function () {
   delete_recipe(recipe_id);
@@ -197,8 +199,13 @@ function uiUpdate() {
     deleteBtn.classList.remove("display-hide");
     if (userProfile.is_premium) {
       viewBtn.classList.remove("display-hide");
+      viewIcon.classList.remove("rv-icon-btn-disabled");
+      viewIcon.classList.add("rv-icon-btn");
+      viewBtn.addEventListener('click',makingPrivate)
     } else {
-      viewBtn.disabled = true;
+      viewIcon.classList.add("rv-icon-btn-disabled");
+      viewIcon.classList.remove("rv-icon-btn");
+      viewBtn.removeEventListener('click',makingPrivate);
     }
   } else {
     deleteBtn.classList.add("display-hide");

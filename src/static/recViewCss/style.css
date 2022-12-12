@@ -91,6 +91,11 @@
   cursor: pointer;
 }
 
+.rv-icon-btn-disabled{
+  font-size: 3.2rem;
+  cursor: not-allowed;
+  color:#a39f99 !important;
+}
 .rv-red {
   color: #f48892;
 }

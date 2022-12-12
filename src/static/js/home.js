@@ -100,18 +100,104 @@ const userPasswordInput = document.getElementById("user-password");
 const loginBtn = document.getElementById("login-btn");
 const signupOpenBtn = document.getElementById("signup-open-btn");
 
+
+const signupForm = document.querySelector(".signup-ov");
+const signupFormClose = document.getElementById("signup-frm-close");
+const signupBtn = document.getElementById("signup-btn");
+const signupEmail = document.getElementById("user-email-signup");
+const signupPwd = document.getElementById("user-password-signup");
+const signupPwdConf = document.getElementById("user-password-signup-confirm");
+const signupErrDisplay = document.getElementById("signup-err-msg");
+const signupName = document.getElementById("user-name-signup");
+
 signupOpenBtn.addEventListener("click", function (e) {
   e.preventDefault();
   hideDisplay(loginSection);
   showDisplay(signupForm);
+  hideDisplay(signupErrDisplay)
 });
 
-const signupForm = document.querySelector(".signup-ov");
-const signupFormClose = document.getElementById("signup-frm-close");
 signupFormClose.addEventListener("click", function (e) {
   e.preventDefault();
   hideDisplay(signupForm);
 });
+
+signupBtn.addEventListener("click", function(e){
+  e.preventDefault();
+  complete_sigup();
+})
+
+async function complete_sigup(){
+  var email = signupEmail.value;
+  var pwd = signupPwd.value;
+  var confpwd = signupPwdConf.value;
+  var username = signupName.value;
+  if(!username){
+    signupName.focus();
+    signupErrDisplay.textContent = "Please enter username";
+    showDisplay(signupErrDisplay);
+  } else if(!email){
+    signupEmail.focus();
+    signupErrDisplay.textContent = "Please enter your email id";
+    showDisplay(signupErrDisplay);
+  } else if(!pwd){
+    signupPwd.focus();
+    signupErrDisplay.textContent = "Please enter a password";
+    showDisplay(signupErrDisplay);
+  } else if(!confpwd) {
+    signupPwdConf.focus();
+    signupErrDisplay.textContent = "Confirm password is empty";
+    showDisplay(signupErrDisplay);
+  } else if (pwd != confpwd){
+    signupPwd.focus();
+    signupPwdConf.focus();
+    signupErrDisplay.textContent = "Passwords do not match!";
+    showDisplay(signupErrDisplay);
+  } else{
+    try {
+      await register_api({email: email, password: pwd});
+      await create_profile_api({user_name: username, bio_info: ""});
+      window.location.reload();
+    } catch(err){
+      console.log("error", err.message);
+      signupEmail.value = signupPwd.value = signupPwdConf.value = signupName.value = "";
+      signupName.focus();
+      signupErrDisplay.textContent = err.message;
+      showDisplay(signupErrDisplay);
+    }
+  }
+}
+
+async function register_api(user_json){
+  var options = {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(user_json)
+  }
+  var response = await fetch('/api/register', options);
+  var rjson = await response.json();
+  if(response.ok){
+    return;
+  } else{
+    throw Error(rjson.message);
+  }
+}
+
+async function create_profile_api(profile_json){
+  var options = {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(profile_json)
+  }
+  var response = await fetch('/api/profile/create', options);
+  var rjson = await response.json();
+  if(response.ok){
+    return;
+  } else{
+    console.log("Profile not created");
+    console.log(rjson.message);
+  }
+}
 
 const doLogin = async function () {
   let emailId = userEmailInput.value;
