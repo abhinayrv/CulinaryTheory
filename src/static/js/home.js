@@ -101,6 +101,8 @@ const loginBtn = document.getElementById("login-btn");
 const signupOpenBtn = document.getElementById("signup-open-btn");
 
 
+
+
 const signupForm = document.querySelector(".signup-ov");
 const signupFormClose = document.getElementById("signup-frm-close");
 const signupBtn = document.getElementById("signup-btn");
@@ -110,11 +112,44 @@ const signupPwdConf = document.getElementById("user-password-signup-confirm");
 const signupErrDisplay = document.getElementById("signup-err-msg");
 const signupName = document.getElementById("user-name-signup");
 
+const signInOpenBtn = document.getElementById("signin-open-btn");
+const signInOpenBtnReset = document.getElementById("signin-open-btn-reset");
+const resetOpenBtn = document.getElementById("forgot-password-btn");
+const resetForm = document.querySelector(".reset-ov");
+const resetErrDisplay = document.getElementById("reset-err-msg");
+const resetCloseBtn = document.getElementById("reset-frm-close");
+
+resetCloseBtn.addEventListener("click", function(e){
+  e.preventDefault();
+  hideDisplay(resetForm);
+})
+
+resetOpenBtn.addEventListener("click", function(e){
+  e.preventDefault();
+  hideDisplay(loginSection);
+  showDisplay(resetForm);
+  hideDisplay(resetErrDisplay)
+});
+
+signInOpenBtnReset.addEventListener("click", function(e){
+  e.preventDefault();
+  hideDisplay(resetForm);
+  showDisplay(loginSection);
+  hideDisplay(loginErrDisplay);
+});
+
+signInOpenBtn.addEventListener("click", function(e){
+  e.preventDefault();
+  hideDisplay(signupForm);
+  showDisplay(loginSection);
+  hideDisplay(loginErrDisplay);
+});
+
 signupOpenBtn.addEventListener("click", function (e) {
   e.preventDefault();
   hideDisplay(loginSection);
   showDisplay(signupForm);
-  hideDisplay(signupErrDisplay)
+  hideDisplay(signupErrDisplay);
 });
 
 signupFormClose.addEventListener("click", function (e) {
@@ -127,6 +162,57 @@ signupBtn.addEventListener("click", function(e){
   complete_sigup();
 })
 
+// Reset password logic
+const resetSubmitBtn = document.getElementById("reset-btn");
+const resetEmail = document.getElementById("user-email-reset");
+
+resetSubmitBtn.addEventListener("click", function(e){
+  e.preventDefault();
+  reset_password();
+})
+
+async function reset_password(){
+  var email = resetEmail.value;
+  if(!email){
+    resetEmail.focus();
+    resetErrDisplay.textContent = "Please enter your email address";
+    showDisplay(resetErrDisplay);
+  } else {
+    try {
+      var message = await call_reset_api({email: email});
+      resetErrDisplay.textContent = message;
+      resetErrDisplay.style.color = "#16a085";
+      showDisplay(resetErrDisplay);
+      setTimeout(()=>{
+        hideDisplay(resetForm);
+        resetErrDisplay.style.color = "#be2e3a";
+      }, 2000);
+    } catch(error) {
+      console.log(error)
+      resetEmail.focus();
+      resetErrDisplay.textContent = error.message;
+      showDisplay(resetErrDisplay);
+    }
+  }
+}
+
+async function call_reset_api(reset_json){
+  var options = {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(reset_json)
+  }
+
+  var response = await fetch("/api/auth/resetemail", options);
+  var rjson = await response.json();
+  if(response.ok){
+    return rjson.message;
+  } else{
+    throw Error(rjson.message);
+  }
+}
+
+// Sign up logic
 async function complete_sigup(){
   var email = signupEmail.value;
   var pwd = signupPwd.value;

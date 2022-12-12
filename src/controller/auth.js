@@ -152,7 +152,7 @@ exports.resetPasswordEmail = function(req, res, next) {
     if (!user) {
         
       console.log("User not found");
-      return response.sendUnauthorized(res, "Incorrect username or password");
+      return response.sendUnauthorized(res, "No acount with given email");
 
     } 
 
