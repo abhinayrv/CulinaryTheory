@@ -7,16 +7,17 @@ const DraftSchema = new Schema({
         type: String,
         required: true
     },
-    image_url: String,
+    image_url: {type: String, default: ""},
     title: {type:String,required:true},
-    description: String,
-    tags: {type:[String], validate: [tagsValid, '{PATH} does not meet requirements.']},
+    description: {type: String, defaut: ""},
+    tags: {type:[String], validate: [tagsValid, '{PATH} does not meet requirements.'], default:[]},
     steps: {
         type: [{
             step_no: {type:Number},
             step: {type:String}
     }],
         validate: [stepsValid, '{PATH} does not meet requirements.'],
+        default: []
     },
     ingredients: {
         type: [{
@@ -24,13 +25,14 @@ const DraftSchema = new Schema({
             ingredient: {type:String},
             quantity: {type:String},
         }],
-        validate: [ingredsValid, '{PATH} does not meet requirements.']
+        validate: [ingredsValid, '{PATH} does not meet requirements.'],
+        default: []
     },
-    dietary_preferences: {type:String},
+    dietary_preferences: {type:String, default:""},
     prep_time: {
         type:String,
-        enum: ['0-30', '30-60', '60-90', '>90']},
-    cuisine: String,
+        enum: ['0-30', '30-60', '60-90', '>90', '']},
+    cuisine: {type: String, default:""},
     is_public: {type:Boolean,default:true},
     user_id: {type:String, required:true}
 },
