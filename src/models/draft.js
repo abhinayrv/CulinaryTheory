@@ -29,7 +29,6 @@ const DraftSchema = new Schema({
     dietary_preferences: {type:String},
     prep_time: {
         type:String,
-        required:true,
         enum: ['0-30', '30-60', '60-90', '>90']},
     cuisine: String,
     is_public: {type:Boolean,default:true},
