@@ -942,6 +942,12 @@ const loginSessionCheck = async function () {
     initCheckOnLogin();
   } catch (error) {
     console.log(error.message);
+  } finally {
+    updateMainNav();
+    await getRecipe(recipe_id);
+    commentsUi();
+
+    initCheckOnLogin();
   }
 };
 
