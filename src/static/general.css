@@ -576,7 +576,11 @@ body {
   color: #f48892;
 }
 .bookmark-icon {
-  color: #f6c484;
+  color: #ed8909;
+}
+
+.icon-color {
+  color: #ed8909;
 }
 
 .rc-food-type-indicate {

@@ -126,6 +126,9 @@
 .Subscription {
   gap: 5rem;
 }
+.Subscription .container-background {
+  padding: 4.8rem;
+}
 .price-style {
   color: #d57b08;
 }
@@ -136,7 +139,7 @@
   justify-content: center;
   overflow: hidden;
 }
-.features-list{
+.features-list {
   list-style: none;
 }
 
@@ -148,7 +151,8 @@
   direction: ltr;
 }
 .subscription-card {
-  margin-left: 40rem;
+  /* margin-left: 40rem; */
+  margin: 0 auto;
   width: 35.8rem;
   gap: 2.4rem;
   border-radius: 2.4rem;

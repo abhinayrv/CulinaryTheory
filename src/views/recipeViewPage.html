@@ -95,7 +95,130 @@
           </form>
         </div>
       </section>
+      <!-- ------------------- Signup Display ------------------- -->
+      <section class="signup-ov overlay-display display-hide">
+        <div class="container-background ov-container flex-column">
+          <div class="ov-close-btn-box flex-row">
+            <div class="material-icons form-btn-icon" id="signup-frm-close">
+              cancel
+            </div>
+          </div>
+          <form class="flex-column ov-form formalign" action="#">
+            <div class="help-margin-bt-32">
+              <div>
+                <label
+                  for="user-name-signup"
+                  class="h-3-main input-label help-margin-bt-24"
+                  >Sign Up</label
+                >
+                <p
+                  class="p-help-semibold err-display-c help-margin-bt-8 display-hide"
+                  id="signup-err-msg"
+                >
+                  * email or password incorrect
+                </p>
+                <input
+                  type="text"
+                  class="input-box h-5-main-semibold ov-input-box-med help-margin-bt-8"
+                  id="user-name-signup"
+                  placeholder="Username"
+                  required
+                />
+              </div>
+              <div>
+                <input
+                  type="email"
+                  class="input-box h-5-main-semibold ov-input-box-med help-margin-bt-8"
+                  id="user-email-signup"
+                  placeholder="Enter you email"
+                  required
+                />
+              </div>
+              <div>
+                <input
+                  type="password"
+                  class="input-box h-5-main-semibold ov-input-box-med help-margin-bt-8"
+                  id="user-password-signup"
+                  placeholder="Enter your password"
+                  required
+                />
+              </div>
+              <div>
+                <input
+                  type="password"
+                  class="input-box h-5-main-semibold ov-input-box-med help-margin-bt-8"
+                  id="user-password-signup-confirm"
+                  placeholder="Confirm password"
+                  required
+                />
+              </div>
+            </div>
+            <div class="ov-btn-list flex-column">
+              <button class="btn h-5-main-semibold" id="signup-btn">
+                SignUp
+              </button>
+              <p class="constraint-label p-help-semibold">
+                Already have an account?&nbsp;
+                <a
+                  class="p-help-semibold nav-item-link ov-links-c"
+                  href="#"
+                  id="signin-open-btn"
+                  >Sign In</a
+                >
+              </p>
+            </div>
+          </form>
+        </div>
+      </section>
 
+      <!-- ------------------- reset password ------------------- -->
+
+      <section class="reset-ov overlay-display display-hide">
+        <div class="container-background ov-container flex-column">
+          <div class="ov-close-btn-box flex-row">
+            <div class="material-icons form-btn-icon" id="reset-frm-close">
+              cancel
+            </div>
+          </div>
+          <form class="flex-column ov-form formalign" action="#">
+            <div class="help-margin-bt-32">
+              <div>
+                <label
+                  for="user-name-signup"
+                  class="h-3-main input-label help-margin-bt-24"
+                  >Reset Password</label
+                >
+                <p
+                  class="p-help-semibold err-display-c help-margin-bt-8 display-hide"
+                  id="reset-err-msg"
+                ></p>
+                <input
+                  type="text"
+                  class="input-box h-5-main-semibold ov-input-box-med help-margin-bt-8"
+                  id="user-email-reset"
+                  placeholder="email"
+                  required
+                />
+              </div>
+            </div>
+            <div class="ov-btn-list flex-column">
+              <button class="btn h-5-main-semibold" id="reset-btn">
+                Submit
+              </button>
+              <p class="constraint-label p-help-semibold">
+                <a
+                  class="p-help-semibold nav-item-link ov-links-c"
+                  href="#"
+                  id="signin-open-btn-reset"
+                  >Sign In</a
+                >
+              </p>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- ------------------- Error message popup ------------------- -->
       <div class="error-popup-box flex-row display-hide" id="error-popup">
         <p class="h-4-help-medium" id="error-popup-msg">
           This is to display error message
@@ -104,7 +227,7 @@
           cancel
         </div>
       </div>
-
+      <!-- ------------------- report recipe popup ------------------- -->
       <section class="for-report-recipe overlay-display display-hide">
         <div class="container-background ov-container flex-column">
           <div class="ov-close-btn-box report-pop-close flex-row">
@@ -344,7 +467,7 @@
                       </div>
                     </div>
 
-                    <div class="rv-edit flex-row display-hide">
+                    <div class="rv-edit flex-row">
                       <div class="material-icons rv-orange rv-icon-btn">
                         edit
                       </div>
@@ -411,7 +534,7 @@
               <div class="rv-directions rv-txt-width">
                 <p class="h-3-main help-margin-bt-16">Directions</p>
                 <div class="rv-directions-container flex-column">
-                  <div class="rv-step-row help-margin-bt-8">
+                  <div class="rv-step-row">
                     <p class="step-num h-5-main-bold">Step 1</p>
                     <p class="step-cont p-main-reg">
                       Aliqua id fugiat nostrud irure ex duis ea quis id quis ad
@@ -446,7 +569,12 @@
 
               <div class="commenting-box flex-row help-margin-bt-48">
                 <div class="co-user-img-container">
-                  <img src="" alt="user photo" class="user-img" />
+                  <img
+                    src=""
+                    alt="user photo"
+                    class="user-img"
+                    id="comment-box-user-img"
+                  />
                 </div>
                 <input
                   type="text"

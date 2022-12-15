@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Profile View Page | Culinary Theory</title>
+    <title>Account View Page | Culinary Theory</title>
 
     <!-- Fonts Inclusion -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -24,6 +24,7 @@
     <!-- css style sheets Inclusion -->
     <link href="/general.css" rel="stylesheet" />
     <link href="/accCss/style.css" rel="stylesheet" />
+    <script defer src="/js/profView.js"></script>
   </head>
   <body>
     <div class="page-container flex-column">
@@ -113,55 +114,70 @@
             <nav class="nav-bar">
               <ul class="nav-list flex-row nav-list-flex h-5-main-bold">
                 <li class="nav-list-item">
-                  <a href="./../homePage/home.html" class="nav-item-link"
+                  <a href="#" class="nav-item-link" id="home-btn"
                     ><p>Home</p></a
                   >
                 </li>
                 <li class="nav-list-item">
-                  <a href="#" class="nav-item-link"><p>About Us</p></a>
+                  <a href="#" class="nav-item-link" id="about-us-btn"
+                    ><p>About Us</p></a
+                  >
                 </li>
                 <li class="nav-list-item">
                   <a
-                    href="./../createRecipePage/createRecipe.html"
+                    href="#"
                     class="nav-item-link flex-row nav-item-flex"
+                    id="recipe-create-btn"
                   >
                     <div class="material-icons nav-item-icon">add_circle</div>
                     <p>Recipe</p>
                   </a>
                 </li>
-                <li class="nav-list-item nav-item-hide">
-                  <a href="#" class="nav-item-link"><p>Login/SignUp</p></a>
+                <li class="nav-list-item display-hide">
+                  <a href="#" class="nav-item-link" id="login-signup-btn"
+                    ><p>Login/SignUp</p></a
+                  >
                 </li>
                 <li class="nav-list-item">
-                  <a href="#" class="nav-item-link flex-row nav-item-flex"
-                    ><div class="nav-item-img-container">
+                  <a
+                    href="#"
+                    class="nav-item-link flex-row nav-item-flex nav-link-active"
+                    id="account-btn"
+                    ><div class="nav-item-img-container" id="nav-user-img-ct">
                       <img
                         class="nav-item-img"
+                        id="nav-user-img"
                         src="../img/people/aiony-haust-3TLl_97HNJo-unsplash.jpg"
                         alt="Photo of the user"
                       />
                     </div>
-                    <p>Account Name</p></a
+                    <p id="nav-auth-name">Account Name</p></a
                   >
                 </li>
               </ul>
             </nav>
           </div>
+
+          <!-- ------------------- Secondary Navigation Bar ------------------- -->
         </header>
         <main class="section-spacing-bt">
           <!-- ------------------- Profile display & Section Navigation bar ------------------- -->
-          <header class="section-nav-header container">
+          <header class="section-nav-header container help-margin-bt-32">
+            <!-- <h1 class="h-1-main header-title help-margin-bt-32">
+              Create your recipe
+            </h1> -->
             <div class="profile-display-box flex-row section-spacing-bt">
               <div class="profile-image-container">
                 <img
                   class="profile-image"
+                  id="prof-auth-img"
                   src="./../img/people/aiony-haust-3TLl_97HNJo-unsplash.jpg"
                   alt="Cameron Williamson Image"
                 />
               </div>
               <div class="profile-details-container flex-column">
-                <p class="h-3-main">Camerom Williamson</p>
-                <p class="h-5-main-semibold">
+                <p class="h-3-main" id="prof-auth-name">Camerom Williamson</p>
+                <p class="h-5-main-semibold" id="prof-auth-bio">
                   Lorem ipsum dolor sit amet consectetur, adipisicing elit.
                   Quas, veritatis fugit? Iure explicabo, ipsam at architecto
                   molestias consequatur minima incidunt rem nesciunt non est
@@ -171,16 +187,19 @@
             </div>
           </header>
           <!-- ------------------- Section User Recipe Display ------------------- -->
-
-          <section class="section-rc-display container container-background">
-            <div class="rc-grid">
-              <!-- ------------------- Card 1 ------------------- -->
+          <!-- ---------- Section My Recipes ---------- -->
+          <section
+            class="section-rc-display container container-background"
+            id="my-recipes"
+          >
+            <div class="rc-grid js-search-rc-box help-margin-bt-48">
+              <!-- ---------------- Card 1 - Default Recipe Card ---------------- -->
               <a href="#" class="recipe-card-btn">
                 <div class="recipe-card flex-column">
                   <!-- ------------------- Image ------------------- -->
                   <div class="rc-image-container">
                     <img
-                      src="./../img/food/benjamin-zanatta-XHDkktJAv1U-unsplash.jpg"
+                      src="./../img/placeHolderImage.jpeg"
                       alt="Photo of food"
                       class="rc-food-image"
                     />
@@ -189,25 +208,28 @@
                   <div class="rc-content-container flex-column">
                     <div class="rc-title-container">
                       <p class="rc-title p-main-semibold">
-                        Norwegian Seafood Burgers
+                        No recipes to display
                       </p>
                     </div>
-                    <!-- <div class="rc-author-details flex-row">
-                    <div class="rc-auth-img-container">
-                      <img
-                        src="./../img/people/albert-dera-ILip77SbmOE-unsplash.jpg"
-                        alt="Photo of Author"
-                        class="rc-auth-image"
-                      />
+                    <div class="rc-author-details flex-row">
+                      <div class="rc-auth-img-container">
+                        <img
+                          src="./../img/personPHpreview.jpeg"
+                          alt="Photo of Author"
+                          class="rc-auth-image"
+                        />
+                      </div>
+                      <p class="rc-auth-name p-main-semibold">
+                        The Culinary Theory
+                      </p>
                     </div>
-                    <p class="rc-auth-name p-main-semibold">Guy Hawkins</p>
-                  </div> -->
                     <div class="rc-action-btns flex-row">
                       <div class="rc-action-set flex-row">
                         <div class="like-box flex-row">
                           <p class="like-count p-main-semibold">0</p>
                           <div>
-                            <span class="material-icons-outlined like-icon"
+                            <span
+                              class="material-icons-outlined like-icon rc-noRecipe-c"
                               >thumb_up</span
                             >
                             <span
@@ -219,7 +241,8 @@
                         <div class="dislike-box flex-row">
                           <p class="dislike-count p-main-semibold">0</p>
                           <div>
-                            <span class="material-icons-outlined dislike-icon"
+                            <span
+                              class="material-icons-outlined dislike-icon rc-noRecipe-c"
                               >thumb_down</span
                             >
                             <span
@@ -231,7 +254,8 @@
                       </div>
                       <div class="rc-action-set flex-row">
                         <div class="rc_action_link">
-                          <span class="material-icons-outlined bookmark-icon"
+                          <span
+                            class="material-icons-outlined bookmark-icon rc-noRecipe-c"
                             >bookmark_outline</span
                           >
                           <span
@@ -243,87 +267,33 @@
                     </div>
                   </div>
                   <!-- ------------------- Recipe Indicator ------------------- -->
-                  <div class="rc-food-type-indicate rc-nonveg"></div>
+                  <div class="rc-food-type-indicate rc-noRecipe"></div>
                 </div>
               </a>
               <!-- ------------------- Card 2 ------------------- -->
+            </div>
+            <div class="btn-list flex-row">
+              <p class="h-5-main-semibold js-load-more-msg display-hide">
+                No more results
+              </p>
+              <button class="btn h-5-main-bold js-load-more-btn">
+                Load More
+              </button>
+            </div>
+          </section>
+          <!-- ---------- Section Saved Recipes ---------- -->
+          <section
+            class="section-rc-display container container-background display-hide"
+            id="saved-recipes"
+          >
+            <div class="rc-grid js-search-rc-box help-margin-bt-48">
+              <!-- ---------------- Card 1 - Default Recipe Card ---------------- -->
               <a href="#" class="recipe-card-btn">
                 <div class="recipe-card flex-column">
                   <!-- ------------------- Image ------------------- -->
                   <div class="rc-image-container">
                     <img
-                      src="./../img/food/ben-kolde-FFqNATH27EM-unsplash.jpg"
-                      alt="Photo of food"
-                      class="rc-food-image"
-                    />
-                  </div>
-                  <!-- ------------------- Recipe content ------------------- -->
-                  <div class="rc-content-container flex-column">
-                    <div class="rc-title-container">
-                      <p class="rc-title p-main-semibold">Avacado Egg Toast</p>
-                    </div>
-                    <!-- <div class="rc-author-details flex-row">
-                      <div class="rc-auth-img-container">
-                        <img
-                          src="./../img/people/edward-cisneros-_H6wpor9mjs-unsplash.jpg"
-                          alt="Photo of Author"
-                          class="rc-auth-image"
-                        />
-                      </div>
-                      <p class="rc-auth-name p-main-semibold">
-                        Kristin Watson
-                      </p>
-                    </div> -->
-                    <div class="rc-action-btns flex-row">
-                      <div class="rc-action-set flex-row">
-                        <div class="like-box flex-row">
-                          <p class="like-count p-main-semibold">0</p>
-                          <div>
-                            <span class="material-icons-outlined like-icon"
-                              >thumb_up</span
-                            >
-                            <span
-                              class="material-icons like-icon icon-inactive icon-filled"
-                              >thumb_up</span
-                            >
-                          </div>
-                        </div>
-                        <div class="dislike-box flex-row">
-                          <p class="dislike-count p-main-semibold">0</p>
-                          <div>
-                            <span class="material-icons-outlined dislike-icon"
-                              >thumb_down</span
-                            >
-                            <span
-                              class="material-icons dislike-icon icon-inactive icon-filled"
-                              >thumb_down</span
-                            >
-                          </div>
-                        </div>
-                      </div>
-                      <div class="rc-action-set flex-row">
-                        <div class="rc_action_link">
-                          <span class="material-icons-outlined bookmark-icon"
-                            >bookmark_outline</span
-                          >
-                          <span
-                            class="material-icons bookmark-icon icon-filled icon-inactive"
-                            >bookmark</span
-                          >
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="rc-food-type-indicate rc-egg"></div>
-                </div>
-              </a>
-              <!-- ------------------- Card 3 ------------------- -->
-              <a href="#" class="recipe-card-btn">
-                <div class="recipe-card flex-column">
-                  <!-- ------------------- Image ------------------- -->
-                  <div class="rc-image-container">
-                    <img
-                      src="./../img/food/joseph-gonzalez-zcUgjyqEwe8-unsplash.jpg"
+                      src="./../img/placeHolderImage.jpeg"
                       alt="Photo of food"
                       class="rc-food-image"
                     />
@@ -332,27 +302,28 @@
                   <div class="rc-content-container flex-column">
                     <div class="rc-title-container">
                       <p class="rc-title p-main-semibold">
-                        Brioche French Toast
+                        No recipes to display
                       </p>
                     </div>
-                    <!-- <div class="rc-author-details flex-row">
+                    <div class="rc-author-details flex-row">
                       <div class="rc-auth-img-container">
                         <img
-                          src="./../img/people/aiony-haust-3TLl_97HNJo-unsplash.jpg"
+                          src="./../img/personPHpreview.jpeg"
                           alt="Photo of Author"
                           class="rc-auth-image"
                         />
                       </div>
                       <p class="rc-auth-name p-main-semibold">
-                        Cameron Williamson
+                        The Culinary Theory
                       </p>
-                    </div> -->
+                    </div>
                     <div class="rc-action-btns flex-row">
                       <div class="rc-action-set flex-row">
                         <div class="like-box flex-row">
                           <p class="like-count p-main-semibold">0</p>
                           <div>
-                            <span class="material-icons-outlined like-icon"
+                            <span
+                              class="material-icons-outlined like-icon rc-noRecipe-c"
                               >thumb_up</span
                             >
                             <span
@@ -364,7 +335,8 @@
                         <div class="dislike-box flex-row">
                           <p class="dislike-count p-main-semibold">0</p>
                           <div>
-                            <span class="material-icons-outlined dislike-icon"
+                            <span
+                              class="material-icons-outlined dislike-icon rc-noRecipe-c"
                               >thumb_down</span
                             >
                             <span
@@ -376,7 +348,8 @@
                       </div>
                       <div class="rc-action-set flex-row">
                         <div class="rc_action_link">
-                          <span class="material-icons-outlined bookmark-icon"
+                          <span
+                            class="material-icons-outlined bookmark-icon rc-noRecipe-c"
                             >bookmark_outline</span
                           >
                           <span
@@ -388,16 +361,33 @@
                     </div>
                   </div>
                   <!-- ------------------- Recipe Indicator ------------------- -->
-                  <div class="rc-food-type-indicate rc-veg"></div>
+                  <div class="rc-food-type-indicate rc-noRecipe"></div>
                 </div>
               </a>
-              <!-- ------------------- Card 4 ------------------- -->
+              <!-- ------------------- Card 2 ------------------- -->
+            </div>
+            <div class="btn-list flex-row">
+              <p class="h-5-main-semibold js-load-more-msg display-hide">
+                No more Search results
+              </p>
+              <button class="btn h-5-main-bold js-load-more-btn">
+                Load More
+              </button>
+            </div>
+          </section>
+          <!-- ---------- Section Draft Recipes ---------- -->
+          <section
+            class="section-rc-display container container-background display-hide"
+            id="draft-recipes"
+          >
+            <div class="rc-grid js-search-rc-box help-margin-bt-48">
+              <!-- ---------------- Card 1 - Default Recipe Card ---------------- -->
               <a href="#" class="recipe-card-btn">
                 <div class="recipe-card flex-column">
                   <!-- ------------------- Image ------------------- -->
                   <div class="rc-image-container">
                     <img
-                      src="./../img/food/randy-fath-SQ20tWzxXO0-unsplash.jpg"
+                      src="./../img/placeHolderImage.jpeg"
                       alt="Photo of food"
                       class="rc-food-image"
                     />
@@ -406,99 +396,28 @@
                   <div class="rc-content-container flex-column">
                     <div class="rc-title-container">
                       <p class="rc-title p-main-semibold">
-                        Banana Cinnamon French Toast
+                        No recipes to display
                       </p>
                     </div>
-                    <!-- <div class="rc-author-details flex-row">
+                    <div class="rc-author-details flex-row">
                       <div class="rc-auth-img-container">
                         <img
-                          src="./../img/people/jimmy-fermin-bqe0J0b26RQ-unsplash.jpg"
-                          alt="Photo of Author"
-                          class="rc-auth-image"
-                        />
-                      </div>
-                      <p class="rc-auth-name p-main-semibold">Jenny Wilson</p>
-                    </div> -->
-                    <div class="rc-action-btns flex-row">
-                      <div class="rc-action-set flex-row">
-                        <div class="like-box flex-row">
-                          <p class="like-count p-main-semibold">0</p>
-                          <div>
-                            <span class="material-icons-outlined like-icon"
-                              >thumb_up</span
-                            >
-                            <span
-                              class="material-icons like-icon icon-inactive icon-filled"
-                              >thumb_up</span
-                            >
-                          </div>
-                        </div>
-                        <div class="dislike-box flex-row">
-                          <p class="dislike-count p-main-semibold">0</p>
-                          <div>
-                            <span class="material-icons-outlined dislike-icon"
-                              >thumb_down</span
-                            >
-                            <span
-                              class="material-icons dislike-icon icon-inactive icon-filled"
-                              >thumb_down</span
-                            >
-                          </div>
-                        </div>
-                      </div>
-                      <div class="rc-action-set flex-row">
-                        <div class="rc_action_link">
-                          <span class="material-icons-outlined bookmark-icon"
-                            >bookmark_outline</span
-                          >
-                          <span
-                            class="material-icons bookmark-icon icon-filled icon-inactive"
-                            >bookmark</span
-                          >
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <!-- ------------------- Recipe Indicator ------------------- -->
-                  <div class="rc-food-type-indicate rc-egg"></div>
-                </div>
-              </a>
-              <!-- ------------------- Card 5 ------------------- -->
-              <a href="#" class="recipe-card-btn">
-                <div class="recipe-card flex-column">
-                  <!-- ------------------- Image ------------------- -->
-                  <div class="rc-image-container">
-                    <img
-                      src="./../img/food/laura-lanckriet-z32XV0TGSzc-unsplash.jpg"
-                      alt="Photo of food"
-                      class="rc-food-image"
-                    />
-                  </div>
-                  <!-- ------------------- Recipe content ------------------- -->
-                  <div class="rc-content-container flex-column">
-                    <div class="rc-title-container">
-                      <p class="rc-title p-main-semibold">
-                        Fried rice with chicken
-                      </p>
-                    </div>
-                    <!-- <div class="rc-author-details flex-row">
-                      <div class="rc-auth-img-container">
-                        <img
-                          src="./../img/people/aiony-haust-3TLl_97HNJo-unsplash.jpg"
+                          src="./../img/personPHpreview.jpeg"
                           alt="Photo of Author"
                           class="rc-auth-image"
                         />
                       </div>
                       <p class="rc-auth-name p-main-semibold">
-                        Cameron Williamson
+                        The Culinary Theory
                       </p>
-                    </div> -->
+                    </div>
                     <div class="rc-action-btns flex-row">
                       <div class="rc-action-set flex-row">
                         <div class="like-box flex-row">
                           <p class="like-count p-main-semibold">0</p>
                           <div>
-                            <span class="material-icons-outlined like-icon"
+                            <span
+                              class="material-icons-outlined like-icon rc-noRecipe-c"
                               >thumb_up</span
                             >
                             <span
@@ -510,7 +429,8 @@
                         <div class="dislike-box flex-row">
                           <p class="dislike-count p-main-semibold">0</p>
                           <div>
-                            <span class="material-icons-outlined dislike-icon"
+                            <span
+                              class="material-icons-outlined dislike-icon rc-noRecipe-c"
                               >thumb_down</span
                             >
                             <span
@@ -522,7 +442,8 @@
                       </div>
                       <div class="rc-action-set flex-row">
                         <div class="rc_action_link">
-                          <span class="material-icons-outlined bookmark-icon"
+                          <span
+                            class="material-icons-outlined bookmark-icon rc-noRecipe-c"
                             >bookmark_outline</span
                           >
                           <span
@@ -534,300 +455,18 @@
                     </div>
                   </div>
                   <!-- ------------------- Recipe Indicator ------------------- -->
-                  <div class="rc-food-type-indicate rc-nonveg"></div>
+                  <div class="rc-food-type-indicate rc-noRecipe"></div>
                 </div>
               </a>
-              <!-- ------------------- Card 6 ------------------- -->
-              <a href="#" class="recipe-card-btn">
-                <div class="recipe-card flex-column">
-                  <!-- ------------------- Image ------------------- -->
-                  <div class="rc-image-container">
-                    <img
-                      src="./../img/food/ben-kolde-FFqNATH27EM-unsplash.jpg"
-                      alt="Photo of food"
-                      class="rc-food-image"
-                    />
-                  </div>
-                  <!-- ------------------- Recipe content ------------------- -->
-                  <div class="rc-content-container flex-column">
-                    <div class="rc-title-container">
-                      <p class="rc-title p-main-semibold">Avacado Egg Toast</p>
-                    </div>
-                    <!-- <div class="rc-author-details flex-row">
-                      <div class="rc-auth-img-container">
-                        <img
-                          src="./../img/people/edward-cisneros-_H6wpor9mjs-unsplash.jpg"
-                          alt="Photo of Author"
-                          class="rc-auth-image"
-                        />
-                      </div>
-                      <p class="rc-auth-name p-main-semibold">
-                        Kristin Watson
-                      </p>
-                    </div> -->
-                    <div class="rc-action-btns flex-row">
-                      <div class="rc-action-set flex-row">
-                        <div class="like-box flex-row">
-                          <p class="like-count p-main-semibold">0</p>
-                          <div>
-                            <span class="material-icons-outlined like-icon"
-                              >thumb_up</span
-                            >
-                            <span
-                              class="material-icons like-icon icon-inactive icon-filled"
-                              >thumb_up</span
-                            >
-                          </div>
-                        </div>
-                        <div class="dislike-box flex-row">
-                          <p class="dislike-count p-main-semibold">0</p>
-                          <div>
-                            <span class="material-icons-outlined dislike-icon"
-                              >thumb_down</span
-                            >
-                            <span
-                              class="material-icons dislike-icon icon-inactive icon-filled"
-                              >thumb_down</span
-                            >
-                          </div>
-                        </div>
-                      </div>
-                      <div class="rc-action-set flex-row">
-                        <div class="rc_action_link">
-                          <span class="material-icons-outlined bookmark-icon"
-                            >bookmark_outline</span
-                          >
-                          <span
-                            class="material-icons bookmark-icon icon-filled icon-inactive"
-                            >bookmark</span
-                          >
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="rc-food-type-indicate rc-egg"></div>
-                </div>
-              </a>
-              <!-- ------------------- Card 7 ------------------- -->
-              <a href="#" class="recipe-card-btn">
-                <div class="recipe-card flex-column">
-                  <!-- ------------------- Image ------------------- -->
-                  <div class="rc-image-container">
-                    <img
-                      src="./../img/food/joseph-gonzalez-zcUgjyqEwe8-unsplash.jpg"
-                      alt="Photo of food"
-                      class="rc-food-image"
-                    />
-                  </div>
-                  <!-- ------------------- Recipe content ------------------- -->
-                  <div class="rc-content-container flex-column">
-                    <div class="rc-title-container">
-                      <p class="rc-title p-main-semibold">
-                        Brioche French Toast
-                      </p>
-                    </div>
-                    <!-- <div class="rc-author-details flex-row">
-                      <div class="rc-auth-img-container">
-                        <img
-                          src="./../img/people/aiony-haust-3TLl_97HNJo-unsplash.jpg"
-                          alt="Photo of Author"
-                          class="rc-auth-image"
-                        />
-                      </div>
-                      <p class="rc-auth-name p-main-semibold">
-                        Cameron Williamson
-                      </p>
-                    </div> -->
-                    <div class="rc-action-btns flex-row">
-                      <div class="rc-action-set flex-row">
-                        <div class="like-box flex-row">
-                          <p class="like-count p-main-semibold">0</p>
-                          <div>
-                            <span class="material-icons-outlined like-icon"
-                              >thumb_up</span
-                            >
-                            <span
-                              class="material-icons like-icon icon-inactive icon-filled"
-                              >thumb_up</span
-                            >
-                          </div>
-                        </div>
-                        <div class="dislike-box flex-row">
-                          <p class="dislike-count p-main-semibold">0</p>
-                          <div>
-                            <span class="material-icons-outlined dislike-icon"
-                              >thumb_down</span
-                            >
-                            <span
-                              class="material-icons dislike-icon icon-inactive icon-filled"
-                              >thumb_down</span
-                            >
-                          </div>
-                        </div>
-                      </div>
-                      <div class="rc-action-set flex-row">
-                        <div class="rc_action_link">
-                          <span class="material-icons-outlined bookmark-icon"
-                            >bookmark_outline</span
-                          >
-                          <span
-                            class="material-icons bookmark-icon icon-filled icon-inactive"
-                            >bookmark</span
-                          >
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <!-- ------------------- Recipe Indicator ------------------- -->
-                  <div class="rc-food-type-indicate rc-veg"></div>
-                </div>
-              </a>
-              <!-- ------------------- Card 8 ------------------- -->
-              <a href="#" class="recipe-card-btn">
-                <div class="recipe-card flex-column">
-                  <!-- ------------------- Image ------------------- -->
-                  <div class="rc-image-container">
-                    <img
-                      src="./../img/food/randy-fath-SQ20tWzxXO0-unsplash.jpg"
-                      alt="Photo of food"
-                      class="rc-food-image"
-                    />
-                  </div>
-                  <!-- ------------------- Recipe content ------------------- -->
-                  <div class="rc-content-container flex-column">
-                    <div class="rc-title-container">
-                      <p class="rc-title p-main-semibold">
-                        Banana Cinnamon French Toast
-                      </p>
-                    </div>
-                    <!-- <div class="rc-author-details flex-row">
-                      <div class="rc-auth-img-container">
-                        <img
-                          src="./../img/people/jimmy-fermin-bqe0J0b26RQ-unsplash.jpg"
-                          alt="Photo of Author"
-                          class="rc-auth-image"
-                        />
-                      </div>
-                      <p class="rc-auth-name p-main-semibold">Jenny Wilson</p>
-                    </div> -->
-                    <div class="rc-action-btns flex-row">
-                      <div class="rc-action-set flex-row">
-                        <div class="like-box flex-row">
-                          <p class="like-count p-main-semibold">0</p>
-                          <div>
-                            <span class="material-icons-outlined like-icon"
-                              >thumb_up</span
-                            >
-                            <span
-                              class="material-icons like-icon icon-inactive icon-filled"
-                              >thumb_up</span
-                            >
-                          </div>
-                        </div>
-                        <div class="dislike-box flex-row">
-                          <p class="dislike-count p-main-semibold">0</p>
-                          <div>
-                            <span class="material-icons-outlined dislike-icon"
-                              >thumb_down</span
-                            >
-                            <span
-                              class="material-icons dislike-icon icon-inactive icon-filled"
-                              >thumb_down</span
-                            >
-                          </div>
-                        </div>
-                      </div>
-                      <div class="rc-action-set flex-row">
-                        <div class="rc_action_link">
-                          <span class="material-icons-outlined bookmark-icon"
-                            >bookmark_outline</span
-                          >
-                          <span
-                            class="material-icons bookmark-icon icon-filled icon-inactive"
-                            >bookmark</span
-                          >
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <!-- ------------------- Recipe Indicator ------------------- -->
-                  <div class="rc-food-type-indicate rc-egg"></div>
-                </div>
-              </a>
-              <!-- ------------------- Card 9 ------------------- -->
-              <a href="#" class="recipe-card-btn">
-                <div class="recipe-card flex-column">
-                  <!-- ------------------- Image ------------------- -->
-                  <div class="rc-image-container">
-                    <img
-                      src="./../img/food/laura-lanckriet-z32XV0TGSzc-unsplash.jpg"
-                      alt="Photo of food"
-                      class="rc-food-image"
-                    />
-                  </div>
-                  <!-- ------------------- Recipe content ------------------- -->
-                  <div class="rc-content-container flex-column">
-                    <div class="rc-title-container">
-                      <p class="rc-title p-main-semibold">
-                        Fried rice with chicken
-                      </p>
-                    </div>
-                    <!-- <div class="rc-author-details flex-row">
-                      <div class="rc-auth-img-container">
-                        <img
-                          src="./../img/people/aiony-haust-3TLl_97HNJo-unsplash.jpg"
-                          alt="Photo of Author"
-                          class="rc-auth-image"
-                        />
-                      </div>
-                      <p class="rc-auth-name p-main-semibold">
-                        Cameron Williamson
-                      </p>
-                    </div> -->
-                    <div class="rc-action-btns flex-row">
-                      <div class="rc-action-set flex-row">
-                        <div class="like-box flex-row">
-                          <p class="like-count p-main-semibold">0</p>
-                          <div>
-                            <span class="material-icons-outlined like-icon"
-                              >thumb_up</span
-                            >
-                            <span
-                              class="material-icons like-icon icon-inactive icon-filled"
-                              >thumb_up</span
-                            >
-                          </div>
-                        </div>
-                        <div class="dislike-box flex-row">
-                          <p class="dislike-count p-main-semibold">0</p>
-                          <div>
-                            <span class="material-icons-outlined dislike-icon"
-                              >thumb_down</span
-                            >
-                            <span
-                              class="material-icons dislike-icon icon-inactive icon-filled"
-                              >thumb_down</span
-                            >
-                          </div>
-                        </div>
-                      </div>
-                      <div class="rc-action-set flex-row">
-                        <div class="rc_action_link">
-                          <span class="material-icons-outlined bookmark-icon"
-                            >bookmark_outline</span
-                          >
-                          <span
-                            class="material-icons bookmark-icon icon-filled icon-inactive"
-                            >bookmark</span
-                          >
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <!-- ------------------- Recipe Indicator ------------------- -->
-                  <div class="rc-food-type-indicate rc-nonveg"></div>
-                </div>
-              </a>
+              <!-- ------------------- Card 2 ------------------- -->
+            </div>
+            <div class="btn-list flex-row">
+              <p class="h-5-main-semibold js-load-more-msg display-hide">
+                No more Search results
+              </p>
+              <button class="btn h-5-main-bold js-load-more-btn">
+                Load More
+              </button>
             </div>
           </section>
         </main>

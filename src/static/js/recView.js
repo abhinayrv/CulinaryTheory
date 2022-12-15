@@ -1,23 +1,45 @@
 `use strict`;
 
 const apiHost = "";
-
+const editRecipePageUrl = "/editrecipe?";
+const authorProfileUrl = "/profileview?";
+const apiGetUsers = "/api/usernames?users=";
 function getRecipeId() {
   let params = new URLSearchParams(window.location.search);
   return params.get("recipe_id");
 }
 const recipe_id = getRecipeId();
-console.log(recipe_id);
+// console.log(recipe_id);
 
-async function viewRecipe(recipe_id) {
+const defAuthorData = {
+  user_name: "The Culinary Theory",
+  profile_image:
+    "https://test-bucket-culinary.s3.amazonaws.com/3387e4c381f682b9f3b2104b0a4433f7.jpg",
+};
+
+async function getSingleUser(user_id) {
+  return await fetch(`${apiHost}${apiGetUsers}${user_id}`).then((res) =>
+    res.json()
+  );
+}
+async function getMultipleUsers(user_ids) {
+  return await fetch(`${apiHost}${apiGetUsers}${user_ids.join(",")}`).then(
+    (res) => res.json()
+  );
+}
+
+async function getRecipe(recipe_id) {
   try {
     var response = await fetch("/api/recipe/" + recipe_id);
     var rjson = await response.json();
     if (response.ok) {
-      console.log(rjson);
+      // console.log(rjson);
       recipeJson = rjson.data;
-      renderRecipePage(rjson.data);
+      authId = recipeJson.user_id;
+      let { data: authResData } = await getSingleUser(authId);
+      authProfile = authResData[`${authId}`];
 
+      renderRecipePage(rjson.data);
       uiUpdate();
       return rjson;
     } else {
@@ -28,6 +50,10 @@ async function viewRecipe(recipe_id) {
     console.log(error);
   }
 }
+
+// async function getRecipeWithAuth(recipe_id){
+//   await getRecipe(recipe_id);
+// }
 
 // //////////////////////////////////////////////////////////////////
 //pop-up & over-lays
@@ -52,6 +78,8 @@ const displayError = function (errMessage, isErr = true) {
 ////////////////////
 
 let recipeJson;
+let authProfile;
+let authId;
 
 let user_liked;
 let likes;
@@ -80,10 +108,13 @@ const deleteBtn = document.querySelector(".rv-delete");
 const editBtn = document.querySelector(".rv-edit");
 const viewBtn = document.querySelector(".rv-view");
 const viewIcon = viewBtn.querySelector(".rv-icon-btn");
+const recipeAuthBtn = document.getElementById("author-btn");
+const recipeAuthImg = document.getElementById("author-img");
 const recipeAuthor = document.getElementById("author-name");
 const loginBtnComments = document.querySelector(".login-btn-comments");
 const commentsSection = document.querySelector(".comments-section");
 const commentsContainer = document.querySelector(".comments-container");
+const commentsBoxUserImg = document.getElementById("comment-box-user-img");
 const addCommentBtn = document.querySelector(".add-comment");
 const commentInputBox = document.querySelector(".comment-box");
 const reportResonType = document.getElementById("report-reson-type");
@@ -92,14 +123,20 @@ const reportResPopup = document.querySelector(".for-report-recipe");
 const reportPopClose = document.querySelector(".report-pop-close");
 const reportSubmitBtn = document.getElementById("report-submit-btn");
 
-addCommentBtn.addEventListener("click", function () {
+addCommentBtn.addEventListener("click", function (e) {
+  // e.preventDefault();
   let commentText = commentInputBox.value;
   addComment(recipe_id, commentText);
+  commentInputBox.value = "";
+  commentInputBox.blur();
+  // getComments(recipe_id, 0);
 });
 
-reportBtn.addEventListener("click", function () {
+const openReportPopup = function () {
   reportResPopup.classList.remove("display-hide");
-});
+};
+
+// reportBtn.addEventListener("click", openReportPopup);
 reportPopClose.addEventListener("click", function () {
   reportResPopup.classList.add("display-hide");
 });
@@ -145,6 +182,7 @@ async function addComment(recipe_id, comment) {
       //change dom elements as required.
       console.log("Comment added successfully");
       displayError(rjson.message, false);
+      getComments(recipe_id, 0);
       return false;
     } else {
       throw Error(rjson.message);
@@ -155,7 +193,7 @@ async function addComment(recipe_id, comment) {
   }
 }
 
-function renderComments(data) {
+function renderComments(data, commentAuth) {
   let innerHTML = `<div class="comment-row">
   <div class="comment-details flex-row help-margin-bt-8">
     <div
@@ -163,9 +201,11 @@ function renderComments(data) {
       style="gap: 0.8rem; align-items: center"
     >
       <div class="co-user-img-container">
-        <img src="" alt="user photo" class="user-img" />
+        <img src="${
+          commentAuth.profile_image
+        }" alt="user photo" class="user-img" />
       </div>
-      <p class="com-user-name h-5-main-semibold">The Culinary Theory</p>
+      <p class="com-user-name h-5-main-semibold">${commentAuth.user_name}</p>
     </div>
     <p class="p-help-semibold comment-time">${new Date(
       data.createdAt
@@ -185,7 +225,7 @@ function renderComments(data) {
 
 const makingPrivate = function () {
   make_private(recipeJson);
-}
+};
 
 viewBtn.addEventListener("click", makingPrivate);
 
@@ -193,66 +233,116 @@ deleteBtn.addEventListener("click", function () {
   delete_recipe(recipe_id);
 });
 
+const callEditRecipe = function () {
+  window.location.href = `${buildUrl(
+    editRecipePageUrl,
+    "recipe_id",
+    recipe_id
+  )}&isDraft=false`;
+};
+
+editBtn.addEventListener("click", callEditRecipe);
+
+const toLoginMsg = function () {
+  displayError("Please Login");
+};
 function uiUpdate() {
-  console.log(recipeJson.self_recipe);
-  if (recipeJson.self_recipe) {
-    deleteBtn.classList.remove("display-hide");
-    if (userProfile.is_premium) {
-      viewBtn.classList.remove("display-hide");
-      viewIcon.classList.remove("rv-icon-btn-disabled");
-      viewIcon.classList.add("rv-icon-btn");
-      viewBtn.addEventListener('click',makingPrivate)
+  if (userLoggedIn) {
+    dislikeBtn.addEventListener("click", doDisLike);
+    likeBtn.addEventListener("click", doLike);
+    bookmarkBtn.addEventListener("click", doBookMark);
+    reportBtn.addEventListener("click", openReportPopup);
+    if (recipeJson.self_recipe) {
+      deleteBtn.classList.remove("display-hide");
+      editBtn.classList.remove("display-hide");
+      if (userProfile.is_premium) {
+        viewBtn.classList.remove("display-hide");
+        viewIcon.classList.remove("rv-icon-btn-disabled");
+        viewIcon.classList.add("rv-icon-btn");
+        viewBtn.addEventListener("click", makingPrivate);
+      } else {
+        viewIcon.classList.add("rv-icon-btn-disabled");
+        viewIcon.classList.remove("rv-icon-btn");
+        viewBtn.removeEventListener("click", makingPrivate);
+      }
     } else {
-      viewIcon.classList.add("rv-icon-btn-disabled");
-      viewIcon.classList.remove("rv-icon-btn");
-      viewBtn.removeEventListener('click',makingPrivate);
+      deleteBtn.classList.add("display-hide");
+      viewBtn.classList.add("display-hide");
+      editBtn.classList.add("display-hide");
     }
   } else {
+    dislikeBtn.addEventListener("click", toLoginMsg);
+    likeBtn.addEventListener("click", toLoginMsg);
+    bookmarkBtn.addEventListener("click", toLoginMsg);
+    reportBtn.addEventListener("click", toLoginMsg);
+
+    dislikeBtn.removeEventListener("click", doDisLike);
+    likeBtn.removeEventListener("click", doLike);
+    bookmarkBtn.removeEventListener("click", doBookMark);
+    reportBtn.removeEventListener("click", openReportPopup);
+
     deleteBtn.classList.add("display-hide");
     viewBtn.classList.add("display-hide");
+    editBtn.classList.add("display-hide");
   }
 }
 function commentsUi() {
   if (userLoggedIn) {
-    commentsSection.classList.remove("display-hide");
-    loginBtnComments.classList.add("display-hide");
+    if (!recipeJson.is_public) {
+      commentsSection.classList.add("display-hide");
+      loginBtnComments.classList.add("display-hide");
+    } else {
+      commentsSection.classList.remove("display-hide");
+      commentsBoxUserImg.src = userProfile.profile_image;
+      loginBtnComments.classList.add("display-hide");
+    }
   } else {
     commentsSection.classList.add("display-hide");
+
     loginBtnComments.classList.remove("display-hide");
   }
 }
 
-bookmarkBtn.addEventListener("click", function () {
+const doBookMark = function () {
   execBookmark();
-});
+};
 
-likeBtn.addEventListener("click", function (e) {
+const doLike = function (e) {
   execLike(true);
   likes++;
   if (dislikes !== 0) dislikes--;
   rvDislikeCount.textContent = dislikes;
   rvlikeCount.textContent = likes;
-});
+};
 
-dislikeBtn.addEventListener("click", function () {
+const doDisLike = function () {
   execLike(false);
   dislikes++;
   if (likes !== 0) likes--;
   rvDislikeCount.textContent = dislikes;
   rvlikeCount.textContent = likes;
-});
+};
 
 async function getComments(recipe_id, page_number) {
   try {
-    var response = await fetch(
+    commentsContainer.innerHTML = "";
+    let response = await fetch(
       `/api/comments/${recipe_id}?pageNumber=${page_number}`
     );
-    var rjson = await response.json();
+    let rjson = await response.json();
+    let commentsData = rjson.data.data;
+    const commentedUserArr = commentsData.map((comment) => comment.user_id);
+    const { data: commentedUserSetData } = await getMultipleUsers(
+      commentedUserArr
+    );
+    // console.log("user here: ", commentedUserSetData);
     if (response.ok) {
-      // to do - add comments here
-      // var xomments(rjson.data.data);
-      commentsContainer.innerHTML = "";
-      rjson.data.data.forEach((x) => renderComments(x));
+      commentsData.forEach((x) => {
+        let commentorData = commentedUserSetData[`${x.user_id}`];
+        if (!commentorData) commentorData = defAuthorData;
+        renderComments(x, commentorData);
+      });
+
       return rjson;
     } else {
       // to do - no comments found or some error in fetching comments.
@@ -263,10 +353,9 @@ async function getComments(recipe_id, page_number) {
   }
 }
 
-getComments(recipe_id, 0);
 const renderRecipePage = function (data) {
   recipeTitle.innerHTML = "";
-  recipeTitle.insertAdjacentHTML("afterbegin", `${data.title.toUpperCase()}`);
+  recipeTitle.insertAdjacentHTML("afterbegin", `${titleCase(data.title)}`);
   recipePostDate.innerHTML = "";
   recipePostDate.insertAdjacentHTML(
     "afterbegin",
@@ -282,9 +371,12 @@ const renderRecipePage = function (data) {
   rvPreptime.textContent = data.prep_time;
   rvCuisine.textContent = data.cuisine;
   rvPreference.textContent = data.dietary_preferences;
-  if (recipeJson.self_recipe) {
-    recipeAuthor.textContent = userProfile.user_name;
+
+  if (userLoggedIn && !userProfile.self_recipe) {
+    recipeAuthBtn.href = `${buildUrl(authorProfileUrl, "user_id", authId)}`;
   }
+  recipeAuthor.textContent = authProfile.user_name;
+  recipeAuthImg.src = authProfile.profile_image;
   rvDescription.innerHTML = "";
   rvDescription.insertAdjacentHTML("afterbegin", `${data.description}`);
   if (!data.is_public) viewIcon.textContent = "visibility_off";
@@ -299,7 +391,7 @@ const renderRecipePage = function (data) {
   });
   rvStepCon.innerHTML = "";
   data.steps.map((x) => {
-    let innerHtmlr = `<div class="rv-step-row help-margin-bt-8">
+    let innerHtmlr = `<div class="rv-step-row ">
     <p class="step-num h-5-main-bold">Step ${x.step_no}</p>
     <p class="step-cont p-main-reg">
       ${x.step}
@@ -358,7 +450,6 @@ async function check_bookmark() {
   }
 }
 
-check_bookmark();
 async function is_bookmarked(recipe_id) {
   try {
     var response = await fetch(`/api/isbookmarked/${recipe_id}`);
@@ -480,7 +571,6 @@ const checkLike = async function () {
   }
 };
 
-checkLike();
 async function like_dislike(prev_liked, is_like, recipe_id) {
   try {
     if (prev_liked) {
@@ -544,7 +634,15 @@ const buildUrl = function (baseURL, paramsName, paramsValue) {
   params.append(paramsName, paramsValue);
   return `${baseURL}${params}`;
 };
-
+function titleCase(str) {
+  return str
+    .toLowerCase()
+    .split(" ")
+    .map(function (word) {
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    })
+    .join(" ");
+}
 //func to hide/display elements
 const hideDisplay = function (ele) {
   ele.classList.add("display-hide");
@@ -587,6 +685,18 @@ loginSignUpBtn.addEventListener("click", function (e) {
   hideDisplay(loginErrDisplay);
 });
 
+loginBtnComments.addEventListener("click", function (e) {
+  e.preventDefault();
+  showDisplay(loginSection);
+  activMainNavbtn(loginSignUpBtn);
+
+  //login form Reset
+  userEmailInput.value = userPasswordInput.value = "";
+  userEmailInput.blur();
+  userPasswordInput.blur();
+  hideDisplay(loginErrDisplay);
+});
+
 //login and other details
 const loginSection = document.querySelector(".login");
 const loginClsBtn = document.getElementById("login-frm-close");
@@ -595,6 +705,194 @@ const userEmailInput = document.getElementById("user-email");
 const userPasswordInput = document.getElementById("user-password");
 const loginBtn = document.getElementById("login-btn");
 const signupOpenBtn = document.getElementById("signup-open-btn");
+
+const signupForm = document.querySelector(".signup-ov");
+const signupFormClose = document.getElementById("signup-frm-close");
+const signupBtn = document.getElementById("signup-btn");
+const signupEmail = document.getElementById("user-email-signup");
+const signupPwd = document.getElementById("user-password-signup");
+const signupPwdConf = document.getElementById("user-password-signup-confirm");
+const signupErrDisplay = document.getElementById("signup-err-msg");
+const signupName = document.getElementById("user-name-signup");
+
+const signInOpenBtn = document.getElementById("signin-open-btn");
+const signInOpenBtnReset = document.getElementById("signin-open-btn-reset");
+const resetOpenBtn = document.getElementById("forgot-password-btn");
+const resetForm = document.querySelector(".reset-ov");
+const resetErrDisplay = document.getElementById("reset-err-msg");
+const resetCloseBtn = document.getElementById("reset-frm-close");
+
+resetCloseBtn.addEventListener("click", function (e) {
+  e.preventDefault();
+  hideDisplay(resetForm);
+  deactivMainNavbtn(loginSignUpBtn);
+});
+
+resetOpenBtn.addEventListener("click", function (e) {
+  e.preventDefault();
+  hideDisplay(loginSection);
+  showDisplay(resetForm);
+  hideDisplay(resetErrDisplay);
+});
+
+signInOpenBtnReset.addEventListener("click", function (e) {
+  e.preventDefault();
+  hideDisplay(resetForm);
+  showDisplay(loginSection);
+  hideDisplay(loginErrDisplay);
+});
+
+signInOpenBtn.addEventListener("click", function (e) {
+  e.preventDefault();
+  hideDisplay(signupForm);
+  showDisplay(loginSection);
+  hideDisplay(loginErrDisplay);
+});
+
+signupOpenBtn.addEventListener("click", function (e) {
+  e.preventDefault();
+  hideDisplay(loginSection);
+  showDisplay(signupForm);
+  hideDisplay(signupErrDisplay);
+});
+
+signupFormClose.addEventListener("click", function (e) {
+  e.preventDefault();
+  hideDisplay(signupForm);
+  deactivMainNavbtn(loginSignUpBtn);
+});
+
+signupBtn.addEventListener("click", function (e) {
+  e.preventDefault();
+  complete_sigup();
+});
+
+// Reset password logic
+const resetSubmitBtn = document.getElementById("reset-btn");
+const resetEmail = document.getElementById("user-email-reset");
+
+resetSubmitBtn.addEventListener("click", function (e) {
+  e.preventDefault();
+  reset_password();
+});
+
+async function reset_password() {
+  var email = resetEmail.value;
+  if (!email) {
+    resetEmail.focus();
+    resetErrDisplay.textContent = "Please enter your email address";
+    showDisplay(resetErrDisplay);
+  } else {
+    try {
+      var message = await call_reset_api({ email: email });
+      resetErrDisplay.textContent = message;
+      resetErrDisplay.style.color = "#16a085";
+      showDisplay(resetErrDisplay);
+      setTimeout(() => {
+        hideDisplay(resetForm);
+        resetErrDisplay.style.color = "#be2e3a";
+      }, 2000);
+    } catch (error) {
+      console.log(error);
+      resetEmail.focus();
+      resetErrDisplay.textContent = error.message;
+      showDisplay(resetErrDisplay);
+    }
+  }
+}
+
+async function call_reset_api(reset_json) {
+  var options = {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(reset_json),
+  };
+
+  var response = await fetch("/api/auth/resetemail", options);
+  var rjson = await response.json();
+  if (response.ok) {
+    return rjson.message;
+  } else {
+    throw Error(rjson.message);
+  }
+}
+
+// Sign up logic
+async function complete_sigup() {
+  var email = signupEmail.value;
+  var pwd = signupPwd.value;
+  var confpwd = signupPwdConf.value;
+  var username = signupName.value;
+  if (!username) {
+    signupName.focus();
+    signupErrDisplay.textContent = "Please enter username";
+    showDisplay(signupErrDisplay);
+  } else if (!email) {
+    signupEmail.focus();
+    signupErrDisplay.textContent = "Please enter your email id";
+    showDisplay(signupErrDisplay);
+  } else if (!pwd) {
+    signupPwd.focus();
+    signupErrDisplay.textContent = "Please enter a password";
+    showDisplay(signupErrDisplay);
+  } else if (!confpwd) {
+    signupPwdConf.focus();
+    signupErrDisplay.textContent = "Confirm password is empty";
+    showDisplay(signupErrDisplay);
+  } else if (pwd != confpwd) {
+    signupPwd.focus();
+    signupPwdConf.focus();
+    signupErrDisplay.textContent = "Passwords do not match!";
+    showDisplay(signupErrDisplay);
+  } else {
+    try {
+      await register_api({ email: email, password: pwd });
+      await create_profile_api({ user_name: username, bio_info: "" });
+      window.location.reload();
+    } catch (err) {
+      console.log("error", err.message);
+      signupEmail.value =
+        signupPwd.value =
+        signupPwdConf.value =
+        signupName.value =
+          "";
+      signupName.focus();
+      signupErrDisplay.textContent = err.message;
+      showDisplay(signupErrDisplay);
+    }
+  }
+}
+
+async function register_api(user_json) {
+  var options = {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(user_json),
+  };
+  var response = await fetch("/api/register", options);
+  var rjson = await response.json();
+  if (response.ok) {
+    return;
+  } else {
+    throw Error(rjson.message);
+  }
+}
+
+async function create_profile_api(profile_json) {
+  var options = {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(profile_json),
+  };
+  var response = await fetch("/api/profile/create", options);
+  var rjson = await response.json();
+  if (response.ok) {
+    return;
+  } else {
+    console.log("Profile not created");
+    console.log(rjson.message);
+  }
+}
 
 const doLogin = async function () {
   let emailId = userEmailInput.value;
@@ -632,21 +930,25 @@ const loginSessionCheck = async function () {
     let loginCheckRes = await fetch(`${apiHost}/api/myprofile`).then(
       (response) => response.json()
     );
-
     userLoggedIn = loginCheckRes.success;
+
     if (!userLoggedIn) throw new Error(loginCheckRes.message);
     ({ data: userProfile } = loginCheckRes);
 
     updateMainNav();
+    await getRecipe(recipe_id);
     commentsUi();
-    viewRecipe(recipe_id);
+
+    initCheckOnLogin();
   } catch (error) {
     console.log(error.message);
   }
 };
-loginSessionCheck();
+
 const updateMainNav = function () {
   deactivMainNavbtn(homeBtn);
+  aboutUsBtn.setAttribute("href", "/about");
+  homeBtn.setAttribute("href", "/home");
   if (userLoggedIn) {
     showDisplay(recipeCreateBtn.parentElement);
     showDisplay(accountBtn.parentElement);
@@ -659,19 +961,16 @@ const updateMainNav = function () {
     //setting href
     recipeCreateBtn.setAttribute("href", "/createrecipe");
     accountBtn.setAttribute("href", "/myprofile");
-    aboutUsBtn.setAttribute("href", "/about");
-    homeBtn.setAttribute("href", "/home");
   } else {
     hideDisplay(recipeCreateBtn.parentElement);
     hideDisplay(accountBtn.parentElement);
     showDisplay(loginSignUpBtn.parentElement);
-    aboutUsBtn.setAttribute("href", "/about");
   }
 };
 
 loginClsBtn.addEventListener("click", function () {
   hideDisplay(loginSection);
-  activMainNavbtn(homeBtn);
+  // activMainNavbtn(homeBtn);
   deactivMainNavbtn(loginSignUpBtn);
 });
 
@@ -679,3 +978,13 @@ loginBtn.addEventListener("click", function (e) {
   e.preventDefault();
   doLogin();
 });
+
+function initCheckOnLogin() {
+  if (userLoggedIn) {
+    getComments(recipe_id, 0);
+    checkLike();
+    check_bookmark();
+  }
+}
+
+loginSessionCheck();
