@@ -6,6 +6,9 @@ const User = mongoose.model('User');
 const Token = mongoose.model('Token');
 
 exports.authenticate = function(req, res, next) {
+  if (req.session.user){
+    return response.sendBadRequest(res, "A user is already logged-in!");
+  }
     console.log(`Login request`);
   
   if (!req.body.email || !req.body.password) {
@@ -100,6 +103,9 @@ exports.updatePassword = function(req, res, next) {
       }
       
       user.password = req.body.new_password;
+      if (!user.passwordCheck()){
+        return response.sendBadRequest(res, "Password does not meet requirements. Must have at least 8 characters 1 Uppercase letter, 1 Lowercase letter, 1 Number and 1 of @,$,!,%,*,?,&,_,-")
+      }
       var err = user.validateSync();
       if (err) {
         console.log("Password does not meet requirements");
@@ -146,7 +152,7 @@ exports.resetPasswordEmail = function(req, res, next) {
     if (!user) {
         
       console.log("User not found");
-      return response.sendUnauthorized(res, "Incorrect username or password");
+      return response.sendUnauthorized(res, "No acount with given email");
 
     } 
 
@@ -204,6 +210,9 @@ exports.resetPassword = function(req, res, next) {
       }
 
       user.password = req.body.password;
+      if (!user.passwordCheck()){
+        return response.sendBadRequest(res, "Password does not meet requirements. Must have at least 8 characters 1 Uppercase letter, 1 Lowercase letter, 1 Number and 1 of @,$,!,%,*,?,&,_,-")
+      }
       var err = user.validateSync();
       if (err) {
         console.log("Password does not meet requirements");
@@ -316,7 +325,55 @@ exports.ensurePremium = function(req, res, next){
       req.params.user_id = req.session.user.user_id;
       return next();
     } else {
-      return response.sendForbidden(res, "Please subscribe to premium to save this recipe as a draft!");
+      return response.sendForbidden(res, "Please subscribe to premium to access this feature!");
+    }
+  } else {
+    return response.sendUnauthorized(res, "Please login and retry");
+  }
+}
+
+exports.changeRole = function(req, res, next){
+  if (!req.body.target_user) {
+    return response.sendBadRequest(res, "No user specified");
+  }
+
+  if (!req.body.target_role) {
+    return response.sendBadRequest(res, "No target role specified");
+  }
+
+  if(!(req.body.target_role == "admin" || req.body.target_role == "user")){
+    return response.sendBadRequest(res, "Target role is not valid");
+  }
+
+  User.findOne({email: req.body.target_user}, function(err, user){
+    if(err) {
+      return next(err);
+    }
+
+    if(!user) {
+      return response.sendBadRequest(res, "User does not exist");
+    }
+
+    user.role = req.body.target_role;
+    user.save(function(err, user){
+      if(err){
+        return next(err);
+      }
+
+      return response.sendSuccess(res, "User role changed successfully!", user.toJSON());
+
+    });
+  });
+}
+
+exports.ensureRoot = function(req, res, next){
+  if(req.session.user){
+    if (req.session.user.role == "superadmin"){
+      req.body.user_id = req.session.user.user_id;
+      req.params.user_id = req.session.user.user_id;
+      return next();
+    } else {
+      return response.sendForbidden(res);
     }
   } else {
     return response.sendUnauthorized(res, "Please login and retry");

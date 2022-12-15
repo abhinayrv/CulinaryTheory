@@ -47,15 +47,68 @@ exports.getbookmarks = function (req, res, next)  {
     if (!req.params.user_id) {
       return response.sendBadRequest(res, 'user_id is required');
     }
- 
-   bookmarkModel.find({user_id: req.params.user_id}).exec(function(err, bookmarks){
+
+    // var limit = 6;
+    // var pageNumber = 0
+    // if(req.query.pageNumber){
+    //   pageNumber = parseInt(req.query.pageNumber);
+    // }
+
+  // bookmarkModel.find({user_id: req.params.user_id}, function(err1, bookmarks){
+
+  //   bookmarkModel.countDocuments({user_id: req.params.user_id}, function(err2, count){
+  //       if(err1){
+  //           return next(err1);
+  //       }
+  //       else if(err2){
+  //           return next(err2);
+  //       }
+
+  //       if(!bookmarks){
+  //           return response.sendNotFound(res, "No bookmarks found");
+  //       } 
+  //       else{
+  //           var data = {}
+  //           data['page'] = pageNumber;
+  //           data['total_count'] = count;
+  //           data['total_pages'] = Math.ceil(count / limit);
+  //           if (bookmarks.length == 0){
+  //             data['data'] = []
+  //             return response.sendSuccess(res, "Successfully fetched the bookmarsk", data)
+  //           } else{
+  //             var bookmarks_arr = []
+  //             bookmarks.forEach(function(bookmark){
+  //               bookmarks_arr.push(bookmark.recipe_id);
+  //             })
+  //             data['data'] = bookmarks_arr;
+  //             req.bookmarks = data
+  //             next();
+  //             // return response.sendSuccess(res, "Successfully fetched the recipes.", data);
+  //           }
+  //       }
+
+  //   });
+    
+  // }).limit(limit).skip(pageNumber * limit);
+
+  bookmarkModel.find({user_id: req.params.user_id}, function(err, bookmarks){
     if (err){
-        return next(err);
+      return next(err);
     }
 
-    return response.sendSuccess(res, "Success", bookmarks);
-   });
-  }
+    if(!bookmarks){
+      return response.sendNotFound(res, "No bookmarks found");
+    } else {
+      var bookmarks_arr = [];
+      bookmarks.forEach(function(bookmark){
+      bookmarks_arr.push(bookmark.recipe_id);
+      })
+      req.bookmarks = bookmarks_arr;
+      return next();
+    }
+  });
+
+}
 
 exports.deletebookmark = function (req, res, next) {
   console.log('In delete bookmark');
@@ -154,8 +207,11 @@ exports.deleteLikedislike = function(req,res, next){
         if (!doc) {
           return response.sendNotFound(res);
         }
-        
-        return response.sendSuccess(res, "Successfully deleted.", doc.toJSON());
+        else{
+          req.like = doc.toJSON();
+          return next();
+          // return response.sendSuccess(res, "Successfully deleted.", doc.toJSON());
+        }
     })
   };
    
@@ -191,7 +247,7 @@ exports.deleteLikedislike = function(req,res, next){
       return response.sendBadRequest(res, 'recipe_id  is required');
     }
 
-    var limit = 5;
+    var limit = 6;
     var pageNumber = 0;
     if(req.query.limit){
       limit = parseInt(req.query.limit);
@@ -215,7 +271,7 @@ exports.deleteLikedislike = function(req,res, next){
            data['data'] = comments;
            return response.sendSuccess(res,"Successfully fetched comments." ,data);
       });
-     }).sort({timestamps: -1}).limit(limit).skip(pageNumber * limit);
+     }).sort({createdAt: -1, _id:1}).limit(limit).skip(pageNumber * limit);
   }
   //Comments Get end
 
@@ -255,7 +311,7 @@ exports.deleteLikedislike = function(req,res, next){
 
 exports.getReports = function (req, res, next)  {
 
-  var limit = 5;
+  var limit = 6;
   var pageNumber = 0;
   if(req.query.limit){
     limit = parseInt(req.query.limit);
@@ -280,7 +336,7 @@ exports.getReports = function (req, res, next)  {
          return response.sendSuccess(res,"Successfully fetched reported recipes." ,data);
     
     }) 
-   }).sort({timestamps: -1}).limit(limit).skip(pageNumber * limit);
+   }).sort({createdAt: 1, _id:1}).limit(limit).skip(pageNumber * limit);
 }
 
 exports.closeReport = function(req, res, next) {
@@ -296,24 +352,57 @@ exports.closeReport = function(req, res, next) {
     return response.sendBadRequest(res, "Action not specified");
   }
 
+  
   reportModel.findOne({report_id: req.body.report_id}).exec(function(err, report){
     if(err) {
       console.log("Error finding report")
       return next(err);
     }
 
-    report.action = req.body.action;
-    report.closed = true;
-    report.action_by = req.body.user_id;
+    if(report.closed) {
+      return response.sendBadRequest(res, "The report is already closed.");
+    }
 
-    report.save(function(err, report){
-      if(err) {
-        console.log("Error closing the report");
-        return next(err);
+    if (req.body.action === "delete"){
+      var query = {
+        recipe_id: report.recipe_id,
+        closed: false
       }
 
-      return response.sendSuccess(res, "Successfully closed the report");
-    });
+      var update = {
+        $set : {
+          action: req.body.action,
+          closed: true,
+          action_by: req.body.user_id
+        }
+      }
+
+      reportModel.updateMany(query, update, function(err, result){
+        if(err){
+          return next(err);
+        }
+
+        if(!result){
+          return response.sendBadRequest(res);
+        }
+
+        return response.sendSuccess(res, "Successfully closed the report", {closed_count: result.modifiedCount});
+
+      })
+    } else {
+      report.action = req.body.action;
+      report.closed = true;
+      report.action_by = req.body.user_id;
+
+      report.save(function(err, report){
+        if(err) {
+          console.log("Error closing the report");
+          return next(err);
+        }
+
+        return response.sendSuccess(res, "Successfully closed the report", {closed_count: 1});
+      });
+    }
   });
 }
 
@@ -365,10 +454,13 @@ exports.getMyUserProfile= function (req, res, next)  {
   }
 
   if(!profileUser){
-    return response.sendSuccess(res, "Success", new userprofileModel().toJSON());
+    var data = new userprofileModel({user_id:req.body.user_id, user_name: "The Culinary Theory"}).toJSON();
+    data["is_premium"] = req.session.user.prem;
+    return response.sendSuccess(res, "Success", data);
   }
-
-  return response.sendSuccess(res, "Success", profileUser.toJSON());
+  var data = profileUser.toJSON();
+  data["is_premium"] = req.session.user.prem;
+  return response.sendSuccess(res, "Success", data);
  });
 }
 
@@ -498,6 +590,7 @@ exports.getUserNames = function(req, res, next){
 
  var user_ids = req.query.users;
  user_ids = user_ids.split(",");
+//  console.log(user_ids);
 
  userprofileModel.find({user_id : {$in : user_ids}},{user_name:1, user_id:1, profile_image:1}, function(err, docs){
 
@@ -505,8 +598,38 @@ exports.getUserNames = function(req, res, next){
           return next(err);
       }
 
+      if(docs){
+        var transformed_docs = {};
+        docs.forEach(function(doc){
+          transformed_docs[doc.user_id] = doc;
+        })
+        return response.sendSuccess(res, "Successfully fetched the recipes.", transformed_docs)
+      }
       else{
-          return response.sendSuccess(res, "Successfully fetched the recipes.", docs)
+          return response.sendSuccess(res, "Successfully fetched the recipes.", {})
       }
   });
 }
+
+exports.checkReport = function(req, res, next){
+  if(!req.body.report_id){
+    response.sendBadRequest(res, "No report id given")
+  }
+
+  reportModel.findOne({report_id: req.body.report_id, closed: false}, function(err, report){
+    if(err){
+      console.log(err);
+      return next(err);
+    }
+
+    if(!report){
+      console.log("Report is already closed");
+      return response.sendBadRequest(res, "The report is already closed");
+    }
+
+    return next();
+  })
+
+}
+
+

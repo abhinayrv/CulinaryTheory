@@ -77,11 +77,13 @@ exports.cancelSubscription = function(req, res, next){
 
     User.findOne({user_id: req.body.user_id}).exec(function(err, user){
         if(err){
+            console.log("Cancel sub: Error looking for user");
             console.log("Error looking for user");
             return next(err);
         }
 
         if(!user){
+            console.log("Cancel sub: User does not exist");
             return response.sendBadRequest(res, "User does not exist");
         }
 
@@ -92,6 +94,7 @@ exports.cancelSubscription = function(req, res, next){
             }
 
             if(!premium) {
+                console.log("Cancel sub: No active subscription");
                 return response.sendBadRequest(res, "No active subscription");
             }
 
@@ -108,9 +111,13 @@ exports.cancelSubscription = function(req, res, next){
                     if (err){
                         console.log("Error saving cancelled subscription");
                         return next(err);
-                    }
+                    } else {
 
-                    return response.sendSuccess(res, "Cancelled successfully", premium.toJSON());
+                        req.return_data = premium.toJSON();
+                        req.subscribed = false;
+                        return next();
+                        // return response.sendSuccess(res, "Cancelled successfully", premium.toJSON());
+                    }
                 });
             });
         });
@@ -148,7 +155,11 @@ exports.subscribe = function(req, res, next){
                     return next(err);
                 }
                 email_sub.save(function(err, email_sub){
-                    return response.sendCreated(res, "Subscription successful", premium_sub.toJSON());
+                    req.session.user.prem = true;
+                    req.return_data = premium_sub.toJSON();
+                    req.subscribed = true;
+                    return next();
+                    // return response.sendCreated(res, "Subscription successful", premium_sub.toJSON());
                 })
 
                 // return response.sendCreated(res, "Subscription successful", premium_sub.toJSON());
@@ -162,18 +173,26 @@ exports.getSubscription = function(req, res, next){
         return response.sendBadRequest(res, "No user id");
     }
 
-    Premium.findOne({user_id: req.body.user_id}).exec(function(err, premium){
+    Premium.findOne({user_id: req.body.user_id, active: true}).exec(function(err, premium){
         if (err){
             console.log("Error looking for premium sub details");
             return next(err);
         }
 
         if(!premium){
-            return response.sendSuccess(res, "No premium subscription");
+            var data = {
+                active: false,
+                subscribed: false,
+            }
+            return response.sendSuccess(res, "No premium subscription", data);
         }
 
         if(!premium.active){
-            return response.sendSuccess(res, "No active subscription");
+            var data = {
+                active: false,
+                subscribed: false,
+            }
+            return response.sendSuccess(res, "No active subscription", data);
         }
 
         return response.sendSuccess(res, "Success", premium.toJSON());
@@ -265,4 +284,25 @@ exports.unsubEmail = function(req, res, next){
 
         return response.sendSuccess(res, "Successfully unsubscribed");
     })
+}
+
+exports.sendSubEmail = function(req, res, next){
+    if (!req.body.user_id || !req.return_data || req.subscribed === undefined){
+        return response.sendBadRequest(res, "Required data missing");
+    }
+    User.findOne({user_id: req.body.user_id}, function(err, user){
+        if (user){
+            var message_text = ""
+            if (req.subscribed) {
+                message_text = "Hello,\nYou have successfully subscribed to The Culinary Theory Premium\n\nThe Culinary Theory Team";
+            } else {
+                message_text = "Hello,\nYou have successfully unsubscribed to The Culinary Theory Premium\n\nThe Culinary Theory Team";
+            }
+            user.sendEmail(false, "The Culinary Theory Premium", message_text, function(err){
+                return response.sendSuccess(res, "Success", req.return_data);
+            })
+        } else {
+            return response.sendSuccess(res, "Success", req.return_data);
+        }
+    });
 }

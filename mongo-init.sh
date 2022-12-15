@@ -11,3 +11,7 @@ db.createUser({
     db: '$MONGO_INITDB_DATABASE'
   }]
 })
+
+db.createCollection("users");
+db.users.insert({"user_id": "root-user", "email":"theculinarytheory@gmail.com", "password":"", "role":"superadmin", "salt":""})
+EOF

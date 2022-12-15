@@ -117,10 +117,11 @@ exports.search = function(req, res, next){
 
     if(req.query.prep_time){
         var filterTime = req.query.prep_time.split(",");
+        console.log(`filter time ${filterTime}`);
         query["prep_time"] = {"$in" : filterTime}
     }
     if(req.query.sortBy && req.query.sortAsc){
-        sortQuery[req.query.sortBy] = req.query.sortAsc;
+        sortQuery[req.query.sortBy] = parseInt(req.query.sortAsc);
     }
     if (!req.query.searchBy && !req.query.searchFor){
         console.log("No search fields found.");
@@ -168,7 +169,7 @@ exports.search = function(req, res, next){
             return response.sendBadRequest(res, "Wrong type of search.");
         }
 
-        var limit = 5
+        var limit = 6
         if(req.query.limit){
             limit = parseInt(req.query.limit)
         }
@@ -177,6 +178,7 @@ exports.search = function(req, res, next){
             pageNumber = parseInt(req.query.pageNumber)
         }
         console.log(query);
+        sortQuery["_id"] = 1;
         RecipeModel.find(query, function(err1, docs){
             if(err1){
                 return next(err1);
@@ -247,11 +249,24 @@ exports.delete = function(req, res, next){
         }
         else{
             console.log("Deleting recipe by particular user.")
-            RecipeModel.findOneAndDelete({user_id : req.body.user_id, recipe_id : req.body.recipe_id}, function(err, doc){
-                var sucMessage = 'Successfully deleted the document by user.';
-                return callback(res, err, doc, sucMessage, next);
-            });
+            RecipeModel.findOne({recipe_id: req.body.recipe_id}, function(err, recipe){
+                if(err){
+                    return next(err);
+                }
 
+                if(!recipe){
+                    return response.sendNotFound(res, "No such recipe");
+                }
+
+                if(recipe.user_id != req.body.recipe_id){
+                    return response.sendForbidden(res, "You do not have rights to delete this recipe");
+                }
+
+                RecipeModel.findOneAndDelete({user_id : req.body.user_id, recipe_id : req.body.recipe_id}, function(err, doc){
+                    var sucMessage = 'Successfully deleted the document by user.';
+                    return callback(res, err, doc, sucMessage, next);
+                });
+            });
         }
 
     }
@@ -271,15 +286,21 @@ exports.getSingleRecipe = function(req, res, next){
                 return callback(res, err, recipe, "No such recipe found.",next);
             }
             else{
-                var user_id = "" || req.body.user_id;
+                var user_id = "" ;
+                if(req.session.user){
+                    user_id = req.session.user.user_id;
+                }
                 var self_recipe = false;
                 if(user_id === recipe.user_id){
                     self_recipe = true;
                 }
+                console.log(user_id);
+                console.log(recipe.user_id);
                 recipe = recipe.toJSON();
                 recipe["self_recipe"] = self_recipe;
                 if(recipe.is_public == false){
-                    if(req.session.user && req.session.user.user_id === recipe.user_id && req.session.prem){
+                    console.log(req.session.user);
+                    if(req.session.user && req.session.user.user_id === recipe.user_id && req.session.user.prem){
                         return callback(res, err, recipe, "Successfully fetched the recipe.", next);
                     } else if (req.session.user && req.session.user.user_id === recipe.user_id){
                         return response.sendForbidden(res, "Please subscribe to premium to see your private recipes");
@@ -299,7 +320,7 @@ exports.getSingleRecipe = function(req, res, next){
 exports.getRecipes = function(req, res, next){
 
     var pageNumber = 0;
-    var limit = 5;
+    var limit = 6;
     if(req.query.pageNumber){
         pageNumber = parseInt(req.query.pageNumber);
     }
@@ -363,7 +384,7 @@ exports.userRecipe = function(req, res, next){
     if(!req.params.user_id){
         return response.sendBadRequest(res, "No user id found.");
     }
-    var limit = 5
+    var limit = 6;
     if(req.query.limit){
         limit = parseInt(req.query.limit)
     }
@@ -408,13 +429,13 @@ exports.userRecipePublic = function(req, res, next){
     if(!req.params.query_user_id){
         return response.sendBadRequest(res, "No user id found.");
     }
-    var limit = 5
+    var limit = 6;
     if(req.query.limit){
-        limit = parseInt(req.query.limit)
+        limit = parseInt(req.query.limit);
     }
-    var pageNumber = 0
+    var pageNumber = 0;
     if(req.query.pageNumber){
-        pageNumber = parseInt(req.query.pageNumber)
+        pageNumber = parseInt(req.query.pageNumber);
     }
     RecipeModel.find({user_id : req.params.query_user_id, is_public : true, adminDelete : false}, function(err1, docs){
         RecipeModel.countDocuments({user_id : req.params.query_user_id, is_public : true, adminDelete : false}, function(err2, count){
@@ -456,10 +477,14 @@ exports.addLike = function(req, res, next){
                 return response.sendBadRequest(res, "No recipe found with the given id.");
             }
             else{
+                console.log(req.body.is_liked);
+                console.log(!req.body.is_liked);
                 if(req.body.is_liked){
+                    console.log("here");
                     recipe.likes = recipe.likes + 1;
                 }
                 else{
+                    console.log("disliking");
                     recipe.dislikes = recipe.dislikes + 1;
                 }
                 recipe.save(function(err, recipe){
@@ -482,6 +507,8 @@ exports.getMultipleRecipes = function(req, res, next){
     var ids = []
     if(req.query.recipe_ids){
         ids = req.query.recipe_ids.split(",");
+    } else {
+        return response.sendBadRequest(res, "No recipe IDs specified");
     }
 
     RecipeModel.find({recipe_id : {$in : ids}},{title:1, recipe_id:1}, function(err, docs){
@@ -489,8 +516,15 @@ exports.getMultipleRecipes = function(req, res, next){
         if(err){
             return next(err);
         }
+        if(docs){
+            var transformed_docs = {};
+            docs.forEach(function(doc){
+            transformed_docs[doc.recipe_id] = doc;
+            });
+            return response.sendSuccess(res, "Successfully fetched the recipes.", transformed_docs);
+        }
         else{
-            return response.sendSuccess(res, "Successfully fetched the recipes.", docs);
+            return response.sendSuccess(res, "Successfully fetched the recipes.", {});
         }
     });
 }
@@ -507,5 +541,77 @@ exports.uploadImage = function(req, res, next){
 
         return response.sendSuccess(res, "Image successfully uploaded", {image_url: fileurl});
     })
+}
+
+exports.getBookmarkedRecipes = function(req, res, next){
+    if (!req.bookmarks){
+        return next(new Error("Bookmarks data not present"));
+    }
+
+    var recipe_ids = req.bookmarks;
+
+    var limit = 6;
+    var pageNumber = 0;
+    if(req.query.pageNumber) {
+        pageNumber = parseInt(req.query.pageNumber);
+    }
+
+    RecipeModel.find({recipe_id : {$in : recipe_ids}, adminDelete:false, is_public:true},{dietary_preferences:1, image_url:1, title:1, recipe_id:1, likes:1, dislikes:1, user_id:1}, function(err, docs){
+        RecipeModel.countDocuments({recipe_id : {$in : recipe_ids}, is_public : true, adminDelete : false}, function(err2, count){
+
+            if(err){
+                return next(err);
+            }
+
+            if(err2){
+                return next(err2);
+            }
+            if(!docs){
+                return response.sendNotFound(res, "No bookmarked recipes by this user.");
+            }
+            else{
+                var data = {}
+                data['page'] = pageNumber;
+                data['total_count'] = count;
+                data['total_pages'] = Math.ceil(count / limit);
+                data['data'] = docs;
+                return response.sendSuccess(res, "Successfully fetched the recipes.", data);
+            }
+        }); 
+    }).limit(limit).skip(pageNumber * limit);
+}
+
+exports.removeLike = function(req, res, next){
+    if (!req.like){
+        return response.sendBadRequest(res, "Required fields missing.");
+    }
+    else{
+        RecipeModel.findOne({recipe_id : req.like.recipe_id}, function(err, recipe){
+
+            if (err){
+                return next(err);
+            }
+            if (!recipe){
+                return response.sendBadRequest(res, "No recipe found with the given id.");
+            }
+            else{
+                if(req.like.is_liked){
+                    recipe.likes = recipe.likes - 1;
+                }
+                else{
+                    recipe.dislikes = recipe.dislikes - 1;
+                }
+                recipe.save(function(err, recipe){
+                    if(err){
+                        console.log(err);
+                        return response.sendBadRequest(res,"Some error in deleting likes/dislikes.", err);
+                    }
+                    else{
+                        return response.sendSuccess(res, "Successfully updated the doc.");
+                    }
+                });
+            }
+        });
+    }
 }
 

@@ -12,7 +12,7 @@ function callback(res, err, docs, message, next){
     }
     else if (!docs && typeof(docs) !== "undefined"){
         console.log("Docs not found.")
-        return response.sendBadRequest(res, message);
+        return response.sendBadRequest(res, "Doc not found.");
 
     }
     else{
@@ -79,11 +79,90 @@ exports.delete = function(req, res, next){
     else{
         
         console.log("Deleting draft by particular user.")
-        DraftModel.deleteOne({user_id : req.body.user_id, draft_id : req.body.draft_id}, function(err){
+        DraftModel.findOneAndDelete({draft_id : req.body.draft_id}, function(err, doc){
+            if(err){
+                return next(err);
+            }
+
+            if(!doc){
+                return response.sendBadRequest(res, "No such draft exists.");
+            }
+
+            if(doc.user_id != req.body.user_id){
+                return response.sendForbidden(res, "You do not have rights to delete this");
+            }
             var sucMessage = 'Successfully deleted the document by user.';
-            return callback(res, err, undefined, sucMessage, next);
+            return callback(res, err, doc, sucMessage, next);
         });
 
     }
 
+}
+
+exports.getDraft = function(req, res, next){
+
+    if(!req.params.draft_id){
+        return response.sendBadRequest(res, "No draft id found.");
+    }
+    if(!req.params.user_id){
+        return response.sendBadRequest(res, "No user id found.");
+    }
+    else{
+        DraftModel.findOne({draft_id : req.params.draft_id, user_id : req.params.user_id}, function(err, doc){
+
+            if(err){
+                return next(err);
+            }
+
+            if(!doc){
+                return response.sendNotFound(res, "Draft not found.");
+            }
+
+            else{
+                return response.sendSuccess(res, "Draft found with given id.",doc);
+            }
+
+        });
+    }
+
+}
+
+exports.getUserDrafts = function(req, res, next){
+
+    var pageNumber = 0;
+    if(req.params.pageNumber){
+        pageNumber = parseInt(req.params.pageNumber);
+    }
+
+    var limit = 5;
+    if(req.params.limit){
+        limit = parseInt(req.params.limit);
+    }
+    if(!req.params.user_id){
+        return response.sendBadRequest(res, "No user id found.");
+    }
+    else{
+        DraftModel.find({user_id : req.params.user_id}, function(err1, docs){
+            if(err1){
+                return next(err1);
+            }
+            else{
+                DraftModel.countDocuments({user_id : req.params.user_id}, function(err2, count){
+                    if(err2){
+                        return next(err2);
+                    }
+                    else{
+                        var data = {}
+                        data['page'] = pageNumber;
+                        data['total_count'] = count;
+                        data['total_pages'] = Math.ceil(count / limit);
+                        data['data'] = docs;
+                        return response.sendSuccess(res, "Successfully fetched the drafts.",data);
+                    }
+
+                });
+            }
+    
+        });
+    }
 }
