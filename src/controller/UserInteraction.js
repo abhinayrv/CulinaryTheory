@@ -271,7 +271,7 @@ exports.deleteLikedislike = function(req,res, next){
            data['data'] = comments;
            return response.sendSuccess(res,"Successfully fetched comments." ,data);
       });
-     }).sort({createdAt: 1, _id:1}).limit(limit).skip(pageNumber * limit);
+     }).sort({createdAt: -1, _id:1}).limit(limit).skip(pageNumber * limit);
   }
   //Comments Get end
 
