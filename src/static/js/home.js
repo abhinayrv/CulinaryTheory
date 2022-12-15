@@ -6,6 +6,10 @@ const apiSearchBytitleEP = "/api/recipe/search?searchBy=title&searchFor=";
 const apiSearchByIngEP = "/api/recipe/search?searchBy=ingredients&searchFor=";
 const apiGetUsers = "/api/usernames?users=";
 const recipeViewPageUrl = "/recipe?";
+const defaultRecipeImg =
+  "https://test-bucket-culinary.s3.amazonaws.com/2987f51efb8dc3b1dcb1de2c3a56b38e.jpeg";
+const defaultAuthorImg =
+  "https://test-bucket-culinary.s3.amazonaws.com/3387e4c381f682b9f3b2104b0a4433f7.jpg";
 
 //login related varaibles
 let userProfile;
@@ -48,6 +52,16 @@ const buildUrl = function (baseURL, paramsName, paramsValue) {
   params.append(paramsName, paramsValue);
   return `${baseURL}${params}`;
 };
+
+function titleCase(str) {
+  return str
+    .toLowerCase()
+    .split(" ")
+    .map(function (word) {
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    })
+    .join(" ");
+}
 
 //func to hide/display elements
 const hideDisplay = function (ele) {
@@ -100,9 +114,6 @@ const userPasswordInput = document.getElementById("user-password");
 const loginBtn = document.getElementById("login-btn");
 const signupOpenBtn = document.getElementById("signup-open-btn");
 
-
-
-
 const signupForm = document.querySelector(".signup-ov");
 const signupFormClose = document.getElementById("signup-frm-close");
 const signupBtn = document.getElementById("signup-btn");
@@ -119,26 +130,28 @@ const resetForm = document.querySelector(".reset-ov");
 const resetErrDisplay = document.getElementById("reset-err-msg");
 const resetCloseBtn = document.getElementById("reset-frm-close");
 
-resetCloseBtn.addEventListener("click", function(e){
+resetCloseBtn.addEventListener("click", function (e) {
   e.preventDefault();
   hideDisplay(resetForm);
-})
+  activMainNavbtn(homeBtn);
+  deactivMainNavbtn(loginSignUpBtn);
+});
 
-resetOpenBtn.addEventListener("click", function(e){
+resetOpenBtn.addEventListener("click", function (e) {
   e.preventDefault();
   hideDisplay(loginSection);
   showDisplay(resetForm);
-  hideDisplay(resetErrDisplay)
+  hideDisplay(resetErrDisplay);
 });
 
-signInOpenBtnReset.addEventListener("click", function(e){
+signInOpenBtnReset.addEventListener("click", function (e) {
   e.preventDefault();
   hideDisplay(resetForm);
   showDisplay(loginSection);
   hideDisplay(loginErrDisplay);
 });
 
-signInOpenBtn.addEventListener("click", function(e){
+signInOpenBtn.addEventListener("click", function (e) {
   e.preventDefault();
   hideDisplay(signupForm);
   showDisplay(loginSection);
@@ -155,40 +168,42 @@ signupOpenBtn.addEventListener("click", function (e) {
 signupFormClose.addEventListener("click", function (e) {
   e.preventDefault();
   hideDisplay(signupForm);
+  activMainNavbtn(homeBtn);
+  deactivMainNavbtn(loginSignUpBtn);
 });
 
-signupBtn.addEventListener("click", function(e){
+signupBtn.addEventListener("click", function (e) {
   e.preventDefault();
   complete_sigup();
-})
+});
 
 // Reset password logic
 const resetSubmitBtn = document.getElementById("reset-btn");
 const resetEmail = document.getElementById("user-email-reset");
 
-resetSubmitBtn.addEventListener("click", function(e){
+resetSubmitBtn.addEventListener("click", function (e) {
   e.preventDefault();
   reset_password();
-})
+});
 
-async function reset_password(){
+async function reset_password() {
   var email = resetEmail.value;
-  if(!email){
+  if (!email) {
     resetEmail.focus();
     resetErrDisplay.textContent = "Please enter your email address";
     showDisplay(resetErrDisplay);
   } else {
     try {
-      var message = await call_reset_api({email: email});
+      var message = await call_reset_api({ email: email });
       resetErrDisplay.textContent = message;
       resetErrDisplay.style.color = "#16a085";
       showDisplay(resetErrDisplay);
-      setTimeout(()=>{
+      setTimeout(() => {
         hideDisplay(resetForm);
         resetErrDisplay.style.color = "#be2e3a";
       }, 2000);
-    } catch(error) {
-      console.log(error)
+    } catch (error) {
+      console.log(error);
       resetEmail.focus();
       resetErrDisplay.textContent = error.message;
       showDisplay(resetErrDisplay);
@@ -196,57 +211,61 @@ async function reset_password(){
   }
 }
 
-async function call_reset_api(reset_json){
+async function call_reset_api(reset_json) {
   var options = {
     method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify(reset_json)
-  }
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(reset_json),
+  };
 
   var response = await fetch("/api/auth/resetemail", options);
   var rjson = await response.json();
-  if(response.ok){
+  if (response.ok) {
     return rjson.message;
-  } else{
+  } else {
     throw Error(rjson.message);
   }
 }
 
 // Sign up logic
-async function complete_sigup(){
+async function complete_sigup() {
   var email = signupEmail.value;
   var pwd = signupPwd.value;
   var confpwd = signupPwdConf.value;
   var username = signupName.value;
-  if(!username){
+  if (!username) {
     signupName.focus();
     signupErrDisplay.textContent = "Please enter username";
     showDisplay(signupErrDisplay);
-  } else if(!email){
+  } else if (!email) {
     signupEmail.focus();
     signupErrDisplay.textContent = "Please enter your email id";
     showDisplay(signupErrDisplay);
-  } else if(!pwd){
+  } else if (!pwd) {
     signupPwd.focus();
     signupErrDisplay.textContent = "Please enter a password";
     showDisplay(signupErrDisplay);
-  } else if(!confpwd) {
+  } else if (!confpwd) {
     signupPwdConf.focus();
     signupErrDisplay.textContent = "Confirm password is empty";
     showDisplay(signupErrDisplay);
-  } else if (pwd != confpwd){
+  } else if (pwd != confpwd) {
     signupPwd.focus();
     signupPwdConf.focus();
     signupErrDisplay.textContent = "Passwords do not match!";
     showDisplay(signupErrDisplay);
-  } else{
+  } else {
     try {
-      await register_api({email: email, password: pwd});
-      await create_profile_api({user_name: username, bio_info: ""});
+      await register_api({ email: email, password: pwd });
+      await create_profile_api({ user_name: username, bio_info: "" });
       window.location.reload();
-    } catch(err){
+    } catch (err) {
       console.log("error", err.message);
-      signupEmail.value = signupPwd.value = signupPwdConf.value = signupName.value = "";
+      signupEmail.value =
+        signupPwd.value =
+        signupPwdConf.value =
+        signupName.value =
+          "";
       signupName.focus();
       signupErrDisplay.textContent = err.message;
       showDisplay(signupErrDisplay);
@@ -254,32 +273,32 @@ async function complete_sigup(){
   }
 }
 
-async function register_api(user_json){
+async function register_api(user_json) {
   var options = {
     method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify(user_json)
-  }
-  var response = await fetch('/api/register', options);
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(user_json),
+  };
+  var response = await fetch("/api/register", options);
   var rjson = await response.json();
-  if(response.ok){
+  if (response.ok) {
     return;
-  } else{
+  } else {
     throw Error(rjson.message);
   }
 }
 
-async function create_profile_api(profile_json){
+async function create_profile_api(profile_json) {
   var options = {
     method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify(profile_json)
-  }
-  var response = await fetch('/api/profile/create', options);
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(profile_json),
+  };
+  var response = await fetch("/api/profile/create", options);
   var rjson = await response.json();
-  if(response.ok){
+  if (response.ok) {
     return;
-  } else{
+  } else {
     console.log("Profile not created");
     console.log(rjson.message);
   }
@@ -329,6 +348,7 @@ const loginSessionCheck = async function () {
     updateMainNav();
   } catch (error) {
     console.log(error.message);
+    updateMainNav();
   }
 };
 loginSessionCheck();
@@ -349,6 +369,7 @@ const updateMainNav = function () {
     accountBtn.setAttribute("href", "/myprofile");
     aboutUsBtn.setAttribute("href", "/about");
   } else {
+    console.log("entered here");
     hideDisplay(recipeCreateBtn.parentElement);
     hideDisplay(accountBtn.parentElement);
     showDisplay(loginSignUpBtn.parentElement);
@@ -379,7 +400,7 @@ const defRecipeCardHtml = `<a href="#" class="recipe-card-btn">
   <!-- ------------------- Image ------------------- -->
   <div class="rc-image-container">
     <img
-      src="./../img/placeHolderImage.jpeg"
+      src="${defaultRecipeImg}"
       alt="Photo of food"
       class="rc-food-image"
     />
@@ -394,7 +415,7 @@ const defRecipeCardHtml = `<a href="#" class="recipe-card-btn">
     <div class="rc-author-details flex-row">
       <div class="rc-auth-img-container">
         <img
-          src="./../img/personPHpreview.jpeg"
+          src="${defaultAuthorImg}"
           alt="Photo of Author"
           class="rc-auth-image"
         />
@@ -467,11 +488,9 @@ const fetchRecipeData = async function (apiUrl, contentBox, search) {
     let recipesDataArr = recipeSetData.data;
 
     const userIdArr = recipesDataArr.map((recipe) => recipe.user_id);
-
     const { data: userSetData } = await fetch(
-      `${apiHost}${apiGetUsers}${JSON.stringify(userIdArr)}`
+      `${apiHost}${apiGetUsers}${userIdArr.join(",")}`
     ).then((res) => res.json());
-
     // throw new Error("This is for Testing");
     if (!search || recipePageNumber === 0) contentBox.innerHTML = "";
     recipesDataArr.forEach((recipeData) => {
@@ -487,7 +506,7 @@ const fetchRecipeData = async function (apiUrl, contentBox, search) {
       <!-- ------------------- Image ------------------- -->
       <div class="rc-image-container">
         <img
-          src="./../img/placeHolderImage.jpeg"
+          src="${defaultRecipeImg}"
           alt="Photo of food"
           class="rc-food-image"
         />
@@ -496,13 +515,13 @@ const fetchRecipeData = async function (apiUrl, contentBox, search) {
       <div class="rc-content-container flex-column">
         <div class="rc-title-container">
           <p class="rc-title p-main-semibold">
-            ${e.message}
+            ${titleCase(e.message)}
           </p>
         </div>
         <div class="rc-author-details flex-row">
           <div class="rc-auth-img-container">
             <img
-              src="./../img/personPHpreview.jpeg"
+              src="${defaultAuthorImg}"
               alt="Photo of Author"
               class="rc-auth-image"
             />
@@ -585,7 +604,7 @@ const renderRecipeCard = function (recipeData, userData, contentBox) {
     <div class="rc-content-container flex-column">
       <div class="rc-title-container">
         <p class="rc-title p-main-semibold">
-        ${recipeData.title.toUpperCase()}
+        ${titleCase(recipeData.title)}
         </p>
       </div>
       <div class="rc-author-details flex-row">
@@ -597,7 +616,7 @@ const renderRecipeCard = function (recipeData, userData, contentBox) {
           />
         </div>
         <p class="rc-auth-name p-main-semibold">
-          ${userData.user_name}
+          ${titleCase(userData.user_name)}
         </p>
       </div>
       <div class="rc-action-btns flex-row">

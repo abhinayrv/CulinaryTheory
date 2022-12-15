@@ -3,9 +3,13 @@
 const apiHost = "";
 const apiMyRecipes = "/api/recipe/myrecipes";
 const apiSavedRecipes = "/api/bookmarks";
-const apiDrafts = "/api/recipe/search?searchBy=ingredients&searchFor=";
+const apiDrafts = "/api/drafts/mydrafts";
 const apiGetUsers = "/api/usernames?users=";
 const recipeViewPageUrl = "/recipe?";
+const defaultRecipeImg =
+  "https://test-bucket-culinary.s3.amazonaws.com/2987f51efb8dc3b1dcb1de2c3a56b38e.jpeg";
+const defaultAuthorImg =
+  "https://test-bucket-culinary.s3.amazonaws.com/3387e4c381f682b9f3b2104b0a4433f7.jpg";
 
 //login related varaibles
 let userProfile;
@@ -51,6 +55,16 @@ const buildUrl = function (baseURL, paramsName, paramsValue) {
   return `${baseURL}${params}`;
 };
 
+function titleCase(str) {
+  return str
+    .toLowerCase()
+    .split(" ")
+    .map(function (word) {
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    })
+    .join(" ");
+}
+
 //func to hide/display elements
 const hideDisplay = function (ele) {
   ele.classList.add("display-hide");
@@ -87,37 +101,37 @@ updatePwdFormClose.addEventListener("click", function () {
   hideDisplay(updatePwdForm);
 });
 
-async function prefill_profile_form(){
+async function prefill_profile_form() {
   editProfileName.value = userProfile.user_name;
   editProfileBio.value = userProfile.bio_info;
 }
 
-editProfileSubmitBtn.addEventListener("click", function(e){
+editProfileSubmitBtn.addEventListener("click", function (e) {
   e.preventDefault();
   complete_update();
-})
+});
 
-async function complete_update(){
+async function complete_update() {
   var username = editProfileName.value;
   var user_bio = editProfileBio.value;
   var profile_image = editProfileImg.value;
-  if(!username){
+  if (!username) {
     console.log("Username empty");
     editProfileName.focus();
     editErrDisplay.textContent = "Username cannot be empty";
     showDisplay(editErrDisplay);
-  } else if(user_bio.length > 300){
+  } else if (user_bio.length > 300) {
     editProfileBio.focus();
     editErrDisplay.textContent = "Bio length must be less than 100 character";
     showDisplay(editErrDisplay);
-  } else if(profile_image){
+  } else if (profile_image) {
     try {
       var image_url = await upload_image_api(editProfileImg);
       var profile_json = {
         user_name: username,
         bio_info: user_bio || userProfile.bio_info,
-        profile_image: image_url
-      }
+        profile_image: image_url,
+      };
       await update_profile_api(profile_json);
       await loginSessionCheck();
       hideDisplay(editErrDisplay);
@@ -131,8 +145,8 @@ async function complete_update(){
       var profile_json = {
         user_name: username,
         bio_info: userProfile.bio_info,
-        profile_image: userProfile.profile_image
-      }
+        profile_image: userProfile.profile_image,
+      };
       await update_profile_api(profile_json);
       await loginSessionCheck();
       hideDisplay(editErrDisplay);
@@ -144,7 +158,7 @@ async function complete_update(){
   }
 }
 
-async function upload_image_api(image_input){
+async function upload_image_api(image_input) {
   let file_data = image_input.files[0];
   let formdata = new FormData();
   formdata.append("image", file_data);
@@ -161,19 +175,19 @@ async function upload_image_api(image_input){
   }
 }
 
-async function update_profile_api(profile_json){
+async function update_profile_api(profile_json) {
   var options = {
     method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify(profile_json)
-  }
-  
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(profile_json),
+  };
+
   var response = await fetch("/api/profile/edit", options);
   var rjson = await response.json();
 
-  if(!response.ok){
+  if (!response.ok) {
     throw Error(rjson.message);
-  } else{
+  } else {
     return;
   }
 }
@@ -184,67 +198,72 @@ const updatePwdPassword = document.getElementById("curr-password");
 const updatePwdNewPassword = document.getElementById("new-password");
 const updatePwdConfPassword = document.getElementById("new-password-conf");
 
-updatePwdBtn.addEventListener("click", function(e){
+updatePwdBtn.addEventListener("click", function (e) {
   e.preventDefault();
   // updatePwdErrDisplay.textContent = "Update password clicked";
   // showDisplay(updatePwdErrDisplay);
   change_password();
 });
 
-async function change_password(){
+async function change_password() {
   var password = updatePwdPassword.value;
   var new_password = updatePwdNewPassword.value;
   var conf_password = updatePwdConfPassword.value;
 
-  if(!password){
+  if (!password) {
     updatePwdPassword.focus();
     updatePwdErrDisplay.textContent = "Please enter your current password";
     showDisplay(updatePwdErrDisplay);
-  } else if(!new_password){
+  } else if (!new_password) {
     updatePwdNewPassword.focus();
     updatePwdErrDisplay.textContent = "Please enter a new password";
     showDisplay(updatePwdErrDisplay);
-  } else if(!conf_password){
+  } else if (!conf_password) {
     updatePwdConfPassword.focus();
     updatePwdErrDisplay.textContent = "Please confirm your new password";
     showDisplay(updatePwdErrDisplay);
-  } else if(new_password !== conf_password){
+  } else if (new_password !== conf_password) {
     updatePwdNewPassword.focus();
     updatePwdErrDisplay.textContent = "Passwords do not match";
     showDisplay(updatePwdErrDisplay);
   } else {
-
     try {
-      await update_password_api({password: password, new_password: new_password, verify_password: conf_password});
+      await update_password_api({
+        password: password,
+        new_password: new_password,
+        verify_password: conf_password,
+      });
       updatePwdErrDisplay.textContent = "Successfully updated the password!";
       updatePwdErrDisplay.style.color = "#16a085";
       showDisplay(updatePwdErrDisplay);
-      setTimeout(()=>{
+      setTimeout(() => {
         hideDisplay(updatePwdForm);
         updatePwdErrDisplay.style.color = "#be2e3a";
       }, 2000);
     } catch (error) {
       console.log(error);
-      updatePwdPassword.value = updatePwdNewPassword.value = updatePwdConfPassword.value = "";
+      updatePwdPassword.value =
+        updatePwdNewPassword.value =
+        updatePwdConfPassword.value =
+          "";
       updatePwdPassword.focus();
       updatePwdErrDisplay.textContent = error.message;
       showDisplay(updatePwdErrDisplay);
     }
-
   }
 }
 
-async function update_password_api(pwd_json){
+async function update_password_api(pwd_json) {
   var options = {
     method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify(pwd_json)
-  }
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(pwd_json),
+  };
 
   var response = await fetch("/api/auth/updatepassword", options);
   var rjson = await response.json();
-  if(response.ok){
-    return
+  if (response.ok) {
+    return;
   } else {
     throw Error(rjson.message);
   }
@@ -279,7 +298,7 @@ const loginSessionCheck = async function () {
     userLoggedIn = loginCheckRes.success;
     if (!userLoggedIn) throw new Error(loginCheckRes.message);
     ({ data: userProfile } = loginCheckRes);
-
+    userPremium = userProfile.is_premium;
     updateMainNav();
     doProfileDisplay();
   } catch (error) {
@@ -339,7 +358,6 @@ editProfileBtn.addEventListener("click", function () {
   deactivMainNavbtn(mngSubBtn);
   deactivMainNavbtn(logoutBtn);
 
-  
   prefill_profile_form();
   showDisplay(editProfileForm);
   hideDisplay(editErrDisplay);
@@ -416,9 +434,9 @@ myRecipeSecBtn.addEventListener("click", function (e) {
   deactivSecNavbtn(draftsSecBtn.querySelector(".nav-btn-highlight"));
 
   showDisplay(recipeDisSec);
-  bookmarks = false;
+
   apiFetchUrl = `${apiHost}${apiMyRecipes}`;
-  fetchRecipeBySerch(apiFetchUrl, searchRCardBox, bookmarks);
+  fetchRecipeBySerch(apiFetchUrl, searchRCardBox);
 });
 savedSecBtn.addEventListener("click", function (e) {
   e.preventDefault();
@@ -430,9 +448,9 @@ savedSecBtn.addEventListener("click", function (e) {
   deactivSecNavbtn(draftsSecBtn.querySelector(".nav-btn-highlight"));
 
   showDisplay(recipeDisSec);
-  bookmarks = true;
+
   apiFetchUrl = `${apiHost}${apiSavedRecipes}`;
-  fetchRecipeBySerch(apiFetchUrl, searchRCardBox, bookmarks);
+  fetchRecipeBySerch(apiFetchUrl, searchRCardBox, true);
 });
 draftsSecBtn.addEventListener("click", function (e) {
   e.preventDefault();
@@ -446,8 +464,10 @@ draftsSecBtn.addEventListener("click", function (e) {
   if (userPremium) {
     showDisplay(recipeDisSec);
     bookmarks = false;
+    drafts = true;
+    console.log("here");
     apiFetchUrl = `${apiHost}${apiDrafts}`;
-    fetchRecipeBySerch(apiFetchUrl, searchRCardBox, bookmarks);
+    fetchRecipeBySerch(apiFetchUrl, searchRCardBox, bookmarks, drafts);
   } else {
     // alert("This feature is only avilable for premium users");
     searchRCardBox.innerHTML = "";
@@ -581,7 +601,13 @@ const defRecipeCardHtml = `<a href="#" class="recipe-card-btn">
 </div>
 </a>`;
 
-const fetchRecipeData = async function (apiUrl, contentBox, search, bookmark) {
+const fetchRecipeData = async function (
+  apiUrl,
+  contentBox,
+  search,
+  isBookmark,
+  isDraft
+) {
   try {
     let { data: recipeSetData } = await fetch(apiUrl).then((res) => res.json());
     console.log(recipeSetData);
@@ -596,11 +622,11 @@ const fetchRecipeData = async function (apiUrl, contentBox, search, bookmark) {
     }
     if (!recipeSetData.total_pages) throw new Error(`No Recipes found`);
     let recipesDataArr = recipeSetData.data;
-    if (bookmark) {
+    if (isBookmark) {
       const userIdArr = recipesDataArr.map((recipe) => recipe.user_id);
 
       const { data: userSetData } = await fetch(
-        `${apiHost}${apiGetUsers}${JSON.stringify(userIdArr)}`
+        `${apiHost}${apiGetUsers}${userIdArr.join(",")}`
       ).then((res) => res.json());
 
       // throw new Error("This is for Testing");
@@ -613,7 +639,7 @@ const fetchRecipeData = async function (apiUrl, contentBox, search, bookmark) {
     } else {
       if (!search || recipePageNumber === 0) contentBox.innerHTML = "";
       recipesDataArr.forEach((recipeData) => {
-        renderRecipeCard(recipeData, null, contentBox);
+        renderRecipeCard(recipeData, null, contentBox, isDraft);
       });
     }
   } catch (e) {
@@ -624,7 +650,7 @@ const fetchRecipeData = async function (apiUrl, contentBox, search, bookmark) {
       <!-- ------------------- Image ------------------- -->
       <div class="rc-image-container">
         <img
-          src="./../img/placeHolderImage.jpeg"
+          src="${defaultRecipeImg}"
           alt="Photo of food"
           class="rc-food-image"
         />
@@ -633,13 +659,13 @@ const fetchRecipeData = async function (apiUrl, contentBox, search, bookmark) {
       <div class="rc-content-container flex-column">
         <div class="rc-title-container">
           <p class="rc-title p-main-semibold">
-            ${e.message}
+            ${titleCase(e.message)}
           </p>
         </div>
         <div class="rc-author-details flex-row">
           <div class="rc-auth-img-container">
             <img
-              src="./../img/personPHpreview.jpeg"
+              src="${defaultAuthorImg}"
               alt="Photo of Author"
               class="rc-auth-image"
             />
@@ -703,7 +729,12 @@ const fetchRecipeData = async function (apiUrl, contentBox, search, bookmark) {
   }
 };
 
-const renderRecipeCard = function (recipeData, userData, contentBox) {
+const renderRecipeCard = function (
+  recipeData,
+  userData,
+  contentBox,
+  isDraft = false
+) {
   let recipeCardHtml;
   if (userData) {
     recipeCardHtml = `<a href="${buildUrl(
@@ -724,7 +755,7 @@ const renderRecipeCard = function (recipeData, userData, contentBox) {
     <div class="rc-content-container flex-column">
       <div class="rc-title-container">
         <p class="rc-title p-main-semibold">
-        ${recipeData.title.toUpperCase()}
+        ${titleCase(recipeData.title)}
         </p>
       </div>
       <div class="rc-author-details flex-row">
@@ -736,7 +767,7 @@ const renderRecipeCard = function (recipeData, userData, contentBox) {
           />
         </div>
         <p class="rc-auth-name p-main-semibold">
-          ${userData.user_name}
+          ${titleCase(userData.user_name)}
         </p>
       </div>
       <div class="rc-action-btns flex-row">
@@ -789,75 +820,123 @@ const renderRecipeCard = function (recipeData, userData, contentBox) {
   </div>
 </a>`;
   } else {
-    recipeCardHtml = `<a href="${buildUrl(
-      recipeViewPageUrl,
-      "recipe_id",
-      recipeData.recipe_id
-    )}" class="recipe-card-btn">
-  <div class="recipe-card flex-column">
-    <!-- ------------------- Image ------------------- -->
-    <div class="rc-image-container">
-      <img
-        src="${recipeData.image_url}"
-        alt="Photo of food"
-        class="rc-food-image"
-      />
-    </div>
-    <!-- ------------------- Recipe content ------------------- -->
-    <div class="rc-content-container flex-column">
-      <div class="rc-title-container">
-        <p class="rc-title p-main-semibold">
-        ${recipeData.title.toUpperCase()}
-        </p>
+    if (isDraft) {
+      recipeCardHtml = `<a href="${`${buildUrl(
+        "/editrecipe?",
+        "recipe_id",
+        recipeData.draft_id
+      )}&isDraft=true`}" class="recipe-card-btn">
+    <div class="recipe-card flex-column">
+      <!-- ------------------- Image ------------------- -->
+      <div class="rc-image-container">
+        <img
+          src="${
+            recipeData.image_url !== ""
+              ? recipeData.image_url
+              : defaultRecipeImg
+          }"
+          alt="Photo of food"
+          class="rc-food-image"
+        />
       </div>
-      <div class="rc-action-btns flex-row">
-        <div class="rc-action-set flex-row">
-          <div class="like-box flex-row">
-            <p class="like-count p-main-semibold">${recipeData.likes}</p>
-            <div>
-              <span class="material-icons-outlined like-icon"
-                >thumb_up</span
-              >
-              <span
-                class="material-icons like-icon icon-inactive icon-filled"
-                >thumb_up</span
-              >
+      <!-- ------------------- Recipe content ------------------- -->
+      <div class="rc-content-container flex-column">
+        <div class="rc-title-container">
+          <p class="rc-title p-main-semibold">
+          ${titleCase(recipeData.title)}
+          </p>
+        </div>
+        <!-- ------------------- Like dislike display ------------------- -->
+      </div>
+      <div class="rc-food-type-indicate rc-noRecipe"></div>
+    </div>
+  </a>`;
+    } else {
+      recipeCardHtml = `<a href="${buildUrl(
+        recipeViewPageUrl,
+        "recipe_id",
+        recipeData.recipe_id
+      )}" class="recipe-card-btn">
+    <div class="recipe-card flex-column">
+      <!-- ------------------- Image ------------------- -->
+      <div class="rc-image-container">
+        <img
+          src="${recipeData.image_url}"
+          alt="Photo of food"
+          class="rc-food-image"
+        />
+      </div>
+      <!-- ------------------- Recipe content ------------------- -->
+      <div class="rc-content-container flex-column">
+        <div class="rc-title-container">
+          <p class="rc-title p-main-semibold">
+          ${titleCase(recipeData.title)}
+          </p>
+        </div>
+        <div class="rc-action-btns flex-row">
+          <div class="rc-action-set flex-row">
+            <div class="like-box flex-row">
+              <p class="like-count p-main-semibold">${recipeData.likes}</p>
+              <div>
+                <span class="material-icons-outlined like-icon"
+                  >thumb_up</span
+                >
+                <span
+                  class="material-icons like-icon icon-inactive icon-filled"
+                  >thumb_up</span
+                >
+              </div>
+            </div>
+            <div class="dislike-box flex-row">
+              <p class="dislike-count p-main-semibold">${
+                recipeData.dislikes
+              }</p>
+              <div>
+                <span class="material-icons-outlined dislike-icon"
+                  >thumb_down</span
+                >
+                <span
+                  class="material-icons dislike-icon icon-inactive icon-filled"
+                  >thumb_down</span
+                >
+              </div>
             </div>
           </div>
-          <div class="dislike-box flex-row">
-            <p class="dislike-count p-main-semibold">${recipeData.dislikes}</p>
-            <div>
-              <span class="material-icons-outlined dislike-icon"
-                >thumb_down</span
-              >
-              <span
-                class="material-icons dislike-icon icon-inactive icon-filled"
-                >thumb_down</span
-              >
-            </div>
+          <div class="rc-action-set flex-row">
+          <div class="rc_action_link">
+            <div class="material-icons icon-color">
+            ${recipeData.is_public ? "visibility" : "visibility_off"}
+            
+          </div>
           </div>
         </div>
+        </div>
       </div>
+      <div class="rc-food-type-indicate ${
+        recipeData.dietary_preferences === "contains egg"
+          ? "rc-egg"
+          : recipeData.dietary_preferences === "vegetarian"
+          ? "rc-veg"
+          : "rc-nonveg"
+      }"></div>
     </div>
-    <div class="rc-food-type-indicate ${
-      recipeData.dietary_preferences === "contains egg"
-        ? "rc-egg"
-        : recipeData.dietary_preferences === "vegetarian"
-        ? "rc-veg"
-        : "rc-nonveg"
-    }"></div>
-  </div>
-</a>`;
+  </a>`;
+    }
   }
 
   contentBox.insertAdjacentHTML("beforeend", recipeCardHtml);
 };
 
-const fetchRecipeBySerch = function (apiFetUrl, containerBox, bookmark) {
+const fetchRecipeBySerch = function (
+  apiFetUrl,
+  containerBox,
+  bookmark = false,
+  draft = false
+) {
   hideDisplay(loadMoreMsg);
   showDisplay(loadMoreBtn);
 
-  fetchRecipeData(apiFetUrl, containerBox, true, bookmark);
+  fetchRecipeData(apiFetUrl, containerBox, true, bookmark, draft);
 };
 
 const initialCall = function () {

@@ -48,7 +48,12 @@ const loginSessionCheck = async function () {
 };
 
 const updateMainNav = function () {
-  activMainNavbtn(recipeCreateBtn);
+  deactivMainNavbtn(homeBtn);
+  deactivMainNavbtn(aboutUsBtn);
+  deactivMainNavbtn(recipeCreateBtn);
+  deactivMainNavbtn(loginSignUpBtn);
+  deactivMainNavbtn(accountBtn);
+  // activMainNavbtn(recipeCreateBtn);
   if (userLoggedIn) {
     showDisplay(recipeCreateBtn.parentElement);
     showDisplay(accountBtn.parentElement);
@@ -67,14 +72,16 @@ const updateMainNav = function () {
     window.location.href = "/home";
   }
 };
+const headerTitle = document.querySelector(".header-title");
 const saveDraftApi = function () {
   objecBuild(true);
   console.log(reciptObj);
 };
 const onLoadUisetup = function () {
-  if (userPremium) {
+  if (isDraft) {
+    headerTitle.textContent = "Edit your Draft Recipe";
     saveBtns.forEach((x) => {
-      x.classList.remove("btn-not-active");
+      x.classList.remove("btn-not-active", "display-hide");
       x.addEventListener("click", (e) => e.preventDefault());
       x.addEventListener("click", saveDraftApi);
     });
@@ -84,22 +91,53 @@ const onLoadUisetup = function () {
 
     inpPosting.forEach((x) => (x.disabled = false));
   } else {
+    headerTitle.textContent = "Edit your recipe";
     saveBtns.forEach((x) => {
-      x.classList.add("btn-not-active");
+      x.classList.add("btn-not-active", "display-hide");
       x.addEventListener("click", (e) => e.preventDefault());
       x.removeEventListener("click", saveDraftApi);
     });
     document
       .querySelector(".posting-type-box")
       .classList.add("input-field-disabled");
-
-    inpPosting.forEach((x) => (x.disabled = true));
+    inpPosting.forEach((x) => (x.disabled = false));
+    inpPosting[0].checked = true;
   }
 };
 // //////////////////////////////////////////////////////////////////
 //Form related code.
 //form UI related
 //Navigating tabs
+let title = false;
+let titleVal;
+let image = false;
+let imageVal;
+let description = false;
+let descriptionVal;
+let ingredients = false;
+let ingredientsVal;
+let steps = false;
+let stepsVal;
+let prepTime = false;
+let prepTimeVal;
+let cuisine = false;
+let cuisineVal;
+let preferences = false;
+let preferencesVal;
+let tags = false;
+let tagsVal;
+let posting = true;
+let postingVal;
+
+const inpTitle = document.getElementById("recipe-title");
+const inpImage = document.getElementById("recipe-image");
+const inpDesc = document.getElementById("recipe-description");
+const inpPrepTime = document.getElementById("prep-time");
+const inpCuisine = document.getElementById("cuisine-type");
+const inpPreferences = document.getElementsByName("radio");
+const inpTags = document.getElementById("recipe-tags");
+const inpPosting = document.getElementsByName("radio1");
+
 const saveBtns = document.querySelectorAll(".btn-save");
 const formNavBar = document.querySelector(".form-nav-bar");
 const formNavBtns = document.querySelectorAll(".form-nav-btn");
@@ -238,38 +276,282 @@ formIngContainer.addEventListener("click", function (e) {
     return;
   }
 });
+///////////////////////
+// getting recipe through api call
+function getRecipeId() {
+  let params = new URLSearchParams(window.location.search);
+  return params.get("recipe_id");
+}
+function findIsDraft() {
+  let params = new URLSearchParams(window.location.search);
+
+  return params.get("isDraft") === "true" ? true : false;
+}
+const recipe_id = getRecipeId();
+const isDraft = findIsDraft();
+// console.log(recipe_id);
+// console.log(isDraft);
+
+async function getEditRecipe(recipe_id) {
+  try {
+    let response = await fetch("/api/recipe/" + recipe_id);
+    let rjson = await response.json();
+    if (response.ok) {
+      console.log(rjson);
+      recipeJson = rjson.data;
+      renderInput(rjson.data);
+
+      // uiUpdate();
+      return rjson;
+    } else {
+      //some error or recipe not found.
+      throw Error(rjson.message);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+async function getDraftRecipe(recipe_id) {
+  try {
+    let response = await fetch("api/draft/" + recipe_id);
+    let rjson = await response.json();
+    if (response.ok) {
+      console.log(rjson);
+      recipeJson = rjson.data;
+      renderInput(rjson.data);
+      return rjson;
+    } else {
+      throw new Error(rjson.message);
+    }
+  } catch (error) {
+    console.log(error.message);
+  }
+}
+const getRecipeData = function (recipe_id) {
+  if (isDraft) {
+    getDraftRecipe(recipe_id);
+  } else {
+    getEditRecipe(recipe_id);
+  }
+};
+
+getRecipeData(recipe_id);
+
+/////////////////////////////////////
+// rendering Recipe in to input fields
+let preExitingImage;
+function renderInput(data) {
+  inpTitle.value = data.title;
+  preExitingImage = data.image_url;
+  inpDesc.value = data.description;
+
+  renderIngrediants(data.ingredients);
+
+  renderSteps(data.steps);
+  inpPrepTime.value = data.prep_time;
+  inpCuisine.value = data.cuisine;
+  if (data.dietary_preferences === "vegetarian") {
+    inpPreferences[0].checked = true;
+  } else if (data.dietary_preferences === "nonvegetarian") {
+    inpPreferences[1].checked = true;
+  } else if (data.dietary_preferences === "contains egg") {
+    inpPreferences[2].checked = true;
+  } else {
+    inpPreferences[0].checked = false;
+    inpPreferences[1].checked = false;
+    inpPreferences[2].checked = false;
+  }
+
+  inpTags.value = data.tags.join(", ");
+  inpPosting[data.is_public ? 0 : 1].checked = true;
+}
+
+function renderIngrediants(data) {
+  formIngContainer.innerHTML = "";
+  if (data.length != 0) {
+    data.forEach((ingData, ind, ingArra) => {
+      let ingAddHtml;
+      if (ind !== ingArra.length - 1) {
+        ingAddHtml = `<div
+    class="fields-side flex-row ingredients-box ingredient-${ingData.ingre_no}"
+  >
+    <input
+      type="text"
+      class="input-box h-5-main-semibold input-box-medium ing-name"
+      placeholder="Enter Ingredient name here"
+      value="${ingData.ingredient}"
+      required
+    />
+    <input
+      type="text"
+      class="input-box h-5-main-semibold input-box-small ing-quan"
+      placeholder="Enter Quantity and Matric"
+      value="${ingData.quantity}"
+      required
+    />
+    <div
+      class="material-icons form-btn-icon delete-ingredient "
+      data-ingredient-number="${ingData.ingre_no}"
+    >
+      do_not_disturb_on
+    </div>
+    <div
+      class="material-icons form-btn-icon add-ingredient display-hide"
+      data-ingredient-number="${ingData.ingre_no}"
+    >
+      add_circle
+    </div>
+  </div>`;
+      } else {
+        ingAddHtml = `<div
+    class="fields-side flex-row ingredients-box ingredient-${ingData.ingre_no}"
+  >
+    <input
+      type="text"
+      class="input-box h-5-main-semibold input-box-medium ing-name"
+      placeholder="Enter Ingredient name here"
+      value="${ingData.ingredient}"
+      required
+    />
+    <input
+      type="text"
+      class="input-box h-5-main-semibold input-box-small ing-quan"
+      placeholder="Enter Quantity and Matric"
+      value="${ingData.quantity}"
+      required
+    />
+    <div
+      class="material-icons form-btn-icon delete-ingredient display-hide"
+      data-ingredient-number="${ingData.ingre_no}"
+    >
+      do_not_disturb_on
+    </div>
+    <div
+      class="material-icons form-btn-icon add-ingredient "
+      data-ingredient-number="${ingData.ingre_no}"
+    >
+      add_circle
+    </div>
+  </div>`;
+      }
+      formIngContainer.insertAdjacentHTML("beforeend", ingAddHtml);
+    });
+  } else {
+    let ingAddHtml = `<div
+    class="fields-side flex-row ingredients-box ingredient-${1}"
+  >
+    <input
+      type="text"
+      class="input-box h-5-main-semibold input-box-medium ing-name"
+      placeholder="Enter Ingredient name here"
+      required
+    />
+    <input
+      type="text"
+      class="input-box h-5-main-semibold input-box-small ing-quan"
+      placeholder="Enter Quantity and Matric"
+      required
+    />
+    <div
+      class="material-icons form-btn-icon delete-ingredient display-hide"
+      data-ingredient-number="${1}"
+    >
+      do_not_disturb_on
+    </div>
+    <div
+      class="material-icons form-btn-icon add-ingredient"
+      data-ingredient-number="${1}"
+    >
+      add_circle
+    </div>
+  </div>`;
+    formIngContainer.insertAdjacentHTML("beforeend", ingAddHtml);
+  }
+}
+
+function renderSteps(data) {
+  formStepContainer.innerHTML = "";
+  if (data.length != 0) {
+    data.forEach((step, ind, stepArra) => {
+      let stepAddHtml;
+      if (ind != stepArra.length - 1) {
+        stepAddHtml = `<div class="fields-side flex-row steps-box step-${step.step_no}">
+        <input
+          type="text"
+          class="input-box h-5-main-semibold input-box-large step"
+          placeholder="Enter your step here"
+          value="${step.step}"
+          required
+        />
+    
+        <div
+          class="material-icons form-btn-icon delete-step "
+          data-step-number="${step.step_no}"
+        >
+          do_not_disturb_on
+        </div>
+        <div
+          class="material-icons form-btn-icon add-step display-hide"
+          data-step-number="${step.step_no}"
+        >
+          add_circle
+        </div>
+      </div>`;
+      } else {
+        stepAddHtml = `<div class="fields-side flex-row steps-box step-${step.step_no}">
+        <input
+          type="text"
+          class="input-box h-5-main-semibold input-box-large step"
+          placeholder="Enter your step here"
+          value="${step.step}"
+          required
+        />
+    
+        <div
+          class="material-icons form-btn-icon delete-step display-hide "
+          data-step-number="${step.step_no}"
+        >
+          do_not_disturb_on
+        </div>
+        <div
+          class="material-icons form-btn-icon add-step "
+          data-step-number="${step.step_no}"
+        >
+          add_circle
+        </div>
+      </div>`;
+      }
+      formStepContainer.insertAdjacentHTML("beforeend", stepAddHtml);
+    });
+  } else {
+    let stepAddHtml = `<div class="fields-side flex-row steps-box step-${1}">
+    <input
+      type="text"
+      class="input-box h-5-main-semibold input-box-large step"
+      placeholder="Enter your step here"
+      required
+    />
+
+    <div
+      class="material-icons form-btn-icon delete-step display-hide"
+      data-step-number="${1}"
+    >
+      do_not_disturb_on
+    </div>
+    <div
+      class="material-icons form-btn-icon add-step"
+      data-step-number="${1}"
+    >
+      add_circle
+    </div>
+  </div>`;
+    formStepContainer.insertAdjacentHTML("beforeend", stepAddHtml);
+  }
+}
+
 // /////////////////////////////////
 //form back end
-let title = false;
-let titleVal;
-let image = false;
-let imageVal;
-let description = false;
-let descriptionVal;
-let ingredients = false;
-let ingredientsVal;
-let steps = false;
-let stepsVal;
-let prepTime = false;
-let prepTimeVal;
-let cuisine = false;
-let cuisineVal;
-let preferences = false;
-let preferencesVal;
-let tags = false;
-let tagsVal;
-let posting = true;
-let postingVal;
-
-const inpTitle = document.getElementById("recipe-title");
-const inpImage = document.getElementById("recipe-image");
-const inpDesc = document.getElementById("recipe-description");
-const inpPrepTime = document.getElementById("prep-time");
-const inpCuisine = document.getElementById("cuisine-type");
-const inpPreferences = document.getElementsByName("radio");
-const inpTags = document.getElementById("recipe-tags");
-const inpPosting = document.getElementsByName("radio1");
-
 const getTitleAndDes = function () {
   title = image = description = true;
   titleVal = inpTitle.value;
@@ -364,49 +646,119 @@ async function uploadFile() {
   }
 }
 
-const objecBuild = async function (isDraft) {
+const objecBuild = async function (isDraftData = false, isSubmitted = false) {
   getTitleAndDes();
-  if (image === true) image = await uploadFile();
+  if (image === true) {
+    image = await uploadFile();
+  } else {
+    imageVal = preExitingImage;
+    image = true;
+  }
   ingredientsVal = ingrediantsData();
   stepsVal = stepsData();
   getAdditionalInfo();
+  if (isDraftData) {
+    if (isSubmitted) {
+      if (
+        !title
+          ? displayError("please fill title")
+          : !image
+          ? displayError("upload image again")
+          : !description
+          ? displayError("please fill description")
+          : !ingredients
+          ? displayError("Please fill ingredients")
+          : !steps
+          ? displayError("Plesae fill the steps")
+          : !prepTime
+          ? displayError("pleae fill prep time")
+          : !cuisine
+          ? displayError("please enter cuisine")
+          : !preferences
+          ? displayError("please check the preferences")
+          : !tags
+          ? displayError("Please enter between 5 to 10 tags")
+          : true
+      ) {
+        reciptObj = {
+          title: titleVal,
+          description: descriptionVal,
+          image_url: imageVal,
+          tags: tagsVal,
+          steps: stepsVal,
+          ingredients: ingredientsVal,
+          dietary_preferences: preferencesVal,
+          prep_time: prepTimeVal,
+          cuisine: cuisineVal,
+          is_public: postingVal,
+        };
 
-  if (isDraft) {
-    if (!title ? displayError("please fill title") : true) {
-      reciptObj = {
-        title: titleVal,
-        description: descriptionVal,
-        image_url: imageVal,
-        tags: tagsVal,
-        steps: stepsVal,
-        ingredients: ingredientsVal,
-        dietary_preferences: preferencesVal,
-        prep_time: prepTimeVal,
-        cuisine: cuisineVal,
-        is_public: postingVal,
-      };
+        let options = {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(reciptObj),
+        };
 
-      var options = {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(reciptObj),
-      };
-
-      var response = await fetch("/api/draft/create", options);
-      var rjson = await response.json();
-      if (response.ok) {
-        displayError(rjson.message, false);
-        setTimeout(() => {
-          console.log(rjson.data);
-          window.location.href = `/myprofile`;
-        }, 2000);
-        return;
+        let response = await fetch("/api/recipe/create", options);
+        let rjson = await response.json();
+        if (response.ok) {
+          let options = {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ draft_id: recipe_id }),
+          };
+          fetch("/api/draft/delete", options);
+          displayError(rjson.message, false);
+          setTimeout(() => {
+            console.log(rjson.data);
+            window.location.href = `/recipe?recipe_id=${rjson.data.recipe_id}`;
+          }, 2000);
+          return;
+        } else {
+          displayError(rjson.message);
+          return;
+        }
       } else {
-        displayError(rjson.message);
-        return;
+        return false;
       }
     } else {
-      return false;
+      if (!title ? displayError("please fill title") : true) {
+        reciptObj = {
+          title: titleVal,
+          description: descriptionVal,
+          image_url: imageVal,
+          tags: tagsVal,
+          steps: stepsVal,
+          ingredients: ingredientsVal,
+          dietary_preferences: preferencesVal,
+          prep_time: prepTimeVal,
+          cuisine: cuisineVal,
+          is_public: postingVal,
+          draft_id: recipe_id,
+        };
+
+        var options = {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(reciptObj),
+        };
+
+        var response = await fetch("/api/draft/edit", options);
+        var rjson = await response.json();
+        if (response.ok) {
+          displayError(rjson.message, false);
+          setTimeout(() => {
+            console.log(rjson.data);
+            window.location.href = `/myprofile`;
+          }, 2000);
+          return;
+        } else {
+          displayError(rjson.message);
+          return;
+        }
+      } else {
+        return false;
+      }
     }
   } else {
     if (
@@ -441,6 +793,7 @@ const objecBuild = async function (isDraft) {
         prep_time: prepTimeVal,
         cuisine: cuisineVal,
         is_public: postingVal,
+        recipe_id: recipe_id,
       };
 
       var options = {
@@ -449,7 +802,7 @@ const objecBuild = async function (isDraft) {
         body: JSON.stringify(reciptObj),
       };
 
-      var response = await fetch("/api/recipe/create", options);
+      var response = await fetch("/api/recipe/edit", options);
       var rjson = await response.json();
       if (response.ok) {
         displayError(rjson.message, false);
@@ -471,8 +824,13 @@ const objecBuild = async function (isDraft) {
 const submi = document.querySelector(".btn-sub");
 submi.addEventListener("click", function (e) {
   e.preventDefault();
-  objecBuild(false);
-  console.log(reciptObj);
+  if (isDraft) {
+    objecBuild(true, true);
+    console.log(reciptObj);
+  } else {
+    objecBuild();
+    console.log(reciptObj);
+  }
 });
 // //////////////////////////////////////////////////////////////////
 //helper functions
