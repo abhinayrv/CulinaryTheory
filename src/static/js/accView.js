@@ -114,6 +114,7 @@ editProfileSubmitBtn.addEventListener("click", function (e) {
 async function complete_update() {
   var username = editProfileName.value;
   var user_bio = editProfileBio.value;
+  console.log("Bio", user_bio);
   var profile_image = editProfileImg.value;
   if (!username) {
     console.log("Username empty");
@@ -132,6 +133,7 @@ async function complete_update() {
         bio_info: user_bio || userProfile.bio_info,
         profile_image: image_url,
       };
+      console.log("Bio", profile_json.bio_info);
       await update_profile_api(profile_json);
       await loginSessionCheck();
       hideDisplay(editErrDisplay);
@@ -144,9 +146,10 @@ async function complete_update() {
     try {
       var profile_json = {
         user_name: username,
-        bio_info: userProfile.bio_info,
+        bio_info: userProfile.bio_info || user_bio,
         profile_image: userProfile.profile_image,
       };
+      console.log("Bio", profile_json.bio_info);
       await update_profile_api(profile_json);
       await loginSessionCheck();
       hideDisplay(editErrDisplay);
