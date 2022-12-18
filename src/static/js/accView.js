@@ -146,7 +146,7 @@ async function complete_update() {
     try {
       var profile_json = {
         user_name: username,
-        bio_info: userProfile.bio_info || user_bio,
+        bio_info: user_bio || userProfile.bio_info,
         profile_image: userProfile.profile_image,
       };
       console.log("Bio", profile_json.bio_info);
