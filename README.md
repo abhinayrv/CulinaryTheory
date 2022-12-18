@@ -1,4 +1,6 @@
 # Culinary Theory
+The application is currently accessible at http://ec2-54-196-0-68.compute-1.amazonaws.com:9000/home. 
+
 Class project for ECE 567/452. There are two options to run the server. 
 1. Running Locally. 
 2. Using Docker
